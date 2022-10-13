@@ -1,0 +1,51 @@
+==================================
+
+			 Autorzy:
+		    Ignacy Bok
+		   Julia Akahori
+
+==================================
+
+
+
+>>>>>>>>>>>>  Domain  <<<<<<<<<<<<
+
+(AuditableEntity zostaje, IHasDomainEvent do zrobienia w przysz³oœci)
+Common - wszelkiego rodzaju encie, których pola wykorzystywane s¹ przez wiele obiektów
+
+ValueObject - reprezentuje nie pe³noprawny obiekt, tylko nieco bardziej z³o¿on¹ strukturê danych, np. Adres (u nas mo¿e karta postaci podczas grania(?))
+
+Events - zapisujemy tam zdarzenia jakie odbywaj¹ siê "pod jakimœ warunkiem", np. usuniêcie konta wi¹¿e siê z wys³aniem maila o tym ¿e zosta³o ono usuniête,
+	albo mo¿e te¿ powiadomienia o tym ¿e dosta³o siê osi¹gniêcie(?)
+
+>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<
+
+
+
+
+>>>>>>>>  Infrastructure  <<<<<<<<
+
+
+
+>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<
+
+
+
+
+
+>>>>>>>>>>  Application  <<<<<<<<<
+
+Jest to warstwa, która s³u¿y do transformacji ¿¹dania z warsty API do warstwy Domain
+Mo¿na zastosowaæ tutaj Interfejsy i Klasy, ale najczêœciej wykorzystuje siê Mediatora.
+
+Mediator:
+- Pozwala dla jednego ¿¹dania API wywo³aæ kilka ró¿nych Handlerów w warstwie Aplikacji
+
+
+(do zastanowienia)
+Foldery jakie tam tworzymy dotyczyæ bêd¹ konkretnych obszarów dziedziny biznesowej (np. Students jakbyœmy robili system uczelniany)
+
+
+
+>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<
+
