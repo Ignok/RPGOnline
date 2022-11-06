@@ -20,7 +20,6 @@ namespace RPGOnline.API.Controllers
             DataTable dt = new DataTable();
             dt.Load(sqlDataReader);
             */
-            Console.WriteLine("FIUTTO");
             return View();
         }
 
