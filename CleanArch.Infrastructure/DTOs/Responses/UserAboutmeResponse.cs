@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace RPGOnline.Infrastructure.DTOs.Responses
 {
-    internal class UserAboutmeResponse
+    public class UserAboutmeResponse
     {
+        public int UId { get; set; }
+        public string Email { get; set; } = null!;
+        public string? Country { get; set; }
+        public string? City { get; set; }
+        public string? AboutMe { get; set; }
+        public string Attitude { get; set; } = null!;
+        public DateTime CreationDate { get; set; }
     }
 }

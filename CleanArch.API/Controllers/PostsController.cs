@@ -19,12 +19,9 @@ namespace RPGOnline.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ICollection<PostResponse>> GetPosts()
+        public async Task<IActionResult> GetPosts()
         {
-
-            //var result = await _dbContext.AllPosts(2)
-
-            return await _dbContext.Posts
+            var result = await _dbContext.Posts
                 .Select(p => new PostResponse()
                 {
                     PostId = p.PostId,
@@ -61,19 +58,15 @@ namespace RPGOnline.API.Controllers
                                             PostIdNavigation = c.PostId
                                         }).ToList()
                 }).ToListAsync();
-            
 
-
-            /*if(result == null)
+            if(result == null)
             {
-               return BadRequest(null);
+                return BadRequest("No posts in database.");
             }
-             return Ok(result);*/
-
-            //return Ok(Mediator.Send(new GetSampleQuery
-            //{
-            //    JustSomeSampleThing = "PT"
-            //}));
+            else
+            {
+                return Ok(result);
+            }
         }
     }
 }
