@@ -3,19 +3,22 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RPGOnline.Infrastructure.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.Interfaces;
+using RPGOnline.Domain.Models;
 using RPGOnline.Infrastructure.Models;
 
 namespace RPGOnline.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : CommonController
     {
         private readonly RPGOnlineDbContext _dbContext;
 
-        public UsersController(RPGOnlineDbContext dbContext)
+        private readonly IUser _userService;
+
+        public UsersController(RPGOnlineDbContext dbContext, IUser userService)
         {
+            _userService = userService;
             _dbContext = dbContext;
         }
 
@@ -45,18 +48,7 @@ namespace RPGOnline.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAboutMe(int id)
         {
-            var result = await _dbContext.Users
-                .Where(u => u.UId == id)
-                .Select(u => new UserAboutmeResponse()
-                {
-                    UId = u.UId,
-                    Email = u.Email,
-                    Country = u.Country,
-                    City = u.City,
-                    AboutMe = u.AboutMe,
-                    Attitude = u.Attitude,
-                    CreationDate = u.CreationDate
-                }).SingleOrDefaultAsync();
+            var result = await _userService.GetAboutMe(id);
 
             if (result == null)
             {

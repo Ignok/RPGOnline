@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using RPGOnline.Application.Common.Interfaces;
+using RPGOnline.Domain.Models;
 
 namespace RPGOnline.Infrastructure.Models
 {
-    public partial class RPGOnlineDbContext : DbContext
+    public partial class RPGOnlineDbContext : DbContext, IApplicationDbContext
     {
         public RPGOnlineDbContext()
         {

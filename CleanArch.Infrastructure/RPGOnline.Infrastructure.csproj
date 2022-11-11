@@ -21,9 +21,4 @@
     <ProjectReference Include="..\CleanArch.Application\RPGOnline.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Requests\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

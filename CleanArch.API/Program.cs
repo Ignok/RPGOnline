@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using RPGOnline.API.Data;
 using RPGOnline.Application;
 using RPGOnline.Application.Common.Interfaces;
+using RPGOnline.Application.Interfaces;
 using RPGOnline.Infrastructure;
 using RPGOnline.Infrastructure.Models;
+using RPGOnline.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,18 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 
+//Enable CORS
+builder.Services.AddCors(c =>
+            {
+                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
+
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<IApplicationDbContext, RPGOnlineDbContext>();
+builder.Services.AddScoped<IUser, UserService>();
+builder.Services.AddScoped<IAccount, AccountService>();
+
 
 builder.Services.AddInfrastructure().AddApplication();
     
@@ -37,6 +49,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fajerbol"));
     app.UseSwaggerUI();
 }
+
+app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.UseHttpsRedirection();
 

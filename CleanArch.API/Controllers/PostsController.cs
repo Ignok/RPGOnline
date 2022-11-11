@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RPGOnline.Infrastructure.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Infrastructure.Models;
 
 namespace RPGOnline.API.Controllers
 {
-    [Route("api/postscontroller")]
-    [ApiController]
-    public class PostsController : ControllerBase
+    public class PostsController : CommonController
     {
 
         private readonly RPGOnlineDbContext _dbContext;
