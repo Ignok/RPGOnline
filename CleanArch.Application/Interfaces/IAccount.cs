@@ -10,5 +10,6 @@ namespace RPGOnline.Application.Interfaces
     public interface IAccount
     {
         Task<Object> Login(LoginRequest loginRequest);
+        Task<Object> Register(RegisterRequest registerRequest);
     }
 }

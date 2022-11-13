@@ -16,8 +16,8 @@ namespace RPGOnline.API.Controllers
             _accountService = accountService;
         }
 
-
-        [HttpPost]
+        
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
             try
@@ -27,6 +27,20 @@ namespace RPGOnline.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { n = ex.Message });
+            }
+        }
+        
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterRequest registerRequest)
+        {
+            try
+            {
+                return Ok(await _accountService.Register(registerRequest));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Data);
             }
         }
     }

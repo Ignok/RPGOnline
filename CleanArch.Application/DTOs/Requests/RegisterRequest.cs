@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 
 namespace RPGOnline.Application.DTOs.Requests
 {
-    public class LoginRequest
+    public class RegisterRequest
     {
         [Required]
         [MaxLength(40)]
         public string Username { get; set; }
+
+        [Required]
+        [MaxLength(40)]
+        public string Email { get; set; }
 
         [Required]
         [MaxLength(30)]

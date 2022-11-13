@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace RPGOnline.API.Controllers
         }
 
         // GET: api/Users
+        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
