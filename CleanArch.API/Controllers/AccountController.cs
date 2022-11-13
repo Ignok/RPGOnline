@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.Interfaces;
@@ -6,6 +7,7 @@ using RPGOnline.Infrastructure.Services;
 
 namespace RPGOnline.API.Controllers
 {
+    //[Authorize]
     public class AccountController : CommonController
     {
 
@@ -16,7 +18,7 @@ namespace RPGOnline.API.Controllers
             _accountService = accountService;
         }
 
-        
+        //[AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
@@ -29,8 +31,8 @@ namespace RPGOnline.API.Controllers
                 return BadRequest(new { n = ex.Message });
             }
         }
-        
 
+        //[AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
@@ -43,5 +45,22 @@ namespace RPGOnline.API.Controllers
                 return BadRequest(ex.Data);
             }
         }
+
+
+        /*
+         [AllowAnonymous]
+         [HttpPost("refresh")]
+         public async Task<IActionResult> RefreshToken([FromHeader(Name = "Authorization")] string token, RefreshTokenRequest refreshToken)
+         {
+             try
+             {
+                 return Ok(await _accountService.RefreshToken(token, refreshToken));
+             }
+             catch (Exception ex)
+             {
+                 return BadRequest(ex.Message);
+             }
+         }
+         */
     }
 }

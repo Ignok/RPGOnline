@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using RPGOnline.API.Middlewares;
 using RPGOnline.Application;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.Interfaces;
@@ -10,6 +11,7 @@ using RPGOnline.Infrastructure.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration;
 
 // Add services to the container.
 
@@ -35,7 +37,7 @@ builder.Services.AddInfrastructure().AddApplication();
     
 
 builder.Services.AddDbContext<RPGOnlineDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DBRPGOnline")));
+                options.UseSqlServer(configuration.GetConnectionString("DBRPGOnline")));
 
 //builder.Services.AddDbContext<ApplicationDbContext>();
 
@@ -44,17 +46,20 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(opt =>
 {
+    opt.SaveToken = true;
+
     opt.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(2),
-        ValidIssuer = "https://localhost:5001",
-        ValidAudience = "https://localhost:5001",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["SuperSecretKey"]))
+        ValidIssuer = configuration["JWT:ValidIssuer"],
+        ValidAudience = configuration["JWT:ValidAudience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
     };
 
     opt.Events = new JwtBearerEvents
@@ -70,6 +75,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -77,6 +84,10 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+
+//app.UseGreatErrorHandling();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

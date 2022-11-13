@@ -106,29 +106,81 @@ namespace RPGOnline.Infrastructure.Services
                 throw new Exception("Incorrect password");
             }
 
-            Claim[] claims = new[]
+            Claim[] UserClaims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, result.UId.ToString()),
                 new Claim(ClaimTypes.Name, loginRequest.Username),
                 new Claim(ClaimTypes.Role, ((result.UId == 1 || result.UId == 2) ? "admin" : "user"))
             };
 
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SuperSecretKey"]));
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
             SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
             JwtSecurityToken token = new JwtSecurityToken(
-                issuer: "https://localhost:5001/",
-                audience: "https://localhost:5001/",
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(420),
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                claims: UserClaims,
+                expires: DateTime.Now.AddMinutes(10),
                 signingCredentials: creds
             );
 
 
             return new
             {
-                accessToken = new JwtSecurityTokenHandler().WriteToken(token)
+                token = new JwtSecurityTokenHandler().WriteToken(token)
             };
         }
+
+        //Refresh token service
+        /*
+        public async Task<Object> RefreshToken(string token, RefreshTokenRequest refreshTokenRequest)
+        {
+            var result = await _dbContext.Users
+               //.Where(u => u.RefreshToken.Equals(refreshTokenRequest.RefreshToken))
+               .SingleOrDefaultAsync();
+
+
+            if (result == null)
+            {
+                throw new SecurityTokenException("Invalid refresh token");
+            }
+
+            if (result.RefreshTokenExp < DateTime.Now)
+            {
+                throw new SecurityTokenException("Refresh token expired");
+            }
+
+            string login = SecurityHelpers.GetUserIdFromAccessToken(token.Replace("Bearer ", ""), _configuration["JWT:Secret"]);
+
+            Claim[] UserClaims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, result.UId.ToString()),
+                new Claim(ClaimTypes.Name, result.Username),
+                new Claim(ClaimTypes.Role, ((result.UId == 1 || result.UId == 2) ? "admin" : "user"))
+            };
+
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
+
+            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            JwtSecurityToken jwtToken = new JwtSecurityToken(
+                issuer: "https://localhost:5001",
+                audience: "https://localhost:5001",
+                claims: UserClaims,
+                expires: DateTime.Now.AddMinutes(10),
+                signingCredentials: creds
+            );
+
+            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+            result.RefreshTokenExp = DateTime.Now.AddDays(1);
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                refreshToken = user.RefreshToken
+            });
+        }
+        */
     }
 }
