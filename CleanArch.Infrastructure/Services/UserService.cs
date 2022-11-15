@@ -25,6 +25,8 @@ namespace RPGOnline.Infrastructure.Services
                 .Select(u => new UserAboutmeResponse()
                 {
                     UId = u.UId,
+                    Username = u.Username,
+                    Picture = u.Picture,
                     Email = u.Email,
                     Country = u.Country,
                     City = u.City,
