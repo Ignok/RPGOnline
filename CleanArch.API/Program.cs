@@ -12,7 +12,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
-
+configuration.AddUserSecrets("aaa");
 // Add services to the container.
 
 //builder.Services.AddControllers();
