@@ -10,8 +10,8 @@ namespace RPGOnline.Domain.Models
             ChatMessages = new HashSet<ChatMessage>();
             GameParticipantItems = new HashSet<GameParticipantItem>();
             GameParticipantNotes = new HashSet<GameParticipantNote>();
-            GameParticipantSpells = new HashSet<GameParticipantSpell>();
             TokenOnMaps = new HashSet<TokenOnMap>();
+            Spells = new HashSet<Spell>();
         }
 
         public int GameParticipantId { get; set; }
@@ -29,7 +29,8 @@ namespace RPGOnline.Domain.Models
         public virtual ICollection<ChatMessage> ChatMessages { get; set; }
         public virtual ICollection<GameParticipantItem> GameParticipantItems { get; set; }
         public virtual ICollection<GameParticipantNote> GameParticipantNotes { get; set; }
-        public virtual ICollection<GameParticipantSpell> GameParticipantSpells { get; set; }
         public virtual ICollection<TokenOnMap> TokenOnMaps { get; set; }
+
+        public virtual ICollection<Spell> Spells { get; set; }
     }
 }

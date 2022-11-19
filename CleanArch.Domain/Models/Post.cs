@@ -8,7 +8,7 @@ namespace RPGOnline.Domain.Models
         public Post()
         {
             Comments = new HashSet<Comment>();
-            UIds = new HashSet<User>();
+            UserLikedPosts = new HashSet<UserLikedPost>();
         }
 
         public int PostId { get; set; }
@@ -18,11 +18,8 @@ namespace RPGOnline.Domain.Models
         public string? Picture { get; set; }
         public DateTime CreationDate { get; set; }
 
-        //number of likes
-        public virtual ICollection<User> UIds { get; set; }
-
         public virtual User UIdNavigation { get; set; } = null!;
         public virtual ICollection<Comment> Comments { get; set; }
-
+        public virtual ICollection<UserLikedPost> UserLikedPosts { get; set; }
     }
 }

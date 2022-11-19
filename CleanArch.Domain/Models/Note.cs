@@ -12,6 +12,7 @@ namespace RPGOnline.Domain.Models
 
         public int NoteId { get; set; }
         public int GameId { get; set; }
+        public string Title { get; set; } = null!;
         public string? Content { get; set; }
         public string? Picture { get; set; }
 

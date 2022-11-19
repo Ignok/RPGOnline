@@ -9,20 +9,20 @@ namespace RPGOnline.Domain.Models
         {
             CharacterItems = new HashSet<CharacterItem>();
             GameParticipantItems = new HashSet<GameParticipantItem>();
-            ItemSkillModifications = new HashSet<ItemSkillModification>();
+            ProfessionStartingItems = new HashSet<ProfessionStartingItem>();
         }
 
         public int ItemId { get; set; }
-        public int? AuthorUId { get; set; }
+        public int AssetId { get; set; }
         public string ItemName { get; set; } = null!;
-        public string Commentary { get; set; } = null!;
-        public int KeySkill { get; set; }
-        public int MinValue { get; set; }
+        public string Description { get; set; } = null!;
+        public string KeySkill { get; set; } = null!;
+        public int SkillMod { get; set; }
         public int GoldMultiplier { get; set; }
 
-        public virtual User? AuthorU { get; set; }
+        public virtual Asset Asset { get; set; } = null!;
         public virtual ICollection<CharacterItem> CharacterItems { get; set; }
         public virtual ICollection<GameParticipantItem> GameParticipantItems { get; set; }
-        public virtual ICollection<ItemSkillModification> ItemSkillModifications { get; set; }
+        public virtual ICollection<ProfessionStartingItem> ProfessionStartingItems { get; set; }
     }
 }

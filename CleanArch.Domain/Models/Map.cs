@@ -13,7 +13,7 @@ namespace RPGOnline.Domain.Models
         public int MapId { get; set; }
         public int? AuthorUId { get; set; }
         public string MapName { get; set; } = null!;
-        public string Commentary { get; set; } = null!;
+        public string Description { get; set; } = null!;
         public string? Picture { get; set; }
         public int IsPublic { get; set; }
 

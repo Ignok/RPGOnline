@@ -7,21 +7,24 @@ namespace RPGOnline.Domain.Models
     {
         public Spell()
         {
-            CharacterSpells = new HashSet<CharacterSpell>();
-            GameParticipantSpells = new HashSet<GameParticipantSpell>();
+            Characters = new HashSet<Character>();
+            GameParticipants = new HashSet<GameParticipant>();
+            Professions = new HashSet<Profession>();
         }
 
         public int SpellId { get; set; }
-        public int? AuthorUId { get; set; }
+        public int AssetId { get; set; }
         public string SpellName { get; set; } = null!;
-        public string Commentary { get; set; } = null!;
-        public int KeySkill { get; set; }
-        public int RequiredValue { get; set; }
+        public string Description { get; set; } = null!;
+        public string KeySkill { get; set; } = null!;
+        public int MinValue { get; set; }
         public int ManaCost { get; set; }
         public string Effects { get; set; } = null!;
 
-        public virtual User? AuthorU { get; set; }
-        public virtual ICollection<CharacterSpell> CharacterSpells { get; set; }
-        public virtual ICollection<GameParticipantSpell> GameParticipantSpells { get; set; }
+        public virtual Asset Asset { get; set; } = null!;
+
+        public virtual ICollection<Character> Characters { get; set; }
+        public virtual ICollection<GameParticipant> GameParticipants { get; set; }
+        public virtual ICollection<Profession> Professions { get; set; }
     }
 }

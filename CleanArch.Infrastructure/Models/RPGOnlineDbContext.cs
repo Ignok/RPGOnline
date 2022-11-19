@@ -19,37 +19,33 @@ namespace RPGOnline.Infrastructure.Models
         }
 
         public virtual DbSet<Achievement> Achievements { get; set; } = null!;
-        public virtual DbSet<Avatar> Avatars { get; set; } = null!;
-        public virtual DbSet<BookRule> BookRules { get; set; } = null!;
+        public virtual DbSet<Asset> Assets { get; set; } = null!;
         public virtual DbSet<Character> Characters { get; set; } = null!;
-        public virtual DbSet<CharacterDescription> CharacterDescriptions { get; set; } = null!;
         public virtual DbSet<CharacterItem> CharacterItems { get; set; } = null!;
-        public virtual DbSet<CharacterSkill> CharacterSkills { get; set; } = null!;
-        public virtual DbSet<CharacterSpell> CharacterSpells { get; set; } = null!;
-        public virtual DbSet<CharacterTrait> CharacterTraits { get; set; } = null!;
+        public virtual DbSet<Characteristic> Characteristics { get; set; } = null!;
         public virtual DbSet<ChatMessage> ChatMessages { get; set; } = null!;
         public virtual DbSet<Comment> Comments { get; set; } = null!;
-        public virtual DbSet<Description> Descriptions { get; set; } = null!;
-        public virtual DbSet<FeatureGlossary> FeatureGlossaries { get; set; } = null!;
         public virtual DbSet<Friendship> Friendships { get; set; } = null!;
         public virtual DbSet<Game> Games { get; set; } = null!;
         public virtual DbSet<GameMap> GameMaps { get; set; } = null!;
         public virtual DbSet<GameParticipant> GameParticipants { get; set; } = null!;
         public virtual DbSet<GameParticipantItem> GameParticipantItems { get; set; } = null!;
         public virtual DbSet<GameParticipantNote> GameParticipantNotes { get; set; } = null!;
-        public virtual DbSet<GameParticipantSpell> GameParticipantSpells { get; set; } = null!;
         public virtual DbSet<Item> Items { get; set; } = null!;
-        public virtual DbSet<ItemSkillModification> ItemSkillModifications { get; set; } = null!;
         public virtual DbSet<Map> Maps { get; set; } = null!;
         public virtual DbSet<Message> Messages { get; set; } = null!;
+        public virtual DbSet<Motivation> Motivations { get; set; } = null!;
         public virtual DbSet<Note> Notes { get; set; } = null!;
         public virtual DbSet<Post> Posts { get; set; } = null!;
+        public virtual DbSet<Profession> Professions { get; set; } = null!;
+        public virtual DbSet<ProfessionStartingItem> ProfessionStartingItems { get; set; } = null!;
+        public virtual DbSet<Race> Races { get; set; } = null!;
         public virtual DbSet<Spell> Spells { get; set; } = null!;
         public virtual DbSet<TokenOnMap> TokenOnMaps { get; set; } = null!;
-        public virtual DbSet<Trait> Traits { get; set; } = null!;
-        public virtual DbSet<TraitSkillModification> TraitSkillModifications { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserAchievement> UserAchievements { get; set; } = null!;
+        public virtual DbSet<UserLikedPost> UserLikedPosts { get; set; } = null!;
+        public virtual DbSet<UserSavedAsset> UserSavedAssets { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -89,10 +85,10 @@ namespace RPGOnline.Infrastructure.Models
                     .IsUnicode(false)
                     .HasColumnName("achievement_name");
 
-                entity.Property(e => e.Commentary)
+                entity.Property(e => e.Description)
                     .HasMaxLength(280)
                     .IsUnicode(false)
-                    .HasColumnName("commentary");
+                    .HasColumnName("description");
 
                 entity.Property(e => e.Picture)
                     .HasMaxLength(60)
@@ -100,51 +96,28 @@ namespace RPGOnline.Infrastructure.Models
                     .HasColumnName("picture");
             });
 
-            modelBuilder.Entity<Avatar>(entity =>
+            modelBuilder.Entity<Asset>(entity =>
             {
-                entity.ToTable("Avatar");
+                entity.ToTable("Asset");
 
-                entity.Property(e => e.AvatarId)
+                entity.Property(e => e.AssetId)
                     .ValueGeneratedNever()
-                    .HasColumnName("avatar_id");
+                    .HasColumnName("asset_id");
 
-                entity.Property(e => e.AuthorUId).HasColumnName("author_u_id");
+                entity.Property(e => e.AuthorId).HasColumnName("author_id");
 
-                entity.Property(e => e.AvatarName)
-                    .HasMaxLength(40)
+                entity.Property(e => e.IsPublic).HasColumnName("is_public");
+
+                entity.Property(e => e.Language)
+                    .HasMaxLength(2)
                     .IsUnicode(false)
-                    .HasColumnName("avatar_name");
+                    .HasColumnName("language");
 
-                entity.Property(e => e.Picture)
-                    .HasMaxLength(60)
-                    .IsUnicode(false)
-                    .HasColumnName("picture");
-
-                entity.HasOne(d => d.AuthorU)
-                    .WithMany(p => p.Avatars)
-                    .HasForeignKey(d => d.AuthorUId)
-                    .HasConstraintName("Token_User");
-            });
-
-            modelBuilder.Entity<BookRule>(entity =>
-            {
-                entity.HasKey(e => e.BookRulesId)
-                    .HasName("Book_rules_pk");
-
-                entity.ToTable("Book_rules");
-
-                entity.Property(e => e.BookRulesId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("book_rules_id");
-
-                entity.Property(e => e.Content)
-                    .HasMaxLength(1080)
-                    .HasColumnName("content");
-
-                entity.Property(e => e.Title)
-                    .HasMaxLength(40)
-                    .IsUnicode(false)
-                    .HasColumnName("title");
+                entity.HasOne(d => d.Author)
+                    .WithMany(p => p.Assets)
+                    .HasForeignKey(d => d.AuthorId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Asset_User");
             });
 
             modelBuilder.Entity<Character>(entity =>
@@ -155,60 +128,75 @@ namespace RPGOnline.Infrastructure.Models
                     .ValueGeneratedNever()
                     .HasColumnName("character_id");
 
-                entity.Property(e => e.AvatarId).HasColumnName("avatar_id");
+                entity.Property(e => e.AssetId).HasColumnName("asset_id");
+
+                entity.Property(e => e.Avatar)
+                    .HasMaxLength(60)
+                    .IsUnicode(false)
+                    .HasColumnName("avatar");
 
                 entity.Property(e => e.CharacterName)
                     .HasMaxLength(80)
                     .HasColumnName("character_name");
 
+                entity.Property(e => e.CharacteristicsJson)
+                    .HasMaxLength(280)
+                    .HasColumnName("characteristics_json");
+
                 entity.Property(e => e.Gold).HasColumnName("gold");
 
-                entity.Property(e => e.IsPublic).HasColumnName("is_public");
+                entity.Property(e => e.MotivationJson)
+                    .HasMaxLength(280)
+                    .HasColumnName("motivation_json");
+
+                entity.Property(e => e.ProfessionId).HasColumnName("profession_id");
+
+                entity.Property(e => e.ProficiencyJson)
+                    .HasMaxLength(280)
+                    .HasColumnName("proficiency_json");
+
+                entity.Property(e => e.RaceId).HasColumnName("race_id");
 
                 entity.Property(e => e.Remarks)
                     .HasMaxLength(280)
                     .HasColumnName("remarks");
 
-                entity.Property(e => e.UId).HasColumnName("u_id");
+                entity.Property(e => e.SkillsetJson)
+                    .HasMaxLength(280)
+                    .HasColumnName("skillset_json");
 
-                entity.HasOne(d => d.Avatar)
+                entity.HasOne(d => d.Asset)
                     .WithMany(p => p.Characters)
-                    .HasForeignKey(d => d.AvatarId)
+                    .HasForeignKey(d => d.AssetId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Character_Token");
+                    .HasConstraintName("Character_Asset");
 
-                entity.HasOne(d => d.UIdNavigation)
+                entity.HasOne(d => d.Profession)
                     .WithMany(p => p.Characters)
-                    .HasForeignKey(d => d.UId)
-                    .HasConstraintName("Character_User");
-            });
+                    .HasForeignKey(d => d.ProfessionId)
+                    .HasConstraintName("Character_Profession");
 
-            modelBuilder.Entity<CharacterDescription>(entity =>
-            {
-                entity.HasKey(e => e.CharacterDescriptionsId)
-                    .HasName("Character_descriptions_pk");
+                entity.HasOne(d => d.Race)
+                    .WithMany(p => p.Characters)
+                    .HasForeignKey(d => d.RaceId)
+                    .HasConstraintName("Character_Race");
 
-                entity.ToTable("Character_descriptions");
+                entity.HasMany(d => d.Spells)
+                    .WithMany(p => p.Characters)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "CharacterSpell",
+                        l => l.HasOne<Spell>().WithMany().HasForeignKey("SpellId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Character_spells_Spell"),
+                        r => r.HasOne<Character>().WithMany().HasForeignKey("CharacterId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Character_spells_Character"),
+                        j =>
+                        {
+                            j.HasKey("CharacterId", "SpellId").HasName("Character_spells_pk");
 
-                entity.Property(e => e.CharacterDescriptionsId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("character_descriptions_id");
+                            j.ToTable("Character_spells");
 
-                entity.Property(e => e.CharacterId).HasColumnName("character_id");
+                            j.IndexerProperty<int>("CharacterId").HasColumnName("character_id");
 
-                entity.Property(e => e.DescriptionId).HasColumnName("description_id");
-
-                entity.HasOne(d => d.Character)
-                    .WithMany(p => p.CharacterDescriptions)
-                    .HasForeignKey(d => d.CharacterId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Copy_of_Characters_description_Copy_of_Copy_of_Character");
-
-                entity.HasOne(d => d.Description)
-                    .WithMany(p => p.CharacterDescriptions)
-                    .HasForeignKey(d => d.DescriptionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Copy_of_Characters_description_Description");
+                            j.IndexerProperty<int>("SpellId").HasColumnName("spell_id");
+                        });
             });
 
             modelBuilder.Entity<CharacterItem>(entity =>
@@ -226,6 +214,8 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.ItemId).HasColumnName("item_id");
 
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+
                 entity.HasOne(d => d.Character)
                     .WithMany(p => p.CharacterItems)
                     .HasForeignKey(d => d.CharacterId)
@@ -239,86 +229,38 @@ namespace RPGOnline.Infrastructure.Models
                     .HasConstraintName("Character_items_Item");
             });
 
-            modelBuilder.Entity<CharacterSkill>(entity =>
+            modelBuilder.Entity<Characteristic>(entity =>
             {
-                entity.HasKey(e => new { e.FeatureId, e.CharacterId })
-                    .HasName("Character_skills_pk");
+                entity.HasKey(e => e.CharacteristicsId)
+                    .HasName("Characteristics_pk");
 
-                entity.ToTable("Character_skills");
-
-                entity.Property(e => e.FeatureId).HasColumnName("feature_id");
-
-                entity.Property(e => e.CharacterId).HasColumnName("character_id");
-
-                entity.Property(e => e.Quantity).HasColumnName("quantity");
-
-                entity.HasOne(d => d.Character)
-                    .WithMany(p => p.CharacterSkills)
-                    .HasForeignKey(d => d.CharacterId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Table_60_Character");
-
-                entity.HasOne(d => d.Feature)
-                    .WithMany(p => p.CharacterSkills)
-                    .HasForeignKey(d => d.FeatureId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Table_60_Feature_glossary");
-            });
-
-            modelBuilder.Entity<CharacterSpell>(entity =>
-            {
-                entity.HasKey(e => e.CharacterSpellsId)
-                    .HasName("Character_spells_pk");
-
-                entity.ToTable("Character_spells");
-
-                entity.Property(e => e.CharacterSpellsId)
+                entity.Property(e => e.CharacteristicsId)
                     .ValueGeneratedNever()
-                    .HasColumnName("character_spells_id");
+                    .HasColumnName("characteristics_id");
 
-                entity.Property(e => e.CharacterId).HasColumnName("character_id");
+                entity.Property(e => e.Beliefs)
+                    .HasMaxLength(140)
+                    .HasColumnName("beliefs");
 
-                entity.Property(e => e.SpellId).HasColumnName("spell_id");
+                entity.Property(e => e.Face)
+                    .HasMaxLength(140)
+                    .HasColumnName("face");
 
-                entity.HasOne(d => d.Character)
-                    .WithMany(p => p.CharacterSpells)
-                    .HasForeignKey(d => d.CharacterId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Character_spells_Character");
+                entity.Property(e => e.Origins)
+                    .HasMaxLength(140)
+                    .HasColumnName("origins");
 
-                entity.HasOne(d => d.Spell)
-                    .WithMany(p => p.CharacterSpells)
-                    .HasForeignKey(d => d.SpellId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Character_spells_Spell");
-            });
+                entity.Property(e => e.Posture)
+                    .HasMaxLength(140)
+                    .HasColumnName("posture");
 
-            modelBuilder.Entity<CharacterTrait>(entity =>
-            {
-                entity.HasKey(e => e.CharacterTraitsId)
-                    .HasName("Character_traits_pk");
+                entity.Property(e => e.Temperament)
+                    .HasMaxLength(140)
+                    .HasColumnName("temperament");
 
-                entity.ToTable("Character_traits");
-
-                entity.Property(e => e.CharacterTraitsId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("character_traits_id");
-
-                entity.Property(e => e.CharacterId).HasColumnName("character_id");
-
-                entity.Property(e => e.TraitId).HasColumnName("trait_id");
-
-                entity.HasOne(d => d.Character)
-                    .WithMany(p => p.CharacterTraits)
-                    .HasForeignKey(d => d.CharacterId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Table_59_Character");
-
-                entity.HasOne(d => d.Trait)
-                    .WithMany(p => p.CharacterTraits)
-                    .HasForeignKey(d => d.TraitId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Table_59_Trait");
+                entity.Property(e => e.Voice)
+                    .HasMaxLength(80)
+                    .HasColumnName("voice");
             });
 
             modelBuilder.Entity<ChatMessage>(entity =>
@@ -385,45 +327,6 @@ namespace RPGOnline.Infrastructure.Models
                     .HasConstraintName("Comment_User");
             });
 
-            modelBuilder.Entity<Description>(entity =>
-            {
-                entity.ToTable("Description");
-
-                entity.Property(e => e.DescriptionId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("description_id");
-
-                entity.Property(e => e.Content)
-                    .HasMaxLength(80)
-                    .IsUnicode(false)
-                    .HasColumnName("content");
-
-                entity.Property(e => e.DescriptionFeatureId).HasColumnName("description_feature_id");
-
-                entity.HasOne(d => d.DescriptionFeature)
-                    .WithMany(p => p.Descriptions)
-                    .HasForeignKey(d => d.DescriptionFeatureId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Copy_of_Lineament_Feature_glossary");
-            });
-
-            modelBuilder.Entity<FeatureGlossary>(entity =>
-            {
-                entity.HasKey(e => e.FeatureId)
-                    .HasName("Feature_glossary_pk");
-
-                entity.ToTable("Feature_glossary");
-
-                entity.Property(e => e.FeatureId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("feature_id");
-
-                entity.Property(e => e.FeatureGlossaryName)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("feature_glossary_name");
-            });
-
             modelBuilder.Entity<Friendship>(entity =>
             {
                 entity.HasKey(e => new { e.UId, e.FriendUId })
@@ -435,9 +338,9 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.FriendUId).HasColumnName("friend_u_id");
 
-                entity.Property(e => e.FollowStatus).HasColumnName("follow_status");
-
                 entity.Property(e => e.FriendshipStatus).HasColumnName("friendship_status");
+
+                entity.Property(e => e.IsFollowed).HasColumnName("is_followed");
 
                 entity.HasOne(d => d.FriendU)
                     .WithMany(p => p.FriendshipFriendUs)
@@ -460,15 +363,15 @@ namespace RPGOnline.Infrastructure.Models
                     .ValueGeneratedNever()
                     .HasColumnName("game_id");
 
-                entity.Property(e => e.Commentary)
-                    .HasMaxLength(280)
-                    .HasColumnName("commentary");
-
                 entity.Property(e => e.CreationDate)
                     .HasColumnType("date")
                     .HasColumnName("creation_date");
 
                 entity.Property(e => e.CreatorUId).HasColumnName("creator_u_id");
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(280)
+                    .HasColumnName("description");
 
                 entity.Property(e => e.GameName)
                     .HasMaxLength(80)
@@ -557,6 +460,23 @@ namespace RPGOnline.Infrastructure.Models
                     .HasForeignKey(d => d.UId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Game_participant_User");
+
+                entity.HasMany(d => d.Spells)
+                    .WithMany(p => p.GameParticipants)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "GameParticipantSpell",
+                        l => l.HasOne<Spell>().WithMany().HasForeignKey("SpellId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Game_participant_spells_Spell"),
+                        r => r.HasOne<GameParticipant>().WithMany().HasForeignKey("GameParticipantId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Game_participant_spells_Game_participant"),
+                        j =>
+                        {
+                            j.HasKey("GameParticipantId", "SpellId").HasName("Game_participant_spells_pk");
+
+                            j.ToTable("Game_participant_spells");
+
+                            j.IndexerProperty<int>("GameParticipantId").HasColumnName("game_participant_id");
+
+                            j.IndexerProperty<int>("SpellId").HasColumnName("spell_id");
+                        });
             });
 
             modelBuilder.Entity<GameParticipantItem>(entity =>
@@ -573,6 +493,8 @@ namespace RPGOnline.Infrastructure.Models
                 entity.Property(e => e.GameParticipantId).HasColumnName("game_participant_id");
 
                 entity.Property(e => e.ItemId).HasColumnName("item_id");
+
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
 
                 entity.HasOne(d => d.GameParticipant)
                     .WithMany(p => p.GameParticipantItems)
@@ -618,34 +540,6 @@ namespace RPGOnline.Infrastructure.Models
                     .HasConstraintName("Game_participant_notes_Note");
             });
 
-            modelBuilder.Entity<GameParticipantSpell>(entity =>
-            {
-                entity.HasKey(e => e.GameParticipantSpellsId)
-                    .HasName("Game_participant_spells_pk");
-
-                entity.ToTable("Game_participant_spells");
-
-                entity.Property(e => e.GameParticipantSpellsId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("game_participant_spells_id");
-
-                entity.Property(e => e.GameParticipantId).HasColumnName("game_participant_id");
-
-                entity.Property(e => e.SpellId).HasColumnName("spell_id");
-
-                entity.HasOne(d => d.GameParticipant)
-                    .WithMany(p => p.GameParticipantSpells)
-                    .HasForeignKey(d => d.GameParticipantId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Game_participant_spells_Game_participant");
-
-                entity.HasOne(d => d.Spell)
-                    .WithMany(p => p.GameParticipantSpells)
-                    .HasForeignKey(d => d.SpellId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Game_participant_spells_Spell");
-            });
-
             modelBuilder.Entity<Item>(entity =>
             {
                 entity.ToTable("Item");
@@ -654,11 +548,11 @@ namespace RPGOnline.Infrastructure.Models
                     .ValueGeneratedNever()
                     .HasColumnName("item_id");
 
-                entity.Property(e => e.AuthorUId).HasColumnName("author_u_id");
+                entity.Property(e => e.AssetId).HasColumnName("asset_id");
 
-                entity.Property(e => e.Commentary)
+                entity.Property(e => e.Description)
                     .HasMaxLength(280)
-                    .HasColumnName("commentary");
+                    .HasColumnName("description");
 
                 entity.Property(e => e.GoldMultiplier).HasColumnName("gold_multiplier");
 
@@ -666,40 +560,18 @@ namespace RPGOnline.Infrastructure.Models
                     .HasMaxLength(40)
                     .HasColumnName("item_name");
 
-                entity.Property(e => e.KeySkill).HasColumnName("key_skill");
+                entity.Property(e => e.KeySkill)
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasColumnName("key_skill");
 
-                entity.Property(e => e.MinValue).HasColumnName("min_value");
+                entity.Property(e => e.SkillMod).HasColumnName("skill_mod");
 
-                entity.HasOne(d => d.AuthorU)
+                entity.HasOne(d => d.Asset)
                     .WithMany(p => p.Items)
-                    .HasForeignKey(d => d.AuthorUId)
-                    .HasConstraintName("Item_User");
-            });
-
-            modelBuilder.Entity<ItemSkillModification>(entity =>
-            {
-                entity.HasKey(e => new { e.ItemId, e.SkillFeatureId })
-                    .HasName("Item_skill_modification_pk");
-
-                entity.ToTable("Item_skill_modification");
-
-                entity.Property(e => e.ItemId).HasColumnName("item_id");
-
-                entity.Property(e => e.SkillFeatureId).HasColumnName("skill_feature_id");
-
-                entity.Property(e => e.Modifier).HasColumnName("modifier");
-
-                entity.HasOne(d => d.Item)
-                    .WithMany(p => p.ItemSkillModifications)
-                    .HasForeignKey(d => d.ItemId)
+                    .HasForeignKey(d => d.AssetId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Item_skill_modification_Item");
-
-                entity.HasOne(d => d.SkillFeature)
-                    .WithMany(p => p.ItemSkillModifications)
-                    .HasForeignKey(d => d.SkillFeatureId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Item_skill_modification_Feature_glossary");
+                    .HasConstraintName("Item_Asset");
             });
 
             modelBuilder.Entity<Map>(entity =>
@@ -712,9 +584,9 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.AuthorUId).HasColumnName("author_u_id");
 
-                entity.Property(e => e.Commentary)
+                entity.Property(e => e.Description)
                     .HasMaxLength(280)
-                    .HasColumnName("commentary");
+                    .HasColumnName("description");
 
                 entity.Property(e => e.IsPublic).HasColumnName("is_public");
 
@@ -771,6 +643,39 @@ namespace RPGOnline.Infrastructure.Models
                     .HasConstraintName("Message_Sender_User");
             });
 
+            modelBuilder.Entity<Motivation>(entity =>
+            {
+                entity.ToTable("Motivation");
+
+                entity.Property(e => e.MotivationId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("motivation_id");
+
+                entity.Property(e => e.Destination)
+                    .HasMaxLength(140)
+                    .HasColumnName("destination");
+
+                entity.Property(e => e.HowHappened)
+                    .HasMaxLength(140)
+                    .HasColumnName("how_happened");
+
+                entity.Property(e => e.Objective)
+                    .HasMaxLength(80)
+                    .HasColumnName("objective");
+
+                entity.Property(e => e.Subject)
+                    .HasMaxLength(140)
+                    .HasColumnName("subject");
+
+                entity.Property(e => e.WhatHappened)
+                    .HasMaxLength(140)
+                    .HasColumnName("what_happened");
+
+                entity.Property(e => e.WhereHappened)
+                    .HasMaxLength(140)
+                    .HasColumnName("where_happened");
+            });
+
             modelBuilder.Entity<Note>(entity =>
             {
                 entity.ToTable("Note");
@@ -789,6 +694,10 @@ namespace RPGOnline.Infrastructure.Models
                     .HasMaxLength(60)
                     .IsUnicode(false)
                     .HasColumnName("picture");
+
+                entity.Property(e => e.Title)
+                    .HasMaxLength(80)
+                    .HasColumnName("title");
 
                 entity.HasOne(d => d.Game)
                     .WithMany(p => p.Notes)
@@ -831,6 +740,120 @@ namespace RPGOnline.Infrastructure.Models
                     .HasConstraintName("User_Post");
             });
 
+            modelBuilder.Entity<Profession>(entity =>
+            {
+                entity.ToTable("Profession");
+
+                entity.Property(e => e.ProfessionId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("profession_id");
+
+                entity.Property(e => e.ArmorMod).HasColumnName("armor_mod");
+
+                entity.Property(e => e.AssetId).HasColumnName("asset_id");
+
+                entity.Property(e => e.CompanionMod).HasColumnName("companion_mod");
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(280)
+                    .HasColumnName("description");
+
+                entity.Property(e => e.GadgetMod).HasColumnName("gadget_mod");
+
+                entity.Property(e => e.HiddenTalent)
+                    .HasMaxLength(280)
+                    .HasColumnName("hidden_talent");
+
+                entity.Property(e => e.KeyAttribute)
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasColumnName("key_attribute");
+
+                entity.Property(e => e.ProfessionName)
+                    .HasMaxLength(80)
+                    .HasColumnName("profession_name");
+
+                entity.Property(e => e.PsycheMod).HasColumnName("psyche_mod");
+
+                entity.Property(e => e.Talent)
+                    .HasMaxLength(280)
+                    .HasColumnName("talent");
+
+                entity.Property(e => e.WeaponMod).HasColumnName("weapon_mod");
+
+                entity.HasOne(d => d.Asset)
+                    .WithMany(p => p.Professions)
+                    .HasForeignKey(d => d.AssetId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Profession_Asset");
+            });
+
+            modelBuilder.Entity<ProfessionStartingItem>(entity =>
+            {
+                entity.HasKey(e => e.ProfessionStartingItemsId)
+                    .HasName("Profession_starting_items_pk");
+
+                entity.ToTable("Profession_starting_items");
+
+                entity.Property(e => e.ProfessionStartingItemsId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("profession_starting_items_id");
+
+                entity.Property(e => e.ItemId).HasColumnName("item_id");
+
+                entity.Property(e => e.ProfessionId).HasColumnName("profession_id");
+
+                entity.HasOne(d => d.Item)
+                    .WithMany(p => p.ProfessionStartingItems)
+                    .HasForeignKey(d => d.ItemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Profession_starting_items_Item");
+
+                entity.HasOne(d => d.Profession)
+                    .WithMany(p => p.ProfessionStartingItems)
+                    .HasForeignKey(d => d.ProfessionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Profession_starting_items_Profession");
+            });
+
+            modelBuilder.Entity<Race>(entity =>
+            {
+                entity.ToTable("Race");
+
+                entity.Property(e => e.RaceId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("race_id");
+
+                entity.Property(e => e.AssetId).HasColumnName("asset_id");
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(280)
+                    .HasColumnName("description");
+
+                entity.Property(e => e.HiddenTalent)
+                    .HasMaxLength(280)
+                    .HasColumnName("hidden_talent");
+
+                entity.Property(e => e.KeyAttribute)
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasColumnName("key_attribute");
+
+                entity.Property(e => e.RaceName)
+                    .HasMaxLength(80)
+                    .HasColumnName("race_name");
+
+                entity.Property(e => e.Talent)
+                    .HasMaxLength(280)
+                    .HasColumnName("talent");
+
+                entity.HasOne(d => d.Asset)
+                    .WithMany(p => p.Races)
+                    .HasForeignKey(d => d.AssetId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Race_Asset");
+            });
+
             modelBuilder.Entity<Spell>(entity =>
             {
                 entity.ToTable("Spell");
@@ -839,30 +862,51 @@ namespace RPGOnline.Infrastructure.Models
                     .ValueGeneratedNever()
                     .HasColumnName("spell_id");
 
-                entity.Property(e => e.AuthorUId).HasColumnName("author_u_id");
+                entity.Property(e => e.AssetId).HasColumnName("asset_id");
 
-                entity.Property(e => e.Commentary)
+                entity.Property(e => e.Description)
                     .HasMaxLength(280)
-                    .HasColumnName("commentary");
+                    .HasColumnName("description");
 
                 entity.Property(e => e.Effects)
                     .HasMaxLength(280)
                     .HasColumnName("effects");
 
-                entity.Property(e => e.KeySkill).HasColumnName("key_skill");
+                entity.Property(e => e.KeySkill)
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasColumnName("key_skill");
 
                 entity.Property(e => e.ManaCost).HasColumnName("mana_cost");
 
-                entity.Property(e => e.RequiredValue).HasColumnName("required_value");
+                entity.Property(e => e.MinValue).HasColumnName("min_value");
 
                 entity.Property(e => e.SpellName)
                     .HasMaxLength(40)
                     .HasColumnName("spell_name");
 
-                entity.HasOne(d => d.AuthorU)
+                entity.HasOne(d => d.Asset)
                     .WithMany(p => p.Spells)
-                    .HasForeignKey(d => d.AuthorUId)
-                    .HasConstraintName("Spell_User");
+                    .HasForeignKey(d => d.AssetId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Spell_Asset");
+
+                entity.HasMany(d => d.Professions)
+                    .WithMany(p => p.Spells)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "ProfessionStartingSpell",
+                        l => l.HasOne<Profession>().WithMany().HasForeignKey("ProfessionId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Profession_starting_spells_Profession"),
+                        r => r.HasOne<Spell>().WithMany().HasForeignKey("SpellId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Profession_starting_spells_Spell"),
+                        j =>
+                        {
+                            j.HasKey("SpellId", "ProfessionId").HasName("Profession_starting_spells_pk");
+
+                            j.ToTable("Profession_starting_spells");
+
+                            j.IndexerProperty<int>("SpellId").HasColumnName("spell_id");
+
+                            j.IndexerProperty<int>("ProfessionId").HasColumnName("profession_id");
+                        });
             });
 
             modelBuilder.Entity<TokenOnMap>(entity =>
@@ -892,68 +936,6 @@ namespace RPGOnline.Infrastructure.Models
                     .HasForeignKey(d => d.GameParticipantId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Token_on_map_Game_participant");
-            });
-
-            modelBuilder.Entity<Trait>(entity =>
-            {
-                entity.ToTable("Trait");
-
-                entity.Property(e => e.TraitId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("trait_id");
-
-                entity.Property(e => e.AuthorUId).HasColumnName("author_u_id");
-
-                entity.Property(e => e.Commentary)
-                    .HasMaxLength(280)
-                    .HasColumnName("commentary");
-
-                entity.Property(e => e.HiddenTalent)
-                    .HasMaxLength(280)
-                    .HasColumnName("hidden_talent");
-
-                entity.Property(e => e.IsRace).HasColumnName("is_race");
-
-                entity.Property(e => e.KeySkill).HasColumnName("key_skill");
-
-                entity.Property(e => e.Talent)
-                    .HasMaxLength(280)
-                    .HasColumnName("talent");
-
-                entity.Property(e => e.TraitName)
-                    .HasMaxLength(80)
-                    .HasColumnName("trait_name");
-
-                entity.HasOne(d => d.AuthorU)
-                    .WithMany(p => p.Traits)
-                    .HasForeignKey(d => d.AuthorUId)
-                    .HasConstraintName("Trait_User");
-            });
-
-            modelBuilder.Entity<TraitSkillModification>(entity =>
-            {
-                entity.HasKey(e => new { e.SkillFeatureId, e.TraitId })
-                    .HasName("Trait_skill_modification_pk");
-
-                entity.ToTable("Trait_skill_modification");
-
-                entity.Property(e => e.SkillFeatureId).HasColumnName("skill_feature_id");
-
-                entity.Property(e => e.TraitId).HasColumnName("trait_id");
-
-                entity.Property(e => e.Modifier).HasColumnName("modifier");
-
-                entity.HasOne(d => d.SkillFeature)
-                    .WithMany(p => p.TraitSkillModifications)
-                    .HasForeignKey(d => d.SkillFeatureId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Copy_of_Copy_of_Skill_Skill_glossary");
-
-                entity.HasOne(d => d.Trait)
-                    .WithMany(p => p.TraitSkillModifications)
-                    .HasForeignKey(d => d.TraitId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Skill_modification_Trait");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -1000,31 +982,24 @@ namespace RPGOnline.Infrastructure.Models
                     .HasColumnName("picture");
 
                 entity.Property(e => e.Pswd)
-                    .HasMaxLength(60)
+                    .HasMaxLength(100)
                     .IsUnicode(false)
                     .HasColumnName("pswd");
+
+                entity.Property(e => e.RefreshToken)
+                    .HasMaxLength(280)
+                    .IsUnicode(false)
+                    .HasColumnName("refresh_token");
+
+                entity.Property(e => e.Salt)
+                    .HasMaxLength(280)
+                    .IsUnicode(false)
+                    .HasColumnName("salt");
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(40)
                     .IsUnicode(false)
                     .HasColumnName("username");
-
-                entity.HasMany(d => d.PostsNavigation)
-                    .WithMany(p => p.UIds)
-                    .UsingEntity<Dictionary<string, object>>(
-                        "UserLikedPost",
-                        l => l.HasOne<Post>().WithMany().HasForeignKey("PostId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("User_liked_post_Post"),
-                        r => r.HasOne<User>().WithMany().HasForeignKey("UId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("User_likedPost_User"),
-                        j =>
-                        {
-                            j.HasKey("UId", "PostId").HasName("User_liked_post_pk");
-
-                            j.ToTable("User_liked_post");
-
-                            j.IndexerProperty<int>("UId").HasColumnName("u_id");
-
-                            j.IndexerProperty<int>("PostId").HasColumnName("post_id");
-                        });
             });
 
             modelBuilder.Entity<UserAchievement>(entity =>
@@ -1053,6 +1028,62 @@ namespace RPGOnline.Infrastructure.Models
                     .HasForeignKey(d => d.UId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("User_achievement_User");
+            });
+
+            modelBuilder.Entity<UserLikedPost>(entity =>
+            {
+                entity.HasKey(e => new { e.UId, e.PostId })
+                    .HasName("User_liked_post_pk");
+
+                entity.ToTable("User_liked_post");
+
+                entity.Property(e => e.UId).HasColumnName("u_id");
+
+                entity.Property(e => e.PostId).HasColumnName("post_id");
+
+                entity.Property(e => e.LikeDate)
+                    .HasColumnType("date")
+                    .HasColumnName("like_date");
+
+                entity.HasOne(d => d.Post)
+                    .WithMany(p => p.UserLikedPosts)
+                    .HasForeignKey(d => d.PostId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("User_liked_post_Post");
+
+                entity.HasOne(d => d.UIdNavigation)
+                    .WithMany(p => p.UserLikedPosts)
+                    .HasForeignKey(d => d.UId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("User_likedPost_User");
+            });
+
+            modelBuilder.Entity<UserSavedAsset>(entity =>
+            {
+                entity.HasKey(e => new { e.UId, e.AssetId })
+                    .HasName("User_saved_asset_pk");
+
+                entity.ToTable("User_saved_asset");
+
+                entity.Property(e => e.UId).HasColumnName("u_id");
+
+                entity.Property(e => e.AssetId).HasColumnName("asset_id");
+
+                entity.Property(e => e.SaveDate)
+                    .HasColumnType("date")
+                    .HasColumnName("save_date");
+
+                entity.HasOne(d => d.Asset)
+                    .WithMany(p => p.UserSavedAssets)
+                    .HasForeignKey(d => d.AssetId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("User_saved_asset_Asset");
+
+                entity.HasOne(d => d.UIdNavigation)
+                    .WithMany(p => p.UserSavedAssets)
+                    .HasForeignKey(d => d.UId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("User_saved_asset_User");
             });
 
             OnModelCreatingPartial(modelBuilder);

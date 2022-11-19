@@ -8,7 +8,7 @@ namespace RPGOnline.Domain.Models
         public int UId { get; set; }
         public int FriendUId { get; set; }
         public int FriendshipStatus { get; set; }
-        public int FollowStatus { get; set; }
+        public int IsFollowed { get; set; }
 
         public virtual User FriendU { get; set; } = null!;
         public virtual User UIdNavigation { get; set; } = null!;
