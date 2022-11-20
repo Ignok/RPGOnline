@@ -7,18 +7,13 @@ using System.Threading.Tasks;
 
 namespace RPGOnline.Application.DTOs.Requests
 {
-    public class RegisterRequest
+    public class UserRequest
     {
         [Required]
-        [MaxLength(40)]
         public string Username { get; set; }
-
         [Required]
-        [MaxLength(30)]
-        public string Pswd { get; set; }
-
-        [Required]
-        [MaxLength(40)]
         public string Email { get; set; }
+        [Required]
+        public string Pswd { get; set; }
     }
 }

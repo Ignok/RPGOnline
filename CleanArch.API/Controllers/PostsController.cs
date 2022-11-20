@@ -28,7 +28,7 @@ namespace RPGOnline.API.Controllers
                     Picture = p.Picture,
                     CreationDate = p.CreationDate,
                     Likes = _dbContext.Users
-                            .Where(u => p.UIds.Select(d => d.UId).Contains(u.UId))
+                            //.Where(u => p.UIds.Select(d => d.UId).Contains(u.UId))
                             .Count(),
                     CreatorNavigation = _dbContext.Users
                                         .Where(u => u.UId == p.UId)

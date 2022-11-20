@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using RPGOnline.API.Helpers;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.Interfaces;
@@ -68,17 +69,26 @@ namespace RPGOnline.Infrastructure.Services
                 throw e;
             }
 
-            //var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(model.Password);
+            var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(registerRequest.Pswd);
 
             var user = new User()
             {
                 Username = registerRequest.Username,
                 Email = registerRequest.Email,
-                Pswd = registerRequest.Pswd
+                CreationDate = DateTime.Now,
+                Country = null,
+                City = null,
+                AboutMe = null,
+                Attitude = "New user",
+                Picture = null,
+                Pswd = hashedPasswordAndSalt.Item1,
+                Salt = hashedPasswordAndSalt.Item2,
+                RefreshToken = SecurityHelpers.GenerateRefreshToken(),
+                RefreshTokenExp = DateTime.Now.AddDays(1)
             };
 
-            //_dbContext.Users.Add(user);
-            //_dbContext.SaveChanges();
+            _dbContext.Users.Add(user);
+            _dbContext.SaveChanges();
 
             return new
             {
@@ -101,7 +111,10 @@ namespace RPGOnline.Infrastructure.Services
                 throw new Exception("User does not exist");
             }
 
-            if (result.Pswd != loginRequest.Pswd)
+            string passwordHashFromDb = result.Pswd;
+            string curHashedPassword = SecurityHelpers.GetHashedPasswordWithSalt(loginRequest.Pswd, result.Salt);
+
+            if (passwordHashFromDb != curHashedPassword)
             {
                 throw new Exception("Incorrect password");
             }
@@ -127,19 +140,20 @@ namespace RPGOnline.Infrastructure.Services
 
             return new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token)
+                accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                refreshToken = result.RefreshToken
             };
         }
 
         //Refresh token service
-        /*
+
         public async Task<Object> RefreshToken(string token, RefreshTokenRequest refreshTokenRequest)
         {
             var result = await _dbContext.Users
-               //.Where(u => u.RefreshToken.Equals(refreshTokenRequest.RefreshToken))
+               .Where(u => u.RefreshToken.Equals(refreshTokenRequest.RefreshToken))
                .SingleOrDefaultAsync();
 
-
+            Console.WriteLine(result);
             if (result == null)
             {
                 throw new SecurityTokenException("Invalid refresh token");
@@ -150,7 +164,9 @@ namespace RPGOnline.Infrastructure.Services
                 throw new SecurityTokenException("Refresh token expired");
             }
 
-            string login = SecurityHelpers.GetUserIdFromAccessToken(token.Replace("Bearer ", ""), _configuration["JWT:Secret"]);
+            var login = SecurityHelpers.GetUserIdFromAccessToken(token.Replace("Bearer ", ""), _configuration["JWT:Secret"]);
+
+            Console.WriteLine(login);
 
             Claim[] UserClaims = new[]
             {
@@ -159,13 +175,13 @@ namespace RPGOnline.Infrastructure.Services
                 new Claim(ClaimTypes.Role, ((result.UId == 1 || result.UId == 2) ? "admin" : "user"))
             };
 
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
             SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             JwtSecurityToken jwtToken = new JwtSecurityToken(
-                issuer: "https://localhost:5001",
-                audience: "https://localhost:5001",
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
                 claims: UserClaims,
                 expires: DateTime.Now.AddMinutes(10),
                 signingCredentials: creds
@@ -173,14 +189,59 @@ namespace RPGOnline.Infrastructure.Services
 
             result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
             result.RefreshTokenExp = DateTime.Now.AddDays(1);
-            _context.SaveChanges();
+            _dbContext.SaveChanges();
 
-            return Ok(new
+            return new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-                refreshToken = user.RefreshToken
-            });
+                refreshToken = result.RefreshToken
+            };
         }
-        */
+
+
+        public async Task<Object> HashPassword()
+        {
+            var result = await _dbContext.Users
+                .Where(u => u.Username.Equals("bocz"))
+                .SingleOrDefaultAsync();
+
+            var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt("PickleRick");
+
+            result.Pswd = hashedPasswordAndSalt.Item1;
+            result.Salt = hashedPasswordAndSalt.Item2;
+            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+            result.RefreshTokenExp = DateTime.Now.AddDays(1);
+
+
+            result = await _dbContext.Users
+                .Where(u => u.Username.Equals("julec"))
+                .SingleOrDefaultAsync();
+
+            hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt("PickleRickes");
+
+            result.Pswd = hashedPasswordAndSalt.Item1;
+            result.Salt = hashedPasswordAndSalt.Item2;
+            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+            result.RefreshTokenExp = DateTime.Now.AddDays(1);
+
+
+            result = await _dbContext.Users
+                .Where(u => u.Username.Equals("maciek"))
+                .SingleOrDefaultAsync();
+
+            hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt("minotarl");
+
+            result.Pswd = hashedPasswordAndSalt.Item1;
+            result.Salt = hashedPasswordAndSalt.Item2;
+            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+            result.RefreshTokenExp = DateTime.Now.AddDays(1);
+
+
+            _dbContext.SaveChanges();
+            return new
+            {
+                wiadomosc = "Udało się"
+            };
+        }
     }
 }

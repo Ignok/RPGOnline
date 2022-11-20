@@ -7,7 +7,7 @@ using RPGOnline.Infrastructure.Services;
 
 namespace RPGOnline.API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class AccountController : CommonController
     {
 
@@ -18,7 +18,7 @@ namespace RPGOnline.API.Controllers
             _accountService = accountService;
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
@@ -32,7 +32,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
@@ -47,7 +47,7 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        /*
+        
          [AllowAnonymous]
          [HttpPost("refresh")]
          public async Task<IActionResult> RefreshToken([FromHeader(Name = "Authorization")] string token, RefreshTokenRequest refreshToken)
@@ -58,9 +58,25 @@ namespace RPGOnline.API.Controllers
              }
              catch (Exception ex)
              {
-                 return BadRequest(ex.Message);
+                 return BadRequest(ex);
              }
          }
-         */
+
+
+        /*
+        [AllowAnonymous]
+        [HttpPost("first_changes")]
+        public async Task<IActionResult> FirstChanges()
+        {
+            try
+            {
+                return Ok(await _accountService.HashPassword());
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+        */
     }
 }

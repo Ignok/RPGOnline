@@ -11,6 +11,7 @@ namespace RPGOnline.Application.Interfaces
     {
         Task<Object> Login(LoginRequest loginRequest);
         Task<Object> Register(RegisterRequest registerRequest);
-        //Task<Object> RefreshToken(string token, RefreshTokenRequest refreshTokenRequest);
+        Task<Object> RefreshToken(string token, RefreshTokenRequest refreshTokenRequest);
+        //Task<Object> HashPassword();
     }
 }

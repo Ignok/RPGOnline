@@ -22,7 +22,7 @@ namespace RPGOnline.API.Helpers
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: password,
                 salt: salt,
-                prf: KeyDerivationPrf.HMACSHA1,
+                prf: KeyDerivationPrf.HMACSHA512,
                 iterationCount: 10000,
                 numBytesRequested: 256 / 8));
 
@@ -62,7 +62,7 @@ namespace RPGOnline.API.Helpers
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateActor = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
+                ClockSkew = TimeSpan.FromMinutes(10),
                 ValidIssuer = "https://localhost:5001", //should come from configuration
                 ValidAudience = "https://localhost:5001", //should come from configuration
                 ValidateLifetime = false, // We don't validate lifetime
@@ -76,7 +76,7 @@ namespace RPGOnline.API.Helpers
             SecurityToken securityToken;
             var principal = tokenHandler.ValidateToken(accessToken, tokenValidationParamters, out securityToken);
             var jwtSecurityToken = securityToken as JwtSecurityToken;
-            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new SecurityTokenException("Invalid token!");
             }

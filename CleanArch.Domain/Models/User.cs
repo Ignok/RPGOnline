@@ -34,6 +34,7 @@ namespace RPGOnline.Domain.Models
         public string Pswd { get; set; } = null!;
         public string Salt { get; set; } = null!;
         public string RefreshToken { get; set; } = null!;
+        public DateTime? RefreshTokenExp { get; set; }
 
         public virtual ICollection<Asset> Assets { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }

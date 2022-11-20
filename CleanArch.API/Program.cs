@@ -46,7 +46,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(opt =>
 {
     opt.SaveToken = true;
@@ -56,7 +56,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromMinutes(2),
+        ClockSkew = TimeSpan.FromMinutes(10),
         ValidIssuer = configuration["JWT:ValidIssuer"],
         ValidAudience = configuration["JWT:ValidAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))

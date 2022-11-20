@@ -945,9 +945,7 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.ToTable("User");
 
-                entity.Property(e => e.UId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("u_id");
+                entity.Property(e => e.UId).HasColumnName("u_id");
 
                 entity.Property(e => e.AboutMe)
                     .HasMaxLength(280)
@@ -990,6 +988,10 @@ namespace RPGOnline.Infrastructure.Models
                     .HasMaxLength(280)
                     .IsUnicode(false)
                     .HasColumnName("refresh_token");
+
+                entity.Property(e => e.RefreshTokenExp)
+                    .HasColumnType("date")
+                    .HasColumnName("refresh_token_exp");
 
                 entity.Property(e => e.Salt)
                     .HasMaxLength(280)
