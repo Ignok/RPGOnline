@@ -26,9 +26,13 @@ namespace RPGOnline.API.Controllers
             {
                 return Ok(await _accountService.Login(loginRequest));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (Exception ex)
             {
-                return BadRequest(new { n = ex.Message });
+                return BadRequest(ex);
             }
         }
 

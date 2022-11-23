@@ -23,7 +23,12 @@ configuration.AddUserSecrets("aaa");
 //Enable CORS
 builder.Services.AddCors(c =>
             {
-                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                c.AddPolicy("AllowSetOrigins", options => {
+                    options.WithOrigins("http://localhost:3000");
+                    options.AllowAnyHeader();
+                    options.AllowAnyMethod();
+                    options.AllowCredentials();
+                });
             });
 
 builder.Services.AddControllers();
@@ -95,7 +100,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors("AllowSetOrigins");
 
 app.UseHttpsRedirection();
 

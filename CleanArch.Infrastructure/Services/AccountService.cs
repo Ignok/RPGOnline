@@ -108,7 +108,7 @@ namespace RPGOnline.Infrastructure.Services
 
             if (result == null)
             {
-                throw new Exception("User does not exist");
+                throw new UnauthorizedAccessException("Bad login or password");
             }
 
             string passwordHashFromDb = result.Pswd;
@@ -116,7 +116,7 @@ namespace RPGOnline.Infrastructure.Services
 
             if (passwordHashFromDb != curHashedPassword)
             {
-                throw new Exception("Incorrect password");
+                throw new UnauthorizedAccessException("Bad login or password");
             }
 
             Claim[] UserClaims = new[]
@@ -137,6 +137,9 @@ namespace RPGOnline.Infrastructure.Services
                 signingCredentials: creds
             );
 
+            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+            result.RefreshTokenExp = DateTime.Now.AddDays(1);
+            _dbContext.SaveChanges();
 
             return new
             {
@@ -164,9 +167,9 @@ namespace RPGOnline.Infrastructure.Services
                 throw new SecurityTokenException("Refresh token expired");
             }
 
-            var login = SecurityHelpers.GetUserIdFromAccessToken(token.Replace("Bearer ", ""), _configuration["JWT:Secret"]);
+            //var login = SecurityHelpers.GetUserIdFromAccessToken(token.Replace("Bearer ", ""), _configuration["JWT:Secret"]);
 
-            Console.WriteLine(login);
+            //Console.WriteLine(login);
 
             Claim[] UserClaims = new[]
             {
