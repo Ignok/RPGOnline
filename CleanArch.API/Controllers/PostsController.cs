@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.Interfaces;
 using RPGOnline.Infrastructure.Models;
 
 namespace RPGOnline.API.Controllers
@@ -9,55 +10,19 @@ namespace RPGOnline.API.Controllers
     public class PostsController : CommonController
     {
 
-        private readonly RPGOnlineDbContext _dbContext;
+        private readonly IPost _postService;
 
-        public PostsController(RPGOnlineDbContext dbContext)
+        public PostsController(IPost postService)
         {
-            _dbContext = dbContext;
+            _postService = postService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetPosts()
         {
-            var result = await _dbContext.Posts
-                .Select(p => new PostResponse()
-                {
-                    PostId = p.PostId,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Picture = p.Picture,
-                    CreationDate = p.CreationDate,
-                    Likes = _dbContext.Users
-                            //.Where(u => p.UIds.Select(d => d.UId).Contains(u.UId))
-                            .Count(),
-                    CreatorNavigation = _dbContext.Users
-                                        .Where(u => u.UId == p.UId)
-                                        .Select(u => new UserResponse()
-                                        {
-                                            UId = u.UId,
-                                            Username = u.Username,
-                                            Picture = u.Picture
-                                        }).First(),
-                    Comments = _dbContext.Comments
-                                        .Where(c => c.PostId == p.PostId)
-                                        .Select(c => new CommentResponse()
-                                        {
-                                            ResponseCommentId = c.ResponseCommentId,
-                                            UserResponse = _dbContext.Users
-                                                .Where(u => u.UId == c.UId)
-                                                .Select(u => new UserResponse()
-                                                {
-                                                    UId = u.UId,
-                                                    Username = u.Username,
-                                                    Picture = u.Picture
-                                                }).First(),
-                                            Content = c.Content,
-                                            CreationDate = c.CreationDate,
-                                            PostIdNavigation = c.PostId
-                                        }).ToList()
-                }).ToListAsync();
+            var result = await _postService.GetPosts();
 
-            if(result == null)
+            if (result == null)
             {
                 return BadRequest("No posts in database.");
             }
@@ -65,6 +30,19 @@ namespace RPGOnline.API.Controllers
             {
                 return Ok(result);
             }
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPost(int id)
+        {
+            var result = await _postService.GetPostDetails(id);
+
+            if (result == null)
+            {
+                return BadRequest("No such post in database.");
+            }
+            return Ok(result);
         }
     }
 }

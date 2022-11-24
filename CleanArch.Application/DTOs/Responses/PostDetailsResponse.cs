@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RPGOnline.Application.DTOs.Responses
 {
-    public class PostResponse
+    public class PostDetailsResponse
     {
         public int PostId { get; set; }
         public string Title { get; set; } = null!;
@@ -14,11 +14,12 @@ namespace RPGOnline.Application.DTOs.Responses
         public string? Picture { get; set; }
         public DateTime CreationDate { get; set; }
 
-        public int Likes { get; set; } 
-        public int Comments { get; set; }
+        public int Likes { get; set; }
 
-        public virtual ICollection<UserResponse> UIds { get; set; }
+        //public virtual ICollection<UserResponse> UIds { get; set; }
 
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
+        public virtual ICollection<CommentResponse> Comments { get; set; } = new HashSet<CommentResponse>();
+
     }
 }
