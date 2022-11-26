@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RPGOnline.Application.Common.Interfaces;
+using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using System;
@@ -18,6 +19,47 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext = dbContext;
         }
 
+        private readonly int postsOnPageAmount = 2;
+
+        public async Task<ICollection<PostResponse>> GetPosts(PostRequest postRequest)
+        {
+            var page = postRequest.page;
+            if (postRequest.page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
+
+            var category = postRequest.category ?? "";
+            var search = postRequest.search ?? "";
+
+            //Search
+            //clear string to prevent sql injection
+
+            var result = await _dbContext.Posts
+                .Select(p => new PostResponse()
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Picture = p.Picture,
+                    CreationDate = p.CreationDate,
+                    Likes = p.UserLikedPosts.Count(),
+                    CreatorNavigation = _dbContext.Users
+                                        .Where(u => u.UId == p.UId)
+                                        .Select(u => new UserResponse()
+                                        {
+                                            UId = u.UId,
+                                            Username = u.Username,
+                                            Picture = u.Picture
+                                        }).First(),
+                    Comments = p.Comments.Count()
+                })
+                //.Where(p => p...)  <- kategoria
+                .Where(p => String.IsNullOrEmpty(search) || p.Title.Contains(search) || p.Content.Contains(search))
+                .Skip(postsOnPageAmount*(page-1))
+                .Take(postsOnPageAmount)
+                .ToListAsync();
+            return result;
+        }
+
+        /*
         public async Task<ICollection<PostResponse>> GetPosts()
         {
             var result = await _dbContext.Posts
@@ -41,6 +83,7 @@ namespace RPGOnline.Infrastructure.Services
                 }).ToListAsync();
             return result;
         }
+        */
 
         public async Task<PostDetailsResponse> GetPostDetails(int id)
         {
