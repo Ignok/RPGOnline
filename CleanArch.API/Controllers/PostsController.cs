@@ -19,17 +19,21 @@ namespace RPGOnline.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPosts([FromQuery] PostRequest postRequest)
+        public async Task<IActionResult> GetPosts([FromQuery] SearchPostRequest postRequest)
         {
             var result = await _postService.GetPosts(postRequest);
 
-            if (result == null)
+            if (result == (null, null))
             {
                 return BadRequest("No posts in database.");
             }
             else
             {
-                return Ok(result);
+                return Ok(new 
+                {
+                    result.Item1,
+                    result.Item2
+                });
             }
         }
         /*
@@ -59,6 +63,18 @@ namespace RPGOnline.API.Controllers
                 return BadRequest("No such post in database.");
             }
             return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostPost(PostRequest postRequest)
+        {
+            var result = await _postService.PostPost(postRequest);
+
+            if(result == null)
+            {
+                return BadRequest(result);
+            }
+            return Ok("Post has been uploaded");
         }
     }
 }

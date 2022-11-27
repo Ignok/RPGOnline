@@ -41,6 +41,7 @@ namespace RPGOnline.Application.Common.Interfaces
         public DbSet<UserLikedPost> UserLikedPosts { get; set; }
         public DbSet<UserSavedAsset> UserSavedAssets { get; set; }
 
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        //Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        public int SaveChanges();
     }
 }

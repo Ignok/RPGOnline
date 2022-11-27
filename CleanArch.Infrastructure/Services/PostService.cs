@@ -3,6 +3,7 @@ using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
+using RPGOnline.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,13 +22,13 @@ namespace RPGOnline.Infrastructure.Services
 
         private readonly int postsOnPageAmount = 2;
 
-        public async Task<ICollection<PostResponse>> GetPosts(PostRequest postRequest)
+        public async Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest searchPostRequest)
         {
-            var page = postRequest.page;
-            if (postRequest.page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
+            var page = searchPostRequest.page;
+            if (searchPostRequest.page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-            var category = postRequest.category ?? "";
-            var search = postRequest.search ?? "";
+            var category = searchPostRequest.category ?? "";
+            var search = searchPostRequest.search ?? "";
 
             //Search
             //clear string to prevent sql injection
@@ -53,10 +54,16 @@ namespace RPGOnline.Infrastructure.Services
                 })
                 //.Where(p => p...)  <- kategoria
                 .Where(p => String.IsNullOrEmpty(search) || p.Title.Contains(search) || p.Content.Contains(search))
-                .Skip(postsOnPageAmount*(page-1))
-                .Take(postsOnPageAmount)
                 .ToListAsync();
-            return result;
+
+            int pageCount = (int)Math.Ceiling((double)result.Count / postsOnPageAmount);
+
+            result = result
+                .Skip(postsOnPageAmount * (page - 1))
+                .Take(postsOnPageAmount)
+                .ToList();
+
+            return (result, pageCount);
         }
 
         /*
@@ -125,6 +132,39 @@ namespace RPGOnline.Infrastructure.Services
                 }).SingleOrDefaultAsync();
 
             return result;
+        }
+
+        public async Task<Object> PostPost(PostRequest postRequest)
+        {
+            if(postRequest == null)
+                throw new ArgumentNullException(nameof(postRequest));
+
+            //if user exists - after authorization has to be deleted
+            if (!_dbContext.Users.Where(u => u.UId == postRequest.UId).ToList().Any())
+                throw new ArgumentException("User does not exist");
+
+            //var maxId = await _dbContext.Posts.OrderByDescending(p => p.PostId).FirstOrDefaultAsync();
+            //int? maxId = _dbContext.Posts.Max(p => (int?)p.PostId);
+            //maxId = maxId ?? 0;
+
+            var post = new Post()
+            {
+                PostId = (_dbContext.Posts.Max(p => (int)p.PostId)+1), //potem jak dodamy automatyczny id można usunąć
+                UId = postRequest.UId,
+                Title = postRequest.Title,
+                Content = postRequest.Content,
+                Picture = postRequest.Picture,
+                CreationDate = DateTime.Now
+            };
+
+            _dbContext.Posts.Add(post);
+            _dbContext.SaveChanges();
+
+            return new
+            {
+                post = post
+            };
+
         }
     }
 }

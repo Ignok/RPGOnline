@@ -11,6 +11,7 @@ namespace RPGOnline.Application.Interfaces
     public interface IPost
     {
         Task<PostDetailsResponse> GetPostDetails(int id);
-        Task<ICollection<PostResponse>> GetPosts(PostRequest postRequest);
+        Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest postRequest);
+        Task<Object> PostPost(PostRequest postRequest);
     }
 }
