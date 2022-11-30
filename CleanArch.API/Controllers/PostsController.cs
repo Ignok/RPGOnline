@@ -76,5 +76,23 @@ namespace RPGOnline.API.Controllers
             }
             return Ok("Post has been uploaded");
         }
+
+        [HttpPost("Comment")]
+        public async Task<IActionResult> PostComment(CommentRequest commentRequest)
+        {
+            try
+            {
+                var result = await _postService.PostComment(commentRequest);
+                return Ok(result);
+
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
+
+            
+           
+        }
     }
 }

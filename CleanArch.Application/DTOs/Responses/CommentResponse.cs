@@ -8,7 +8,9 @@ namespace RPGOnline.Application.DTOs.Responses
 {
     public class CommentResponse
     {
+        public int CommentId { get; set; }
         public int? ResponseCommentId { get; set; }
+        public UserResponse? RespondingUserResponse { get; set; }
 
         public UserResponse UserResponse { get; set; }
 

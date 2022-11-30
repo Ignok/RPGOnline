@@ -13,5 +13,6 @@ namespace RPGOnline.Application.Interfaces
         Task<PostDetailsResponse> GetPostDetails(int id);
         Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest postRequest);
         Task<Object> PostPost(PostRequest postRequest);
+        Task<Object> PostComment(CommentRequest commentRequest);
     }
 }
