@@ -113,7 +113,9 @@ namespace RPGOnline.Infrastructure.Services
                                             Content = c.Content,
                                             CreationDate = c.CreationDate,
                                             PostIdNavigation = c.PostId
-                                        }).ToList()
+                                        })
+                                        .OrderByDescending(c => c.CreationDate)
+                                        .ToList()
                 }).SingleOrDefaultAsync();
 
             return result;
@@ -128,9 +130,9 @@ namespace RPGOnline.Infrastructure.Services
             if (!_dbContext.Users.Where(u => u.UId == postRequest.UId).ToList().Any())
                 throw new ArgumentException("User does not exist");
 
-            //var maxId = await _dbContext.Posts.OrderByDescending(p => p.PostId).FirstOrDefaultAsync();
-            //int? maxId = _dbContext.Posts.Max(p => (int?)p.PostId);
-            //maxId = maxId ?? 0;
+            //if context is not empty or only with spaces
+            if (postRequest.Content.Trim().Length == 0)
+                throw new ArgumentException("Content cannot be empty");
 
             var post = new Post()
             {
@@ -152,21 +154,27 @@ namespace RPGOnline.Infrastructure.Services
 
         }
 
-        public async Task<Object> PostComment(CommentRequest commentRequest)
+        public async Task<CommentResponse> PostComment(int postId, CommentRequest commentRequest)
         {
             if(commentRequest == null)
                 throw new ArgumentNullException(nameof(commentRequest));
+
+            //if post exists
+            if (!_dbContext.Posts.Where(p => p.PostId == postId).ToList().Any())
+                throw new ArgumentException("Post does not exist");
+
+            //if context is not empty or only with spaces
+            if (commentRequest.Content.Trim().Length == 0)
+                throw new ArgumentException("Content cannot be empty");
 
             //if user exists - after authorization has to be deleted
             if (!_dbContext.Users.Where(u => u.UId == commentRequest.UId).ToList().Any())
                 throw new ArgumentException("User does not exist");
 
-            //if post exists
-            if (!_dbContext.Posts.Where(p => p.PostId == commentRequest.PostId).ToList().Any())
-                throw new ArgumentException("Post does not exist");
+            
 
             //if comment that is responsed exists in post
-            if (commentRequest.ResponseCommentId != null && !_dbContext.Comments.Where(c => c.PostId == commentRequest.PostId).Where(c => c.CommentId == commentRequest.ResponseCommentId).ToList().Any())
+            if (commentRequest.ResponseCommentId != null && !_dbContext.Comments.Where(c => c.PostId == postId).Where(c => c.CommentId == commentRequest.ResponseCommentId).ToList().Any())
                 throw new ArgumentException("Response comment ID does not exist");
             
 
@@ -174,7 +182,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 CommentId = (_dbContext.Comments.Max(c => (int)c.CommentId) + 1), //potem jak dodamy automatyczny id można usunąć
                 UId = commentRequest.UId,
-                PostId = commentRequest.PostId,
+                PostId = postId,
                 Content = commentRequest.Content,
                 ResponseCommentId =commentRequest.ResponseCommentId,
                 CreationDate = DateTime.Now
@@ -183,11 +191,29 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext.Comments.Add(comment);
             _dbContext.SaveChanges();
 
-            return new
+            return new CommentResponse
             {
-                commentId = comment.CommentId,
-                Uid = comment.UId,
-                responseCommentId = comment.ResponseCommentId
+                CommentId = comment.CommentId,
+                ResponseCommentId = comment.ResponseCommentId,
+                RespondingUserResponse = _dbContext.Comments
+                                            .Where(cr => cr.CommentId == comment.ResponseCommentId)
+                                            .Select(cr => new UserResponse()
+                                            {
+                                                UId = cr.UIdNavigation.UId,
+                                                Username = cr.UIdNavigation.Username,
+                                                Picture = cr.UIdNavigation.Picture
+                                            }).FirstOrDefault(),
+                UserResponse = _dbContext.Users
+                                .Where(u => u.UId == comment.UId)
+                                .Select(u => new UserResponse()
+                                {
+                                    UId = u.UId,
+                                    Username = u.Username,
+                                    Picture = u.Picture
+                                }).First(),
+                Content = comment.Content,
+                CreationDate = comment.CreationDate,
+                PostIdNavigation = comment.PostId
             };
         }
     }
