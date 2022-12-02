@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RPGOnline.Application.Common.Interfaces;
+using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
+using RPGOnline.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +37,39 @@ namespace RPGOnline.Infrastructure.Services
                     CreationDate = u.CreationDate
                 }).SingleOrDefaultAsync();
 
+            if(result == null)
+            {
+                throw new ArgumentNullException($"There is no user with id {id}");
+            }
+
             return result;
+        }
+
+        public async Task<PutUserResponse> PutUser(int id, UserRequest userRequest)
+        {
+            var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
+            if(user == null)
+            {
+                throw new ArgumentNullException($"User {id} does not exist");
+            }
+            else
+            {
+                user.Country = userRequest.Country;
+                user.City = userRequest.City;
+                user.AboutMe = userRequest.AboutMe;
+                user.Attitude = userRequest.Attitude;
+
+                _dbContext.Entry(user).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+
+                return new PutUserResponse()
+                {
+                    Country = user.Country,
+                    City = user.City,
+                    AboutMe = user.AboutMe,
+                    Attitude = user.Attitude
+                };
+            }  
         }
     }
 }

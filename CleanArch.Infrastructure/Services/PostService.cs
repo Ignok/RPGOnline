@@ -117,7 +117,10 @@ namespace RPGOnline.Infrastructure.Services
                                         .OrderByDescending(c => c.CreationDate)
                                         .ToList()
                 }).SingleOrDefaultAsync();
-
+            if(result == null)
+            {
+                throw new ArgumentNullException($"There is no post with id: {id}");
+            }
             return result;
         }
 

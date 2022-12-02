@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Services.Users;
+using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 using RPGOnline.Infrastructure.Models;
+using RPGOnline.Infrastructure.Services;
 
 namespace RPGOnline.API.Controllers
 {
@@ -83,19 +86,13 @@ namespace RPGOnline.API.Controllers
         }*/
 
         // PUT: api/Users/id
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user) //<- user request
+        [HttpPut("{id}/Details")]
+        public async Task<IActionResult> PutUser(int id, UserRequest userRequest) //<- user request
         {
-            if (id != user.UId)
-            {
-                return BadRequest();
-            }
-
-            _dbContext.Entry(user).State = EntityState.Modified;
-
             try
             {
-                await _dbContext.SaveChangesAsync();
+                var result = await _userService.PutUser(id, userRequest);
+                return Ok(result);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -105,37 +102,9 @@ namespace RPGOnline.API.Controllers
                 }
                 else
                 {
-                    throw;
+                    return NoContent();
                 }
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<IActionResult> PostUser(User user) //<- user request
-        {
-            _dbContext.Users.Add(user);
-            try
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (UserExists(user.UId))
-                {
-                    return Conflict("Such user already exists in database");
-                    //raczej sprawdzac login, mail, bo id w bazie bedzie sekwencyjnie inkrementowane
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetUser", new { id = user.UId }, user);
         }
 
         // DELETE: api/Users/id

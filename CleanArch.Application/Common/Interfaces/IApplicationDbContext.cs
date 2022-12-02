@@ -1,9 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.VisualStudio.Services.Identity;
 using Microsoft.VisualStudio.Services.Profile;
+using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Domain.Entities;
 using RPGOnline.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,5 +47,7 @@ namespace RPGOnline.Application.Common.Interfaces
 
         //Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         public int SaveChanges();
+
+        public EntityEntry Entry(object entity);
     }
 }
