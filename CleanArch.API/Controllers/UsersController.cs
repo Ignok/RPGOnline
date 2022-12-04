@@ -63,28 +63,6 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        /*
-        // GET: api/Users/id
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(int id)
-        {
-            var user = await _dbContext.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            UserResponse result = new UserResponse()
-            {
-                UId = user.UId,
-                Username=user.Username,
-                Picture=user.Picture
-            };
-            {
-                return Ok(result);
-            }
-        }*/
-
         // PUT: api/Users/id
         [HttpPut("{id}/Details")]
         public async Task<IActionResult> PutUser(int id, UserRequest userRequest) //<- user request
@@ -121,6 +99,20 @@ namespace RPGOnline.API.Controllers
             await _dbContext.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        
+        // GET: api/{id}/Friends
+        [HttpGet("{id}/Friends")]
+        public async Task<IActionResult> GetUserFriends(int id)
+        {
+            var result = await _userService.GetUserFriends(id);
+
+            if (result == null)
+            {
+                return BadRequest("No such user in database.");
+            }
+            return Ok(result);
         }
 
         private bool UserExists(int id)

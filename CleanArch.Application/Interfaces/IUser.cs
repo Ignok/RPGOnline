@@ -13,5 +13,7 @@ namespace RPGOnline.Application.Interfaces
         Task<UserAboutmeResponse> GetAboutMe(int id);
 
         Task<PutUserResponse> PutUser(int id, UserRequest userRequest);
+
+        Task<ICollection<UserResponse>> GetUserFriends(int id);
     }
 }

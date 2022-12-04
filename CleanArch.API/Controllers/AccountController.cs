@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Infrastructure.Services;
 
@@ -24,7 +25,30 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                return Ok(await _accountService.Login(loginRequest));
+                TokenResponse tokens = await _accountService.Login(loginRequest);
+
+                HttpContext.Response.Cookies.Append(
+                    "AccessToken",
+                    "Bearer " + tokens.AccessToken,
+                    new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddMinutes(5),
+                        HttpOnly = true,
+                        Secure = false
+                    }
+                    );
+
+                HttpContext.Response.Cookies.Append(
+                    "RefreshToken",
+                    tokens.RefreshToken,
+                    new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddMinutes(5),
+                        HttpOnly = true,
+                        Secure = false
+                    }
+                    );
+                return Ok("Poprawne logowanie");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -54,11 +78,11 @@ namespace RPGOnline.API.Controllers
         
          [AllowAnonymous]
          [HttpPost("refresh")]
-         public async Task<IActionResult> RefreshToken([FromHeader(Name = "Authorization")] string token, RefreshTokenRequest refreshToken)
+         public async Task<IActionResult> RefreshToken()
          {
              try
              {
-                 return Ok(await _accountService.RefreshToken(token, refreshToken));
+                 return Ok(await _accountService.RefreshToken("token", new RefreshTokenRequest { }));
              }
              catch (Exception ex)
              {

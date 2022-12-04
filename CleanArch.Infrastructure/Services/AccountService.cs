@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using RPGOnline.API.Helpers;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 using RPGOnline.Infrastructure.Models;
@@ -99,7 +100,7 @@ namespace RPGOnline.Infrastructure.Services
 
 
         // Login service
-        public async Task<Object> Login(LoginRequest loginRequest)
+        public async Task<TokenResponse> Login(LoginRequest loginRequest)
         {
 
             var result = await _dbContext.Users
@@ -141,10 +142,10 @@ namespace RPGOnline.Infrastructure.Services
             result.RefreshTokenExp = DateTime.Now.AddDays(1);
             _dbContext.SaveChanges();
 
-            return new
+            return new TokenResponse
             {
-                accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                refreshToken = result.RefreshToken
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                RefreshToken = result.RefreshToken
             };
         }
 

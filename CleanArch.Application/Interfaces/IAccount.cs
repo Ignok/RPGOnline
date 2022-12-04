@@ -1,4 +1,5 @@
 ﻿using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace RPGOnline.Application.Interfaces
 {
     public interface IAccount
     {
-        Task<Object> Login(LoginRequest loginRequest);
+        Task<TokenResponse> Login(LoginRequest loginRequest);
         Task<Object> Register(RegisterRequest registerRequest);
         Task<Object> RefreshToken(string token, RefreshTokenRequest refreshTokenRequest);
         //Task<Object> HashPassword();

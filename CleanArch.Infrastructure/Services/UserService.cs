@@ -71,5 +71,37 @@ namespace RPGOnline.Infrastructure.Services
                 };
             }  
         }
+
+        public async Task<ICollection<UserResponse>> GetUserFriends(int id)
+        {
+            var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                throw new ArgumentNullException($"User {id} does not exist");
+            }
+            else
+            {
+                var friendsIds = await _dbContext.Users
+                .Where(u => u.UId == id)
+                .SelectMany(u => u.FriendshipUIdNavigations
+                                .Where(f => f.UId == id)
+                                .Where(f => f.FriendshipStatus == 1 || f.FriendshipStatus == 2)
+                                .Select(f => f.FriendUId)
+                            )
+                .ToListAsync();
+
+
+                var result = await _dbContext.Users
+                    .Where(u => friendsIds.Contains(u.UId))
+                    .Select(u => new UserResponse()
+                    {
+                        UId = u.UId,
+                        Username = u.Username,
+                        Picture = u.Picture
+                    }).ToListAsync();
+               
+                return result;
+            };
+        }
     }
 }
