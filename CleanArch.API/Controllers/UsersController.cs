@@ -129,16 +129,27 @@ namespace RPGOnline.API.Controllers
         }
 
         // POST: api/{senderId}/Messages/{receiverId}
-        [HttpPost("{senderId}/Messages/{receiverId}")]
-        public async Task<IActionResult> PostMessage(int senderId, int receiverId, MessageRequest messageRequest)
+        [HttpPost("{senderId}/Messages")]
+        public async Task<IActionResult> PostMessage(int senderId, MessageRequest messageRequest)
         {
-            var result = await _userService.PostMessage(senderId, receiverId, messageRequest);
 
-            if (result == null)
+            try
             {
-                return BadRequest("Something went wrong.");
+
+                var result = await _userService.PostMessage(senderId, messageRequest);
+
+                if (result == null)
+                {
+                    return BadRequest("Something went wrong.");
+                }
+                return Ok(result);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Data);
+            }
+
+            
         }
 
         private bool UserExists(int id)

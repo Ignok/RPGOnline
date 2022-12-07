@@ -131,16 +131,25 @@ namespace RPGOnline.Infrastructure.Services
             };
         }
 
-        public async Task<MessageResponse> PostMessage(int senderId, int receiverId, MessageRequest messageRequest)
+        public async Task<MessageResponse> PostMessage(int senderId, MessageRequest messageRequest)
         {
 
             if (messageRequest == null)
                 throw new ArgumentNullException("Message cannot be null");
 
-            var isUser = await _dbContext.Users.Where(u => u.UId == senderId || u.UId == receiverId).FirstOrDefaultAsync();
-            if (isUser == null)
+            
+
+            if (await _dbContext.Users.Where(u => u.UId == senderId).FirstOrDefaultAsync() == null)
             {
-                throw new ArgumentNullException("User does not exist");
+                throw new ArgumentNullException($"User id {senderId} does not exist");
+            }
+            var receiver = await _dbContext.Users.Where(u => u.Username.Equals(messageRequest.ReceiverUsername)).Select(u => u).FirstOrDefaultAsync();
+
+            if(receiver == null)
+            {
+                Exception e = new Exception();
+                e.Data.Add("Username", $"Username {messageRequest.ReceiverUsername} does not exist");
+                throw e;
             }
             else
             {
@@ -148,7 +157,7 @@ namespace RPGOnline.Infrastructure.Services
                 {
                     MessageId = (_dbContext.Messages.Max(m => (int)m.MessageId) + 1), //potem jak dodamy automatyczny id można usunąć
                     SenderUId = senderId,
-                    ReceiverUId = receiverId,
+                    ReceiverUId = await _dbContext.Users.Where(u => u.UId == senderId || u.Username.Equals(messageRequest.ReceiverUsername)).Select(u => u.UId).FirstOrDefaultAsync(),
                     Title = messageRequest.Title,
                     Content = messageRequest.Content,
                     SendDate = DateTime.Now
@@ -166,37 +175,6 @@ namespace RPGOnline.Infrastructure.Services
                     SendDate = message.SendDate
                 };
             }
-                /*
-                if (postRequest == null)
-                    throw new ArgumentNullException(nameof(postRequest));
-
-                //if user exists - after authorization has to be deleted
-                if (!_dbContext.Users.Where(u => u.UId == postRequest.UId).ToList().Any())
-                    throw new ArgumentException("User does not exist");
-
-                //if context is not empty or only with spaces
-                if (postRequest.Content.Trim().Length == 0)
-                    throw new ArgumentException("Content cannot be empty");
-
-                var post = new Post()
-                {
-                    PostId = (_dbContext.Posts.Max(p => (int)p.PostId) + 1), //potem jak dodamy automatyczny id można usunąć
-                    UId = postRequest.UId,
-                    Title = postRequest.Title,
-                    Content = postRequest.Content,
-                    Picture = postRequest.Picture,
-                    CreationDate = DateTime.Now
-                };
-
-                _dbContext.Posts.Add(post);
-                _dbContext.SaveChanges();
-
-                return new
-                {
-                    post = post
-                };
-                */
-
-            }
+        }
     }
 }

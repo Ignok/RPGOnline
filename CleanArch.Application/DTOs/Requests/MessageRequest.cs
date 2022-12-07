@@ -16,5 +16,9 @@ namespace RPGOnline.Application.DTOs.Requests
         [Required]
         [MaxLength(280)]
         public string Content { get; set; } = null!;
+
+        [Required]
+        [MaxLength(40)]
+        public string ReceiverUsername { get; set; } = null!;
     }
 }

@@ -18,6 +18,6 @@ namespace RPGOnline.Application.Interfaces
 
         Task<ICollection<MessageResponse>> GetUserMessages(int id);
 
-        Task<MessageResponse> PostMessage(int senderId, int receiverId, MessageRequest messageRequest);
+        Task<MessageResponse> PostMessage(int senderId, MessageRequest messageRequest);
     }
 }
