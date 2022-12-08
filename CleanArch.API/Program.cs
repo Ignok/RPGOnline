@@ -38,6 +38,7 @@ builder.Services.AddScoped<IApplicationDbContext, RPGOnlineDbContext>();
 builder.Services.AddScoped<IUser, UserService>();
 builder.Services.AddScoped<IPost, PostService>();
 builder.Services.AddScoped<IAccount, AccountService>();
+builder.Services.AddScoped<IMessage, MessageService>();
 
 
 builder.Services.AddInfrastructure().AddApplication();

@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests;
-using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
-using RPGOnline.Infrastructure.Models;
 
 namespace RPGOnline.API.Controllers
 {
@@ -36,22 +32,6 @@ namespace RPGOnline.API.Controllers
                 });
             }
         }
-        /*
-        [HttpGet]
-        public async Task<IActionResult> GetPosts()
-        {
-            var result = await _postService.GetPosts();
-
-            if (result == null)
-            {
-                return BadRequest("No posts in database.");
-            }
-            else
-            {
-                return Ok(result);
-            }
-        }
-        */
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPost(int id)

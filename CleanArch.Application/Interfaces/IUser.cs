@@ -16,8 +16,5 @@ namespace RPGOnline.Application.Interfaces
 
         Task<ICollection<UserResponse>> GetUserFriends(int id);
 
-        Task<ICollection<MessageResponse>> GetUserMessages(int id);
-
-        Task<MessageResponse> PostMessage(int senderId, MessageRequest messageRequest);
     }
 }

@@ -54,6 +54,7 @@ namespace RPGOnline.Infrastructure.Services
                 })
                 //.Where(p => p...)  <- kategoria
                 .Where(p => String.IsNullOrEmpty(search) || p.Title.Contains(search) || p.Content.Contains(search))
+                .OrderByDescending(p => p.CreationDate)
                 .ToListAsync();
 
             int pageCount = (int)Math.Ceiling((double)result.Count / postsOnPageAmount);
