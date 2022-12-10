@@ -8,6 +8,6 @@ namespace RPGOnline.Application.DTOs.Responses
 {
     public class CommonResponse
     {
-        public string Message { get; set; }
+        public string Message { get; set; } = null!;
     }
 }

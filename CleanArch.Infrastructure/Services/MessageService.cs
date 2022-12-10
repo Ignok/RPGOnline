@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.Mail;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
@@ -16,7 +17,9 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public async Task<ICollection<MessageResponse>> GetUserMessages(int id)
+        private readonly int messagesOnPage = 10;
+
+        public async Task<(ICollection<MessageResponse>, int pageCount)> GetUserMessages(int id, GetMessageRequest getMessageRequest)
         {
             var isUser = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
             if (isUser == null)
@@ -41,11 +44,18 @@ namespace RPGOnline.Infrastructure.Services
                                     })
                             .ToListAsync();
 
-                return result;
+                int pageCount = (int)Math.Ceiling((double)result.Count / messagesOnPage);
+
+                result = result
+                    .Skip(messagesOnPage * (getMessageRequest.Page - 1))
+                    .Take(messagesOnPage)
+                    .ToList();
+
+                return (result, pageCount);
             };
         }
 
-        public async Task<MessageResponse> PostMessage(int senderId, MessageRequest messageRequest)
+        public async Task<MessageResponse> PostMessage(int senderId, PostMessageRequest messageRequest)
         {
 
             if (messageRequest == null)

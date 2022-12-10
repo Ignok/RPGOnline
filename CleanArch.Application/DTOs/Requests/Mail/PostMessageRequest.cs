@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RPGOnline.Application.DTOs.Requests
 {
-    public class MessageRequest
+    public class PostMessageRequest
     {
         [Required]
         [MaxLength(40)]

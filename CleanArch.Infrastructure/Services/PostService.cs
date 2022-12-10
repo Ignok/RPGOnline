@@ -20,15 +20,15 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        private readonly int postsOnPageAmount = 5;
+        private readonly int postsOnPageAmount = 10;
 
         public async Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest searchPostRequest)
         {
-            var page = searchPostRequest.page;
-            if (searchPostRequest.page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
+            var page = searchPostRequest.Page;
+            if (searchPostRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-            var category = searchPostRequest.category ?? "";
-            var search = searchPostRequest.search ?? "";
+            var category = searchPostRequest.Category ?? "";
+            var search = searchPostRequest.Search ?? "";
 
             //Search
             //clear string to prevent sql injection

@@ -11,8 +11,8 @@ namespace RPGOnline.Application.DTOs.Requests
     [BindProperties]
     public class SearchPostRequest
     {
-        public int page { get; set; }
-        public string? category { get; set; }
-        public string? search { get; set; }
+        public int Page { get; set; }
+        public string? Category { get; set; }
+        public string? Search { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.Mail;
 using RPGOnline.Application.Interfaces;
 
 namespace RPGOnline.API.Controllers
@@ -17,20 +18,27 @@ namespace RPGOnline.API.Controllers
 
         // GET: api/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserMessages(int id)
+        public async Task<IActionResult> GetUserMessages(int id, [FromQuery] GetMessageRequest getMessageRequest)
         {
-            var result = await _messageService.GetUserMessages(id);
-
-            if (result == null)
+            try
             {
-                return BadRequest("Something went wrong");
+                var result = await _messageService.GetUserMessages(id, getMessageRequest);
+                return Ok(new
+                {
+                    result.Item1,
+                    result.pageCount
+                });
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         // POST: api/{senderId}/send
         [HttpPost("{senderId}/send")]
-        public async Task<IActionResult> PostMessage(int senderId, MessageRequest messageRequest)
+        public async Task<IActionResult> PostMessage(int senderId, PostMessageRequest messageRequest)
         {
 
             try

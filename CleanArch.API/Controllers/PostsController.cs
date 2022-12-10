@@ -28,7 +28,7 @@ namespace RPGOnline.API.Controllers
                 return Ok(new 
                 {
                     result.Item1,
-                    result.Item2
+                    result.pageCount
                 });
             }
         }
