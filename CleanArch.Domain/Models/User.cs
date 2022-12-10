@@ -30,7 +30,7 @@ namespace RPGOnline.Domain.Models
         public string? City { get; set; }
         public string? AboutMe { get; set; }
         public string Attitude { get; set; } = null!;
-        public string? Picture { get; set; }
+        public int Picture { get; set; }
         public string Pswd { get; set; } = null!;
         public string Salt { get; set; } = null!;
         public string RefreshToken { get; set; } = null!;

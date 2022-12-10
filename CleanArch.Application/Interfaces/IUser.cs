@@ -1,5 +1,7 @@
 ﻿using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,8 @@ namespace RPGOnline.Application.Interfaces
         Task<UserAboutmeResponse> GetAboutMe(int id);
 
         Task<PutUserResponse> PutUser(int id, UserRequest userRequest);
+
+        Task<UserResponse> PutAvatar(int id, AvatarRequest avatarRequest);
 
         Task<ICollection<UserResponse>> GetUserFriends(int id);
 

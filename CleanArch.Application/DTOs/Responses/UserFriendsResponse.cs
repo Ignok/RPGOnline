@@ -10,7 +10,7 @@ namespace RPGOnline.Application.DTOs.Responses
     {
         public int UId { get; set; }
         public string Username { get; set; } = null!;
-        public string? Picture { get; set; }
+        public int Picture { get; set; }
         public int Status { get; set; }
     }
 }

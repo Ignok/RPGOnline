@@ -81,7 +81,7 @@ namespace RPGOnline.Infrastructure.Services
                 City = null,
                 AboutMe = null,
                 Attitude = "New user",
-                Picture = null,
+                Picture = 0,
                 Pswd = hashedPasswordAndSalt.Item1,
                 Salt = hashedPasswordAndSalt.Item2,
                 RefreshToken = SecurityHelpers.GenerateRefreshToken(),

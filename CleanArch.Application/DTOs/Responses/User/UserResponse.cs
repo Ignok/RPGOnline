@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGOnline.Application.DTOs.Responses
+namespace RPGOnline.Application.DTOs.Responses.User
 {
     public class UserResponse
     {
         public int UId { get; set; }
         public string Username { get; set; } = null!;
-        public string? Picture { get; set; }
+        public int Picture { get; set; }
     }
 }

@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Services.Users;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 using RPGOnline.Infrastructure.Models;
@@ -82,6 +84,20 @@ namespace RPGOnline.API.Controllers
                 {
                     return NoContent();
                 }
+            }
+        }
+
+        [HttpPut("{id}/Avatar")]
+        public async Task<IActionResult> PutAvatar(int id, AvatarRequest avatarRequest)
+        {
+            try
+            {
+                var result = await _userService.PutAvatar(id, avatarRequest);
+                return Ok(result);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NoContent();
             }
         }
 

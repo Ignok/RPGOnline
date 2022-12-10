@@ -975,8 +975,6 @@ namespace RPGOnline.Infrastructure.Models
                     .HasColumnName("email");
 
                 entity.Property(e => e.Picture)
-                    .HasMaxLength(60)
-                    .IsUnicode(false)
                     .HasColumnName("picture");
 
                 entity.Property(e => e.Pswd)

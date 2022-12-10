@@ -2,6 +2,7 @@
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 using System;

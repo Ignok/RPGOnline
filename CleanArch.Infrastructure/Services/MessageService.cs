@@ -17,7 +17,7 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        private readonly int messagesOnPage = 10;
+        private readonly int messagesOnPage = 5;
 
         public async Task<(ICollection<MessageResponse>, int pageCount)> GetUserMessages(int id, GetMessageRequest getMessageRequest)
         {

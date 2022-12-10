@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 using System;
@@ -102,6 +104,29 @@ namespace RPGOnline.Infrastructure.Services
                
                 return result;
             };
+        }
+
+        public async Task<UserResponse> PutAvatar(int id, AvatarRequest avatarRequest)
+        {
+            var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                throw new ArgumentNullException($"User {id} does not exist");
+            }
+            else
+            {
+                user.Picture = avatarRequest.Picture;
+
+                _dbContext.Entry(user).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+
+                return new UserResponse()
+                {
+                    UId = user.UId,
+                    Username = user.Username,
+                    Picture = user.Picture,
+                };
+            }
         }
     }
 }
