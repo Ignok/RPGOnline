@@ -37,6 +37,7 @@ namespace RPGOnline.Infrastructure.Services
                                     {
                                         MessageId = message.MessageId,
                                         SenderId = message.SenderUId,
+                                        SenderPicture = sender.Picture,
                                         SenderUsername = sender.Username,
                                         Title = message.Title,
                                         Content = message.Content,
