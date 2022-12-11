@@ -74,7 +74,7 @@ namespace RPGOnline.Infrastructure.Services
             }  
         }
 
-        public async Task<ICollection<UserResponse>> GetUserFriends(int id)
+        public async Task<ICollection<UserAboutmeResponse>> GetUserFriends(int id)
         {
             var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
             if (user == null)
@@ -95,11 +95,13 @@ namespace RPGOnline.Infrastructure.Services
 
                 var result = await _dbContext.Users
                     .Where(u => friendsIds.Contains(u.UId))
-                    .Select(u => new UserResponse()
+                    .Select(u => new UserAboutmeResponse()
                     {
                         UId = u.UId,
                         Username = u.Username,
-                        Picture = u.Picture
+                        Picture = u.Picture,
+                        Country = u.Country,
+                        Attitude = u.Attitude,
                     }).ToListAsync();
                
                 return result;
