@@ -33,7 +33,9 @@ namespace RPGOnline.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var result = await _dbContext.Users
+            try
+            {
+                var result = await _dbContext.Users
                 .Select(u => new UserResponse()
                 {
                     UId = u.UId,
@@ -41,13 +43,18 @@ namespace RPGOnline.API.Controllers
                     Picture = u.Picture
                 }).ToListAsync();
 
-            if(result == null)
-            {
-                return NotFound("No users in database.");
+                if (result == null)
+                {
+                    return NotFound("No users in database.");
+                }
+                else
+                {
+                    return Ok(result);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(result);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -55,13 +62,22 @@ namespace RPGOnline.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAboutMe(int id)
         {
-            var result = await _userService.GetAboutMe(id);
-
-            if (result == null)
+            try
             {
-                return BadRequest("No such user in database.");
+                var result = await _userService.GetAboutMe(id);
+                if (result==null)
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    return Ok(result);
+                }
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
@@ -105,16 +121,26 @@ namespace RPGOnline.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _dbContext.Users.FindAsync(id);
-            if (user == null)
+            try
             {
-                return NotFound();
+                var user = await _dbContext.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    _dbContext.Users.Remove(user);
+                    await _dbContext.SaveChangesAsync();
+
+                    return NoContent();
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            _dbContext.Users.Remove(user);
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
         }
 
         
@@ -122,16 +148,28 @@ namespace RPGOnline.API.Controllers
         [HttpGet("{id}/Friends")]
         public async Task<IActionResult> GetUserFriends(int id)
         {
-            var result = await _userService.GetUserFriends(id);
-
-            if (result == null)
+            try
             {
-                return BadRequest("No such user in database.");
+                if (!UserExists(id))
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    var result = await _userService.GetUserFriends(id);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-       
 
         private bool UserExists(int id)
         {
