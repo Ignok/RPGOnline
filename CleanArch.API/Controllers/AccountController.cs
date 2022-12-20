@@ -5,6 +5,7 @@ using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Infrastructure.Services;
+using System.Net.Http.Headers;
 
 namespace RPGOnline.API.Controllers
 {
@@ -27,26 +28,24 @@ namespace RPGOnline.API.Controllers
             {
                 TokenResponse tokens = await _accountService.Login(loginRequest);
 
-                HttpContext.Response.Cookies.Append(
+                var cookieOptions = new CookieOptions()
+                {
+                    Secure = true,
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.Now.AddMinutes(1)
+                };
+
+                Response.Cookies.Append(
                     "AccessToken",
                     "Bearer " + tokens.AccessToken,
-                    new CookieOptions
-                    {
-                        Expires = DateTime.Now.AddMinutes(5),
-                        HttpOnly = true,
-                        Secure = false
-                    }
+                    cookieOptions
                     );
 
-                HttpContext.Response.Cookies.Append(
+                Response.Cookies.Append(
                     "RefreshToken",
                     tokens.RefreshToken,
-                    new CookieOptions
-                    {
-                        Expires = DateTime.Now.AddMinutes(5),
-                        HttpOnly = true,
-                        Secure = false
-                    }
+                    cookieOptions
                     );
                 return Ok("Poprawne logowanie");
             }
@@ -78,11 +77,12 @@ namespace RPGOnline.API.Controllers
         
          [AllowAnonymous]
          [HttpPost("refresh")]
-         public async Task<IActionResult> RefreshToken()
+         public async Task<IActionResult> RefreshToken([FromHeader] string Cookie)
          {
              try
              {
-                 return Ok(await _accountService.RefreshToken("token", new RefreshTokenRequest { }));
+                
+                return Ok(await _accountService.RefreshToken("token", new RefreshTokenRequest { }));
              }
              catch (Exception ex)
              {

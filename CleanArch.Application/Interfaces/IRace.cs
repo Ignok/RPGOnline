@@ -1,17 +1,13 @@
-﻿using RPGOnline.Application.DTOs.Requests;
-using RPGOnline.Application.DTOs.Requests.Character;
-using RPGOnline.Application.DTOs.Responses;
-using RPGOnline.Application.DTOs.Responses.Character;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RPGOnline.Application.DTOs.Requests.Asset;
+using RPGOnline.Application.DTOs.Requests.Asset.Race;
+using RPGOnline.Application.DTOs.Responses.Asset.Race;
 
 namespace RPGOnline.Application.Interfaces
 {
     public interface IRace
     {
-        Task<ICollection<RaceResponse>> GetRacesForCharacter(int uId, GetRaceRequest getRaceRequest);
+        Task<ICollection<GetRaceSimplifiedResponse>> GetRacesForCharacter(int uId, GetAssetForCharacterRequest getRacesForCharacterRequest);
+        Task<(ICollection<GetRaceResponse>, int pageCount)> GetRaces(SearchAssetRequest searchRaceRequest, CancellationToken cancellationToken);
+        Task<GetRaceResponse> PostRace(PostRaceRequest postRaceRequest);
     }
 }

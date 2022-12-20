@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGOnline.Application.DTOs.Responses.Character
+namespace RPGOnline.Application.DTOs.Responses.Asset.Race
 {
-    public class RaceResponse
+    public class GetRaceSimplifiedResponse
     {
         public int RaceId { get; set; }
         public int AssetId { get; set; }

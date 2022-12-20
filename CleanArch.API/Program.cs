@@ -40,6 +40,7 @@ builder.Services.AddScoped<IPost, PostService>();
 builder.Services.AddScoped<IAccount, AccountService>();
 builder.Services.AddScoped<IMessage, MessageService>();
 builder.Services.AddScoped<IRace, RaceService>();
+builder.Services.AddScoped<IItem, ItemService>();
 
 
 builder.Services.AddInfrastructure().AddApplication();

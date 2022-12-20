@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using RPGOnline.Application.DTOs.Requests;
-using RPGOnline.Application.DTOs.Requests.Character;
-using RPGOnline.Application.DTOs.Requests.Mail;
+﻿using Microsoft.AspNetCore.Mvc;
+using RPGOnline.Application.DTOs.Requests.Asset;
+using RPGOnline.Application.DTOs.Requests.Asset.Race;
 using RPGOnline.Application.Interfaces;
 
 namespace RPGOnline.API.Controllers
@@ -10,14 +8,36 @@ namespace RPGOnline.API.Controllers
     public class RaceController : CommonController
     {
         private readonly IRace _raceService;
-
         public RaceController(IRace raceService)
         {
             _raceService = raceService;
         }
 
-        [HttpGet("{uId}")]
-        public async Task<IActionResult> GetRaces(int uId, [FromQuery] GetRaceRequest getRaceRequest)
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetRaces([FromQuery] SearchAssetRequest searchRaceRequest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _raceService.GetRaces(searchRaceRequest, cancellationToken);
+
+                return Ok(new
+                {
+                    result.Item1,
+                    result.pageCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpGet("character/{uId}")]
+        public async Task<IActionResult> GetRacesForCharacter(int uId, [FromQuery] GetAssetForCharacterRequest getRaceRequest)
         {
             try
             {
@@ -31,6 +51,26 @@ namespace RPGOnline.API.Controllers
                 {
                     return Ok(result);
                 }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> PostRace(PostRaceRequest postRaceRequest)
+        {
+            try
+            {
+                var result = await _raceService.PostRace(postRaceRequest);
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
             }
             catch (Exception ex)
             {

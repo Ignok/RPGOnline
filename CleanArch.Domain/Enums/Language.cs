@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace RPGOnline.Domain.Enums
 {
-    public enum SampleStatus
+    public enum Language
     {
-        Active=0,
-        Inactive=1,
-        Resigned=2
+        PL,
+        EN,
+        pl,
+        en
     }
 }

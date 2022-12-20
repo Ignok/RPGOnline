@@ -108,6 +108,10 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.IsPublic).HasColumnName("is_public");
 
+                entity.Property(e => e.CreationDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("creation_date");
+
                 entity.Property(e => e.Language)
                     .HasMaxLength(2)
                     .IsUnicode(false)

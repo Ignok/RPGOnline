@@ -16,11 +16,11 @@ namespace RPGOnline.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPosts([FromQuery] SearchPostRequest postRequest)
+        public async Task<IActionResult> GetPosts([FromQuery] SearchPostRequest postRequest, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _postService.GetPosts(postRequest);
+                var result = await _postService.GetPosts(postRequest, cancellationToken);
 
                 if (result == (null, null))
                 {

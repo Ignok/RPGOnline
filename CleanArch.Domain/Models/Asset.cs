@@ -19,6 +19,7 @@ namespace RPGOnline.Domain.Models
         public int AuthorId { get; set; }
         public bool IsPublic { get; set; }
         public string Language { get; set; } = null!;
+        public DateTime CreationDate { get; set; }
 
         public virtual User Author { get; set; } = null!;
         public virtual ICollection<Character> Characters { get; set; }

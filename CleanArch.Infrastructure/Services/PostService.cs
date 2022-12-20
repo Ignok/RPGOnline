@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
@@ -16,56 +17,84 @@ namespace RPGOnline.Infrastructure.Services
     public class PostService : IPost
     {
         private readonly IApplicationDbContext _dbContext;
-        public PostService(IApplicationDbContext dbContext)
+        private ILogger<PostService> _logger;
+
+        public PostService(IApplicationDbContext dbContext, ILogger<PostService> logger)
         {
+            _logger = logger;
             _dbContext = dbContext;
         }
 
         private readonly int postsOnPageAmount = 10;
 
-        public async Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest searchPostRequest)
+        public async Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest searchPostRequest, CancellationToken cancellationToken)
         {
-            var page = searchPostRequest.Page;
-            if (searchPostRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
+            try
+            {
 
-            var category = searchPostRequest.Category ?? "";
-            var search = searchPostRequest.Search ?? "";
+                var page = searchPostRequest.Page;
+                if (searchPostRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-            //Search
-            //clear string to prevent sql injection
+                var category = searchPostRequest.Category ?? "";
+                var search = searchPostRequest.Search ?? "";
 
-            var result = await _dbContext.Posts
-                .Select(p => new PostResponse()
-                {
-                    PostId = p.PostId,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Picture = p.Picture,
-                    CreationDate = p.CreationDate,
-                    Likes = p.UserLikedPosts.Count(),
-                    CreatorNavigation = _dbContext.Users
+                //Search
+                //clear string to prevent sql injection
+
+                var result = _dbContext.Posts.Include(u => u.UIdNavigation)
+                    .Include(ulp => ulp.UserLikedPosts)
+                    .Include(c => c.Comments)
+                    .AsParallel().WithCancellation(cancellationToken)
+                    .Select(p => new PostResponse()
+                    {
+                        PostId = p.PostId,
+                        Title = p.Title,
+                        Content = p.Content,
+                        Picture = p.Picture,
+                        CreationDate = p.CreationDate,
+                        Likes = p.UserLikedPosts.Count,
+                        CreatorNavigation = new UserResponse()
+                        {
+                            UId = p.UIdNavigation.UId,
+                            Username = p.UIdNavigation.Username,
+                            Picture = p.UIdNavigation.Picture
+                        },
+                    /*CreatorNavigation = _dbContext.Users
                                         .Where(u => u.UId == p.UId)
                                         .Select(u => new UserResponse()
                                         {
                                             UId = u.UId,
                                             Username = u.Username,
                                             Picture = u.Picture
-                                        }).First(),
-                    Comments = p.Comments.Count()
-                })
-                //.Where(p => p...)  <- kategoria
-                .Where(p => String.IsNullOrEmpty(search) || p.Title.Contains(search) || p.Content.Contains(search))
-                .OrderByDescending(p => p.CreationDate)
-                .ToListAsync();
+                                        }).First(),*/
+                        Comments = p.Comments.Count
+                    })
+                    //.Where(p => p...)  <- kategoria
+                    .Where(p => String.IsNullOrEmpty(search)
+                                || (p.Title.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
+                                || (p.Content.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
+                            )
+                    .OrderByDescending(p => p.CreationDate)
+                    .ToList();
 
-            int pageCount = (int)Math.Ceiling((double)result.Count / postsOnPageAmount);
 
-            result = result
-                .Skip(postsOnPageAmount * (page - 1))
-                .Take(postsOnPageAmount)
-                .ToList();
+                int pageCount = (int)Math.Ceiling((double)result.Count / postsOnPageAmount);
 
-            return (result, pageCount);
+                result = result
+                    .Skip(postsOnPageAmount * (page - 1))
+                    .Take(postsOnPageAmount)
+                    .ToList();
+
+                await Task.Delay(500, cancellationToken);
+
+                return (result, pageCount);
+            }
+            catch(TaskCanceledException ex)
+            {
+                _logger.LogError("=========== I WAS CANCELLED ==========");
+                throw ex;
+            }
+
         }
 
         
