@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 
 namespace RPGOnline.API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class AccountController : CommonController
     {
 
@@ -38,7 +38,7 @@ namespace RPGOnline.API.Controllers
 
                 Response.Cookies.Append(
                     "AccessToken",
-                    "Bearer " + tokens.AccessToken,
+                    tokens.AccessToken,
                     cookieOptions
                     );
 
@@ -89,6 +89,28 @@ namespace RPGOnline.API.Controllers
                  return BadRequest(ex);
              }
          }
+
+        
+        [AllowAnonymous]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                Response.Cookies.Delete("AccessToken");
+                Response.Cookies.Delete("RefreshToken");
+
+                return Ok("Poprawnie wylogowano");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
 
 
         /*

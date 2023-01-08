@@ -29,7 +29,7 @@ namespace RPGOnline.API.Controllers
         }
 
         // GET: api/Users
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RPGOnline.API.Middlewares;
 using RPGOnline.Application;
@@ -59,18 +60,17 @@ builder.Services.AddAuthentication(options =>
     //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(opt =>
 {
-    opt.SaveToken = true;
-
     opt.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromMinutes(10),
+        ClockSkew = TimeSpan.FromMinutes(1),
         ValidIssuer = configuration["JWT:ValidIssuer"],
         ValidAudience = configuration["JWT:ValidAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
     };
+    opt.SaveToken = true;
 
     opt.Events = new JwtBearerEvents
     {
@@ -80,6 +80,15 @@ builder.Services.AddAuthentication(options =>
             {
                 context.Response.Headers.Add("Token-expired", "true");
             }
+            return Task.CompletedTask;
+        },
+        OnMessageReceived = context => {
+
+            if (context.Request.Cookies.ContainsKey("AccessToken"))
+            {
+                context.Token = context.Request.Cookies["AccessToken"];
+            }
+
             return Task.CompletedTask;
         }
     };
