@@ -109,7 +109,9 @@ namespace RPGOnline.Infrastructure.Services
 
             if (result == null)
             {
-                throw new UnauthorizedAccessException("Bad login or password");
+                Exception e = new Exception();
+                e.Data.Add("Error", "Bad login or password");
+                throw e;
             }
 
             string passwordHashFromDb = result.Pswd;
@@ -117,7 +119,9 @@ namespace RPGOnline.Infrastructure.Services
 
             if (passwordHashFromDb != curHashedPassword)
             {
-                throw new UnauthorizedAccessException("Bad login or password");
+                Exception e = new Exception();
+                e.Data.Add("Error", "Bad login or password");
+                throw e;
             }
 
             Claim[] UserClaims = new[]
@@ -145,7 +149,10 @@ namespace RPGOnline.Infrastructure.Services
             return new TokenResponse
             {
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                RefreshToken = result.RefreshToken
+                RefreshToken = result.RefreshToken,
+                UserRole = UserClaims[2].Value,
+                Username = result.Username,
+                UId = result.UId,
             };
         }
 

@@ -1,26 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
-using RPGOnline.Application.DTOs.Requests.Asset.Item;
+using RPGOnline.Application.DTOs.Requests.Asset.Spell;
 using RPGOnline.Application.Interfaces;
 
 namespace RPGOnline.API.Controllers
 {
-    public class ItemController : CommonController
+    public class SpellController : CommonController
     {
-        private readonly IItem _itemService;
+        private readonly ISpell _spellService;
 
-        public ItemController(IItem itemService)
+        public SpellController(ISpell spellService)
         {
-            _itemService = itemService;
+            _spellService = spellService;
         }
 
-
         [HttpGet]
-        public async Task<IActionResult> GetItems([FromQuery] SearchAssetRequest searchItemRequest, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSpells([FromQuery] SearchAssetRequest searchSpellRequest, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _itemService.GetItems(searchItemRequest, cancellationToken);
+                var result = await _spellService.GetSpells(searchSpellRequest, cancellationToken);
 
                 return Ok(new
                 {
@@ -35,15 +34,15 @@ namespace RPGOnline.API.Controllers
         }
 
         [HttpGet("character/{uId}")]
-        public async Task<IActionResult> GetItemsForCharacter(int uId, [FromQuery] GetAssetForCharacterRequest getItemRequest)
+        public async Task<IActionResult> GetSpellsForCharacter(int uId, [FromQuery] GetAssetForCharacterRequest getSpellRequest)
         {
             try
             {
-                var result = await _itemService.GetItemsForCharacter(uId, getItemRequest);
+                var result = await _spellService.GetSpellsForCharacter(uId, getSpellRequest);
 
                 if (result == null)
                 {
-                    return NotFound("No items in database.");
+                    return NotFound("No spells in database.");
                 }
                 else
                 {
@@ -58,11 +57,11 @@ namespace RPGOnline.API.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> PostItem(PostItemRequest postItemRequest)
+        public async Task<IActionResult> PostSpell(PostSpellRequest postSpellRequest)
         {
             try
             {
-                var result = await _itemService.PostItem(postItemRequest);
+                var result = await _spellService.PostSpell(postSpellRequest);
 
                 if (result == null)
                 {

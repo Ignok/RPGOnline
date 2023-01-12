@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
-using RPGOnline.Infrastructure.Services;
-using System.Net.Http.Headers;
+
 
 namespace RPGOnline.API.Controllers
 {
@@ -33,7 +31,7 @@ namespace RPGOnline.API.Controllers
                     Secure = true,
                     HttpOnly = true,
                     SameSite = SameSiteMode.None,
-                    Expires = DateTime.Now.AddMinutes(1)
+                    Expires = DateTime.Now.AddMinutes(10)
                 };
 
                 Response.Cookies.Append(
@@ -47,15 +45,16 @@ namespace RPGOnline.API.Controllers
                     tokens.RefreshToken,
                     cookieOptions
                     );
-                return Ok("Poprawne logowanie");
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
+                return Ok(new
+                {
+                    UId = tokens.UId,
+                    Username = tokens.Username,
+                    UserRole = tokens.UserRole
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Data);
             }
         }
 
@@ -91,14 +90,28 @@ namespace RPGOnline.API.Controllers
          }
 
         
-        [AllowAnonymous]
+        [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             try
             {
-                Response.Cookies.Delete("AccessToken");
-                Response.Cookies.Delete("RefreshToken");
+                var cookieOptions = new CookieOptions()
+                {
+                    Secure = true,
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.Now.AddDays(-1)
+                };
+
+                if (Request.Cookies["AccessToken"] != null)
+                {
+                    Response.Cookies.Append("AccessToken", "", cookieOptions);
+                }
+                if (Request.Cookies["RefreshToken"] != null)
+                {
+                    Response.Cookies.Append("RefreshToken", "", cookieOptions);
+                }
 
                 return Ok("Poprawnie wylogowano");
             }

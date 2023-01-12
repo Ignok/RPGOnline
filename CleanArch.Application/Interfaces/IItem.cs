@@ -6,12 +6,9 @@ namespace RPGOnline.Application.Interfaces
 {
     public interface IItem
     {
-        Task<ICollection<GetItemSimplifiedResponse>> GetItemsForCharacter(int uId, GetAssetForCharacterRequest getItemsForCharacterRequest);
+        Task<ICollection<GetItemSimplifiedResponse>> GetItemsForCharacter(int uId, GetAssetForCharacterRequest getItemRequest);
         Task<(ICollection<GetItemResponse>, int pageCount)> GetItems(SearchAssetRequest searchRaceRequest, CancellationToken cancellationToken);
         Task<GetItemResponse> PostItem(PostItemRequest postItemRequest);
-
-
-        Task<object> GetItemsTest(SearchAssetRequest searchRaceRequest);
 
     }
 }

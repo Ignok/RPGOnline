@@ -42,6 +42,7 @@ builder.Services.AddScoped<IAccount, AccountService>();
 builder.Services.AddScoped<IMessage, MessageService>();
 builder.Services.AddScoped<IRace, RaceService>();
 builder.Services.AddScoped<IItem, ItemService>();
+builder.Services.AddScoped<ISpell, SpellService>();
 
 
 builder.Services.AddInfrastructure().AddApplication();

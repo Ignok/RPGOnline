@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RPGOnline.Application.DTOs.Requests.Asset.Item
+namespace RPGOnline.Application.DTOs.Requests.Asset.Spell
 {
-    public class PostItemRequest
+    public class PostSpellRequest
     {
         [Required]
         public int UId { get; set; }
@@ -17,7 +17,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Item
         [Required]
         [MinLength(1)]
         [MaxLength(40)]
-        public string ItemName { get; set; } = null!;
+        public string SpellName { get; set; } = null!;
 
         [Required]
         [MinLength(1)]
@@ -29,11 +29,16 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Item
         public string KeySkill { get; set; } = null!;
 
         [Required]
-        [Range(0,6)]
-        public int SkillMod { get; set; }
+        [Range(0, 20)]
+        public int MinValue { get; set; }
 
         [Required]
-        [Range(0, 100)]
-        public int GoldMultiplier { get; set; }
+        [Range(0, 20)]
+        public int ManaCost { get; set; }
+
+        [Required]
+        [MinLength(1)]
+        [MaxLength(280)]
+        public string Effects { get; set; } = null!;
     }
 }

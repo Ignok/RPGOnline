@@ -27,9 +27,7 @@
   <ItemGroup>
     <Folder Include="DTOs\Requests\Asset\Character\" />
     <Folder Include="DTOs\Requests\Asset\Profession\" />
-    <Folder Include="DTOs\Requests\Asset\Spell\" />
     <Folder Include="DTOs\Responses\Asset\Character\" />
-    <Folder Include="DTOs\Responses\Asset\Spell\" />
     <Folder Include="DTOs\Responses\Asset\Profession\" />
   </ItemGroup>
 
