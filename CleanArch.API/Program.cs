@@ -43,6 +43,7 @@ builder.Services.AddScoped<IMessage, MessageService>();
 builder.Services.AddScoped<IRace, RaceService>();
 builder.Services.AddScoped<IItem, ItemService>();
 builder.Services.AddScoped<ISpell, SpellService>();
+builder.Services.AddScoped<IProfession, ProfessionService>();
 
 
 builder.Services.AddInfrastructure().AddApplication();
@@ -95,8 +96,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
 
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

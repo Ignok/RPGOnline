@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ using RPGOnline.Infrastructure.Services;
 
 namespace RPGOnline.API.Controllers
 {
+    [Authorize]
     public class UsersController : CommonController
     {
         private readonly RPGOnlineDbContext _dbContext;
@@ -29,7 +31,7 @@ namespace RPGOnline.API.Controllers
         }
 
         // GET: api/Users
-        [Authorize]
+        //[Authorize(Roles ="admin,user")]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -59,11 +61,16 @@ namespace RPGOnline.API.Controllers
         }
 
         //GET info in About Me
+        //[Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAboutMe(int id)
         {
             try
             {
+                //getting UId from claims as string
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 var result = await _userService.GetAboutMe(id);
                 if (result==null)
                 {
@@ -87,6 +94,17 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
+                //checking if uId in request matches uId from claims
+
+                //getting UId from claims as string
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!userId.Equals(id.ToString()))
+                {
+                    return BadRequest("Cannot modify other user's info");
+                }
+
+
                 var result = await _userService.PutUser(id, userRequest);
                 return Ok(result);
             }
@@ -108,6 +126,13 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!userId.Equals(id.ToString()))
+                {
+                    return BadRequest("Cannot modify other user's info");
+                }
+
                 var result = await _userService.PutAvatar(id, avatarRequest);
                 return Ok(result);
             }
@@ -123,6 +148,13 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!userId.Equals(id.ToString()))
+                {
+                    return BadRequest("Cannot modify other user's info");
+                }
+
                 var user = await _dbContext.Users.FindAsync(id);
                 if (user == null)
                 {
@@ -157,6 +189,35 @@ namespace RPGOnline.API.Controllers
                 else
                 {
                     var result = await _userService.GetUserFriends(id);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{id}/Friends/")]
+        public async Task<IActionResult> ManageFriendship(FriendshipRequest friendshipRequest)
+        {
+            try
+            {
+                if(friendshipRequest == null)
+                {
+                    throw new ArgumentNullException(nameof(friendshipRequest));
+                }
+                else if(!UserExists(friendshipRequest.UId) || !UserExists(friendshipRequest.TargetUId))
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    var result = await _userService.ManageFriendship(friendshipRequest);
                     if (result == null)
                     {
                         return NoContent();

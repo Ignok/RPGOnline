@@ -130,5 +130,18 @@ namespace RPGOnline.Infrastructure.Services
                 };
             }
         }
+
+        public Task<object> ManageFriendship(FriendshipRequest friendshipRequest)
+        {
+            //if friendship option exists
+            if (!Enum.IsDefined(typeof(Friendship), friendshipRequest.Option))
+                throw new InvalidDataException($"Friendship option '{friendshipRequest.Option}' is not supported");
+
+            //if user is blocked
+
+
+
+            throw new NotImplementedException();
+        }
     }
 }
