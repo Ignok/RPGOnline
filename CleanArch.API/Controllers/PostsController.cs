@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.TeamFoundation;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.Interfaces;
+using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
@@ -59,11 +61,17 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostPost(PostRequest postRequest)
         {
             try
             {
+                if (!IsSameId(postRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
                 var result = await _postService.PostPost(postRequest);
 
                 if (result == null)
@@ -78,11 +86,17 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("{postId}/Comment")]
         public async Task<IActionResult> PostComment(int postId, CommentRequest commentRequest)
         {
             try
             {
+                if (!IsSameId(commentRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
                 var result = await _postService.PostComment(postId, commentRequest);
                 return Ok(result);
 
@@ -90,6 +104,14 @@ namespace RPGOnline.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
         }
     }
 }

@@ -67,10 +67,6 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                //getting UId from claims as string
-                var claimsIdentity = this.User.Identity as ClaimsIdentity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
                 var result = await _userService.GetAboutMe(id);
                 if (result==null)
                 {
@@ -96,12 +92,9 @@ namespace RPGOnline.API.Controllers
             {
                 //checking if uId in request matches uId from claims
 
-                //getting UId from claims as string
-                var claimsIdentity = this.User.Identity as ClaimsIdentity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!userId.Equals(id.ToString()))
+                if (!IsSameId(id))
                 {
-                    return BadRequest("Cannot modify other user's info");
+                    return BadRequest("Access denied - bad ID");
                 }
 
 
@@ -126,11 +119,9 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                var claimsIdentity = this.User.Identity as ClaimsIdentity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!userId.Equals(id.ToString()))
+                if (!IsSameId(id))
                 {
-                    return BadRequest("Cannot modify other user's info");
+                    return BadRequest("Access denied - bad ID");
                 }
 
                 var result = await _userService.PutAvatar(id, avatarRequest);
@@ -148,11 +139,9 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                var claimsIdentity = this.User.Identity as ClaimsIdentity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!userId.Equals(id.ToString()))
+                if (!IsSameId(id))
                 {
-                    return BadRequest("Cannot modify other user's info");
+                    return BadRequest("Access denied - bad ID");
                 }
 
                 var user = await _dbContext.Users.FindAsync(id);
@@ -202,16 +191,22 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("{id}/Friends/")]
         public async Task<IActionResult> ManageFriendship(FriendshipRequest friendshipRequest)
         {
             try
             {
-                if(friendshipRequest == null)
+                /*if (!IsSameId(friendshipRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }*/
+
+                if (friendshipRequest == null)
                 {
                     throw new ArgumentNullException(nameof(friendshipRequest));
                 }
-                else if(!UserExists(friendshipRequest.UId) || !UserExists(friendshipRequest.TargetUId))
+                else if(!UserExists(friendshipRequest.TargetUId))
                 {
                     return NotFound("No such user in database");
                 }
@@ -235,6 +230,14 @@ namespace RPGOnline.API.Controllers
         private bool UserExists(int id)
         {
             return _dbContext.Users.Any(e => e.UId == id);
+        }
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
         }
     }
 }

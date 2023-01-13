@@ -5,12 +5,7 @@ using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
-using RPGOnline.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RPGOnline.Domain.Enums;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -131,17 +126,143 @@ namespace RPGOnline.Infrastructure.Services
             }
         }
 
-        public Task<object> ManageFriendship(FriendshipRequest friendshipRequest)
+        public async Task<object> ManageFriendship(FriendshipRequest friendshipRequest)
         {
             //if friendship option exists
             if (!Enum.IsDefined(typeof(Friendship), friendshipRequest.Option))
+            {
                 throw new InvalidDataException($"Friendship option '{friendshipRequest.Option}' is not supported");
+            }
 
-            //if user is blocked
+            var friendshipStatus = await _dbContext.Friendships.Where(f => f.UId == friendshipRequest.UId && f.FriendUId == friendshipRequest.TargetUId).FirstOrDefaultAsync();
+
+            var viceFriendshipStatus = await _dbContext.Friendships.Where(f => f.UId == friendshipRequest.TargetUId && f.FriendUId == friendshipRequest.UId).FirstOrDefaultAsync();
+
+            if (friendshipStatus == null)
+            {
+                friendshipStatus = new Domain.Models.Friendship
+                {
+                    UId = friendshipRequest.UId,
+                    FriendUId = friendshipRequest.TargetUId,
+                    FriendshipStatus = 0,
+                    IsFollowed = 0
+                };
+                _dbContext.Friendships.Add(friendshipStatus);
+            }
+            if(viceFriendshipStatus == null)
+            {
+                viceFriendshipStatus = new Domain.Models.Friendship
+                {
+                    UId = friendshipRequest.TargetUId,
+                    FriendUId = friendshipRequest.UId,
+                    FriendshipStatus = 0,
+                    IsFollowed = 0
+                };
+                _dbContext.Friendships.Add(viceFriendshipStatus);
+            }
+
+            //can do?
+            switch (Enum.Parse(typeof(Friendship), friendshipRequest.Option))
+            {
+                case (Friendship.follow):
+                    if(viceFriendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user has blocked you");
+                    }
+                    else if (friendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user is blocked");
+                    }
+                    else if(friendshipStatus.IsFollowed == 1)
+                    {
+                        throw new Exception("Target user is already followed");
+                    }
+                    friendshipStatus.IsFollowed = 1;
+                    break;
 
 
+                case (Friendship.unfollow):
+                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user has blocked you");
+                    }
+                    else if (friendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user is blocked");
+                    }
+                    else if (friendshipStatus.IsFollowed == 0)
+                    {
+                        throw new Exception("Target user is not followed");
+                    }
+                    friendshipStatus.IsFollowed = 0;
+                    break;
 
-            throw new NotImplementedException();
+
+                case (Friendship.friend):
+                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user has blocked you");
+                    }
+                    else if (friendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user is blocked");
+                    }
+                    else if (friendshipStatus.FriendshipStatus == 1)
+                    {
+                        throw new Exception("Target user is already a friend");
+                    }
+                    friendshipStatus.FriendshipStatus = 1;
+                    break;
+
+
+                case (Friendship.unfriend):
+                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user has blocked you");
+                    }
+                    else if (friendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user is blocked");
+                    }
+                    else if (friendshipStatus.FriendshipStatus == 0)
+                    {
+                        throw new Exception("Target user is not a friend");
+                    }
+                    friendshipStatus.FriendshipStatus = 0;
+                    break;
+
+
+                case (Friendship.block):
+                    if (friendshipStatus.FriendshipStatus == -1)
+                    {
+                        throw new Exception("Target user is already blocked");
+                    }
+                    friendshipStatus.FriendshipStatus = -1;
+                    if(viceFriendshipStatus.FriendshipStatus != -1)
+                    {
+                        viceFriendshipStatus.FriendshipStatus = 0;
+                    }
+                    friendshipStatus.IsFollowed = 0;
+                    viceFriendshipStatus.IsFollowed = 0;
+                    break;
+
+
+                case (Friendship.unblock):
+                    if (friendshipStatus.FriendshipStatus != -1)
+                    {
+                        throw new Exception("Target user is not blocked.");
+                    }
+                    friendshipStatus.FriendshipStatus = 0;
+                    break;
+            }
+
+
+            _dbContext.SaveChanges();
+
+            return new
+            {
+                message = "Successfully changed status"
+            };
         }
     }
 }

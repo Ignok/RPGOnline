@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Item;
 using RPGOnline.Application.Interfaces;
+using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
@@ -34,11 +36,17 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("character/{uId}")]
         public async Task<IActionResult> GetItemsForCharacter(int uId, [FromQuery] GetAssetForCharacterRequest getItemRequest)
         {
             try
             {
+                if (!IsSameId(uId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
                 var result = await _itemService.GetItemsForCharacter(uId, getItemRequest);
 
                 if (result == null)
@@ -56,12 +64,17 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostItem(PostItemRequest postItemRequest)
         {
             try
             {
+                if (!IsSameId(postItemRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
                 var result = await _itemService.PostItem(postItemRequest);
 
                 if (result == null)
@@ -74,6 +87,14 @@ namespace RPGOnline.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
         }
     }
 }

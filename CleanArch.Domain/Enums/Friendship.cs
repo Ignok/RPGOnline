@@ -13,5 +13,6 @@ namespace RPGOnline.Domain.Enums
         friend,
         unfriend,
         block,
+        unblock
     }
 }

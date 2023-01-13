@@ -2,6 +2,7 @@
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Spell;
 using RPGOnline.Application.Interfaces;
+using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
@@ -38,6 +39,11 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
+                if (!IsSameId(uId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
                 var result = await _spellService.GetSpellsForCharacter(uId, getSpellRequest);
 
                 if (result == null)
@@ -61,6 +67,11 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
+                if (!IsSameId(postSpellRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
                 var result = await _spellService.PostSpell(postSpellRequest);
 
                 if (result == null)
@@ -73,6 +84,14 @@ namespace RPGOnline.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
         }
     }
 }
