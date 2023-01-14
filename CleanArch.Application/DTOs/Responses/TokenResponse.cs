@@ -13,5 +13,6 @@ namespace RPGOnline.Application.DTOs.Responses
         public string UserRole { get; set; } = null!;
         public string Username { get; set; } = null!;
         public int UId { get; set; }
+        public int Avatar { get; set; }
     }
 }

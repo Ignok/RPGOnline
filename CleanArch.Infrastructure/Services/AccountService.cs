@@ -153,15 +153,16 @@ namespace RPGOnline.Infrastructure.Services
                 UserRole = UserClaims[2].Value,
                 Username = result.Username,
                 UId = result.UId,
+                Avatar = result.Picture
             };
         }
 
         //Refresh token service
 
-        public async Task<Object> RefreshToken(string token, RefreshTokenRequest refreshTokenRequest)
+        public async Task<TokenResponse> RefreshToken(string token, string refreshToken)
         {
             var result = await _dbContext.Users
-               .Where(u => u.RefreshToken.Equals(refreshTokenRequest.RefreshToken))
+               .Where(u => u.RefreshToken.Equals(refreshToken))
                .SingleOrDefaultAsync();
 
             Console.WriteLine(result);
@@ -202,15 +203,19 @@ namespace RPGOnline.Infrastructure.Services
             result.RefreshTokenExp = DateTime.Now.AddDays(1);
             _dbContext.SaveChanges();
 
-            return new
+            return new TokenResponse
             {
-                accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-                refreshToken = result.RefreshToken
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                RefreshToken = result.RefreshToken,
+                UserRole = UserClaims[2].Value,
+                Username = result.Username,
+                UId = result.UId,
+                Avatar = result.Picture
             };
         }
 
 
-        public async Task<Object> HashPassword()
+        /*public async Task<Object> HashPassword()
         {
             var result = await _dbContext.Users
                 .Where(u => u.Username.Equals("bocz"))
@@ -253,6 +258,6 @@ namespace RPGOnline.Infrastructure.Services
             {
                 wiadomosc = "Udało się"
             };
-        }
+        }*/
     }
 }

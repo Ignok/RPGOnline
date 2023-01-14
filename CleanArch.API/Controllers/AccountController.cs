@@ -47,9 +47,10 @@ namespace RPGOnline.API.Controllers
                     );
                 return Ok(new
                 {
-                    UId = tokens.UId,
-                    Username = tokens.Username,
-                    UserRole = tokens.UserRole
+                    tokens.UId,
+                    tokens.Username,
+                    tokens.UserRole,
+                    tokens.Avatar
                 });
             }
             catch (Exception ex)
@@ -68,7 +69,7 @@ namespace RPGOnline.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Data);
+                return BadRequest(ex);
             }
         }
 
@@ -76,13 +77,43 @@ namespace RPGOnline.API.Controllers
         
          [AllowAnonymous]
          [HttpPost("refresh")]
-         public async Task<IActionResult> RefreshToken([FromHeader] string Cookie)
+         public async Task<IActionResult> RefreshToken()
          {
              try
              {
-                
-                return Ok(await _accountService.RefreshToken("token", new RefreshTokenRequest { }));
-             }
+                if (Request.Cookies["AccessToken"] == null || Request.Cookies["RefreshToken"] == null)
+                {
+                    return BadRequest("No access or refresh token provided");
+                }
+                TokenResponse tokens = await _accountService.RefreshToken(Request.Cookies["AccessToken"], Request.Cookies["RefreshToken"]);
+
+                var cookieOptions = new CookieOptions()
+                {
+                    Secure = true,
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.Now.AddMinutes(10)
+                };
+
+                Response.Cookies.Append(
+                    "AccessToken",
+                    tokens.AccessToken,
+                    cookieOptions
+                    );
+
+                Response.Cookies.Append(
+                    "RefreshToken",
+                    tokens.RefreshToken,
+                    cookieOptions
+                    );
+                return Ok(new
+                {
+                    tokens.UId,
+                    tokens.Username,
+                    tokens.UserRole,
+                    tokens.Avatar
+                });
+            }
              catch (Exception ex)
              {
                  return BadRequest(ex);
