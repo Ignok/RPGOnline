@@ -11,6 +11,7 @@ namespace RPGOnline.Domain.Models
         public string Title { get; set; } = null!;
         public string Content { get; set; } = null!;
         public DateTime SendDate { get; set; }
+        public bool IsOpened { get; set; }
 
         public virtual User ReceiverU { get; set; } = null!;
         public virtual User SenderU { get; set; } = null!;

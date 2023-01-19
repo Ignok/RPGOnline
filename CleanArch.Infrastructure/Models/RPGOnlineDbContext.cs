@@ -627,6 +627,8 @@ namespace RPGOnline.Infrastructure.Models
                     .HasColumnType("datetime")
                     .HasColumnName("send_date");
 
+                entity.Property(e => e.IsOpened).HasColumnName("is_opened");
+
                 entity.Property(e => e.SenderUId).HasColumnName("sender_u_id");
 
                 entity.Property(e => e.Title)

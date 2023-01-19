@@ -95,6 +95,77 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        // PUT: api/{uid}/open/{messageId}
+        [HttpPut("{uId}/open/{messageId}")]
+        public async Task<IActionResult> OpenMessage(int uId, int messageId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _messageService.OpenMessage(uId, messageId);
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // PUT: api/{uid}/close/{messageId}
+        [HttpPut("{uId}/close/{messageId}")]
+        public async Task<IActionResult> CloseMessage(int uId, int messageId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _messageService.CloseMessage(uId, messageId);
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // GET: api/{id}
+        [HttpGet("{id}/newMessages")]
+        public async Task<IActionResult> GetNewMessagesCountMessages(int id)
+        {
+            try
+            {
+                if (!IsSameId(id))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _messageService.GetNewMessagesCount(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
         private bool IsSameId(int id)
         {
             var claimsIdentity = this.User.Identity as ClaimsIdentity;

@@ -15,6 +15,6 @@ namespace RPGOnline.Application.DTOs.Responses
         public string Title { get; set; } = null!;
         public string Content { get; set; } = null!;
         public DateTime SendDate { get; set; }
-
+        public bool IsOpened { get; set; }
     }
 }

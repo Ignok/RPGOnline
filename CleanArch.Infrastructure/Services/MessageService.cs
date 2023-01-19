@@ -3,6 +3,7 @@ using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Requests.Mail;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.Mail;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 
@@ -41,7 +42,8 @@ namespace RPGOnline.Infrastructure.Services
                                         SenderUsername = sender.Username,
                                         Title = message.Title,
                                         Content = message.Content,
-                                        SendDate = message.SendDate
+                                        SendDate = message.SendDate,
+                                        IsOpened = message.IsOpened,
                                     })
                             .ToListAsync();
 
@@ -85,7 +87,8 @@ namespace RPGOnline.Infrastructure.Services
                     ReceiverUId = await _dbContext.Users.Where(u => u.Username.Equals(messageRequest.ReceiverUsername)).Select(u => u.UId).FirstOrDefaultAsync(),
                     Title = messageRequest.Title,
                     Content = messageRequest.Content,
-                    SendDate = DateTime.Now
+                    SendDate = DateTime.Now,
+                    IsOpened = false,
                 };
 
                 _dbContext.Messages.Add(message);
@@ -97,15 +100,14 @@ namespace RPGOnline.Infrastructure.Services
                     SenderId = message.SenderUId,
                     Title = message.Title,
                     Content = message.Content,
-                    SendDate = message.SendDate
+                    SendDate = message.SendDate,
+                    IsOpened = false,
                 };
             }
         }
 
         public async Task<CommonResponse> DeleteMessage(int uId, int messageId)
         {
-            ////////////////////////////////////////
-            //autoryzaja i autentykacja do zrobienia
 
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UId == uId);
             if(user == null)
@@ -124,16 +126,106 @@ namespace RPGOnline.Infrastructure.Services
                 throw new Exception("Permisiion denied - user is not receiver");
             }
 
-            ////////////////////////////
-
             _dbContext.Messages.Remove(message);
             _dbContext.SaveChanges();
 
 
             return new CommonResponse
             {
-                Message = "Message deleted successfully"
+                Message = "Message successfully deleted"
             };
+        }
+
+        public async Task<CommonResponse> OpenMessage(int uId, int messageId)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UId == uId);
+            if (user == null)
+            {
+                throw new Exception($"User id {uId} does not exist");
+            }
+
+            var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.MessageId == messageId);
+            if (message == null)
+            {
+                throw new Exception($"Message id {messageId} does not exist");
+            }
+
+            if (message.ReceiverUId != uId)
+            {
+                throw new Exception("Permisiion denied - user is not receiver");
+            }
+
+            if (message.IsOpened)
+            {
+                throw new Exception("Message is already opened");
+            }
+
+            message.IsOpened = true;
+
+            _dbContext.Entry(message).State = EntityState.Modified;
+            _dbContext.SaveChanges();
+
+            return new CommonResponse
+            {
+                Message = "Message successfully opened"
+            };
+        }
+
+        public async Task<CommonResponse> CloseMessage(int uId, int messageId)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UId == uId);
+            if (user == null)
+            {
+                throw new Exception($"User id {uId} does not exist");
+            }
+
+            var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.MessageId == messageId);
+            if (message == null)
+            {
+                throw new Exception($"Message id {messageId} does not exist");
+            }
+
+            if (message.ReceiverUId != uId)
+            {
+                throw new Exception("Permisiion denied - user is not receiver");
+            }
+
+            if (!message.IsOpened)
+            {
+                throw new Exception("Message is already closed");
+            }
+
+            message.IsOpened = false;
+
+            _dbContext.Entry(message).State = EntityState.Modified;
+            _dbContext.SaveChanges();
+
+            return new CommonResponse
+            {
+                Message = "Message successfully closed"
+            };
+        }
+
+        public async Task<NewMessagesCountResponse> GetNewMessagesCount(int uId)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UId == uId);
+            if (user == null)
+            {
+                throw new Exception($"User id {uId} does not exist");
+            }
+
+            var count = await _dbContext.Messages
+                                .Where(m => m.ReceiverUId == uId)
+                                .Where(m => !m.IsOpened)
+                                .CountAsync();
+
+            return new NewMessagesCountResponse()
+            {
+                NewMessagesCount = count
+            };
+
+
+            throw new NotImplementedException();
         }
     }
 }
