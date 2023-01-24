@@ -26,11 +26,13 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetProfessionSimplifiedResponse>> GetProfessionsForCharacter(int uId, GetAssetForCharacterRequest getProfessionRequest)
         {
+            var prefferedLanguages = getProfessionRequest.PrefferedLanguage.Split('-');
+
             var result = await (from asset in _dbContext.Assets
                                 join profession in _dbContext.Professions on asset.AssetId equals profession.AssetId
                                 where ((object.Equals(profession.KeyAttribute, getProfessionRequest.KeyValueName))
                                     || (object.Equals(profession.KeyAttribute, null)))
-                                where getProfessionRequest.PrefferedLanguage.Contains(asset.Language)
+                                where prefferedLanguages.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
                                 orderby profession.ProfessionName ascending
                                 select new GetProfessionSimplifiedResponse()
@@ -60,7 +62,7 @@ namespace RPGOnline.Infrastructure.Services
                 var page = searchProfessionRequest.Page;
                 if (searchProfessionRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-
+                var prefferedLanguages = searchProfessionRequest.PrefferedLanguage.Split('-');
 
                 var result = _dbContext.Professions.Include(p => p.Asset)
                                                 .Include(p => p.Asset.UserSavedAssets)
@@ -75,7 +77,7 @@ namespace RPGOnline.Infrastructure.Services
                                 || (p.ProfessionName.Contains(searchProfessionRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (p.Description.Contains(searchProfessionRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
-                    .Where(p => searchProfessionRequest.PrefferedLanguage.Contains(p.Asset.Language))
+                    .Where(p => prefferedLanguages.Contains(p.Asset.Language))
                     .Select(p => new GetProfessionResponse()
                     {
                         AssetId = p.Asset.AssetId,

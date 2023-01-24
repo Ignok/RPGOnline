@@ -38,6 +38,8 @@ namespace RPGOnline.Infrastructure.Services
                 var page = searchItemRequest.Page;
                 if (searchItemRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
+                var prefferedLanguages = searchItemRequest.PrefferedLanguage.Split('-');
+
                 
 
                 var result = _dbContext.Items.Include(i => i.Asset).ThenInclude(usa => usa.UserSavedAssets)
@@ -52,7 +54,7 @@ namespace RPGOnline.Infrastructure.Services
                                 || (i.ItemName.Contains(searchItemRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (i.Description.Contains(searchItemRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
-                    .Where(i => searchItemRequest.PrefferedLanguage.Contains(i.Asset.Language))
+                    .Where(i => prefferedLanguages.Contains(i.Asset.Language))
                     .Select(i => new GetItemResponse()
                     {
                         AssetId = i.Asset.AssetId,
@@ -98,10 +100,12 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetItemSimplifiedResponse>> GetItemsForCharacter(int uId, GetAssetForCharacterRequest getItemRequest)
         {
+            var prefferedLanguages = getItemRequest.PrefferedLanguage.Split('-');
+
             var result = await (from asset in _dbContext.Assets
                                 join item in _dbContext.Items on asset.AssetId equals item.AssetId
                                 where object.Equals(item.KeySkill, getItemRequest.KeyValueName)
-                                where getItemRequest.PrefferedLanguage.Contains(asset.Language)
+                                where prefferedLanguages.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
                                 orderby item.ItemName ascending
                                 select new GetItemSimplifiedResponse()

@@ -56,19 +56,7 @@ namespace RPGOnline.Infrastructure.Models
             }
         }
 
-        public Task<List<Post>> AllPosts(int postId) =>
-            Posts.FromSqlRaw(
-                @"WITH peepeepoopoo (post_id, u_id, username, title, content, picture, creation_date, likes, comments) AS (
-                    SELECT p.post_id, u.u_id, u.username, p.title, p.content, p.picture, p.creation_date, COUNT(ulp.post_id), COUNT(c.comment_id)
-                    FROM Post p
-                    JOIN User_liked_post ulp ON ulp.post_id = p.post_id
-                    JOIN [User] u ON u.u_id = p.u_id
-                    LEFT JOIN Comment c ON c.post_id = p.post_id
-                    GROUP BY p.post_id, u.u_id, u.username, p.title, p.content, p.picture, p.creation_date
-                )
-                SELECT * FROM peepeepoopoo", postId)
-                .AsNoTrackingWithIdentityResolution()
-                .ToListAsync();
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

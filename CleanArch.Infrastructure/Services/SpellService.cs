@@ -37,7 +37,7 @@ namespace RPGOnline.Infrastructure.Services
                 var page = searchSpellRequest.Page;
                 if (searchSpellRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-
+                var prefferedLanguages = searchSpellRequest.PrefferedLanguage.Split('-');
 
                 var result = _dbContext.Spells.Include(s => s.Asset)
                                                 .Include(s => s.Asset.UserSavedAssets)
@@ -51,7 +51,7 @@ namespace RPGOnline.Infrastructure.Services
                                 || (s.SpellName.Contains(searchSpellRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (s.Description.Contains(searchSpellRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
-                    .Where(s => searchSpellRequest.PrefferedLanguage.Contains(s.Asset.Language))
+                    .Where(s => prefferedLanguages.Contains(s.Asset.Language))
                     .Select(s => new GetSpellResponse()
                     {
                         AssetId = s.Asset.AssetId,
@@ -96,10 +96,12 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetSpellSimplifiedResponse>> GetSpellsForCharacter(int uId, GetAssetForCharacterRequest getSpellRequest)
         {
+            var prefferedLanguages = getSpellRequest.PrefferedLanguage.Split('-');
+
             var result = await (from asset in _dbContext.Assets
                                 join spell in _dbContext.Spells on asset.AssetId equals spell.AssetId
                                 where object.Equals(spell.KeySkill, getSpellRequest.KeyValueName)
-                                where getSpellRequest.PrefferedLanguage.Contains(asset.Language)
+                                where prefferedLanguages.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
                                 orderby spell.SpellName ascending
                                 select new GetSpellSimplifiedResponse()

@@ -11,6 +11,6 @@ namespace RPGOnline.Application.DTOs.Requests.Asset
         public int Page { get; set; }
         public string? KeyValueName { get; set; }
         public string? Search { get; set; }
-        public string[] PrefferedLanguage { get; set; } = null!;
+        public string PrefferedLanguage { get; set; } = null!;
     }
 }
