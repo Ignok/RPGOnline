@@ -13,11 +13,11 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Profession
         public DateTime CreationDate { get; set; }
         public int TimesSaved { get; set; }
         public int ProfessionId { get; set; }
-        public string ProfesionName { get; set; } = null!;
-        public string ProfessionDescription { get; set; } = null!;
-        public string ProfessionTalent { get; set; } = null!;
-        public string ProfessionHiddenTalent { get; set; } = null!;
-        public string? ProfessionKeyAttribute { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string Talent { get; set; } = null!;
+        public string HiddenTalent { get; set; } = null!;
+        public string? KeyAttribute { get; set; }
         public int WeaponMod { get; set; }
         public int ArmorMod { get; set; }
         public int GadgetMod { get; set; }

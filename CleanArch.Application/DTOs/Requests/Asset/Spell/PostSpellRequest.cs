@@ -17,7 +17,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Spell
         [Required]
         [MinLength(1)]
         [MaxLength(40)]
-        public string SpellName { get; set; } = null!;
+        public string Name { get; set; } = null!;
 
         [Required]
         [MinLength(1)]

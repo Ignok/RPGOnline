@@ -14,7 +14,7 @@ namespace RPGOnline.Domain.Models
 
         public int ProfessionId { get; set; }
         public int AssetId { get; set; }
-        public string ProfessionName { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string Talent { get; set; } = null!;
         public string HiddenTalent { get; set; } = null!;

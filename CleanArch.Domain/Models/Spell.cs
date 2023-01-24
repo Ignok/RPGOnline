@@ -14,7 +14,7 @@ namespace RPGOnline.Domain.Models
 
         public int SpellId { get; set; }
         public int AssetId { get; set; }
-        public string SpellName { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string KeySkill { get; set; } = null!;
         public int MinValue { get; set; }

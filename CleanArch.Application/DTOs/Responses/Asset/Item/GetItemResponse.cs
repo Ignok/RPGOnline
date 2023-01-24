@@ -13,11 +13,11 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Item
         public DateTime CreationDate { get; set; }
         public int TimesSaved { get; set; }
         public int ItemId { get; set; }
-        public string ItemName { get; set; } = null!;
-        public string ItemDescription { get; set; } = null!;
-        public string ItemKeySkill { get; set; } = null!;
-        public int ItemSkillMod { get; set; }
-        public int ItemGoldMultiplier { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string KeySkill { get; set; } = null!;
+        public int SkillMod { get; set; }
+        public int GoldMultiplier { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
     }

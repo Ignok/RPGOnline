@@ -44,7 +44,7 @@ namespace RPGOnline.Infrastructure.Services
                                 || object.Equals(r.KeyAttribute, null)
                             )
                     .Where(r => String.IsNullOrEmpty(searchRaceRequest.Search)
-                                || (r.RaceName.Contains(searchRaceRequest.Search, StringComparison.OrdinalIgnoreCase))
+                                || (r.Name.Contains(searchRaceRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (r.Description.Contains(searchRaceRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
                     .Where(r => prefferedLanguages.Contains(r.Asset.Language))
@@ -54,11 +54,11 @@ namespace RPGOnline.Infrastructure.Services
                         CreationDate = r.Asset.CreationDate,
                         TimesSaved = r.Asset.UserSavedAssets.Count,
                         RaceId = r.RaceId,
-                        RaceName = r.RaceName,
-                        RaceDescription = r.Description,
-                        RaceTalent = r.Talent,
-                        RaceHiddenTalent = r.HiddenTalent,
-                        RaceKeyAttribute = r.KeyAttribute,
+                        Name = r.Name,
+                        Description = r.Description,
+                        Talent = r.Talent,
+                        HiddenTalent = r.HiddenTalent,
+                        KeyAttribute = r.KeyAttribute,
                         PrefferedLanguage = r.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {
@@ -101,12 +101,12 @@ namespace RPGOnline.Infrastructure.Services
                                     || (object.Equals(race.KeyAttribute, null)))
                                 where prefferedLanguages.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
-                                orderby race.RaceName ascending
+                                orderby race.Name ascending
                                 select new GetRaceSimplifiedResponse()
                                 {
                                      RaceId = race.RaceId,
                                      AssetId = asset.AssetId,
-                                     RaceName = race.RaceName,
+                                     Name = race.Name,
                                      Description = race.Description,
                                      Talent = race.Talent,
                                      HiddenTalent = race.HiddenTalent,
@@ -147,7 +147,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 RaceId = (_dbContext.Races.Max(r => (int)r.AssetId) + 1),
                 AssetId = asset.AssetId,
-                RaceName = postRaceRequest.RaceName,
+                Name = postRaceRequest.RaceName,
                 Description = postRaceRequest.Description,
                 Talent = postRaceRequest.Talent,
                 HiddenTalent = postRaceRequest.HiddenTalent,
@@ -167,11 +167,11 @@ namespace RPGOnline.Infrastructure.Services
                 CreationDate = asset.CreationDate,
                 TimesSaved = 0,
                 RaceId = race.RaceId,
-                RaceName = race.RaceName,
-                RaceDescription = race.Description,
-                RaceTalent = race.Talent,
-                RaceHiddenTalent = race.HiddenTalent,
-                RaceKeyAttribute = race.KeyAttribute,
+                Name = race.Name,
+                Description = race.Description,
+                Talent = race.Talent,
+                HiddenTalent = race.HiddenTalent,
+                KeyAttribute = race.KeyAttribute,
                 PrefferedLanguage = race.Asset.Language,
                 CreatorNavigation = new UserResponse()
                 {

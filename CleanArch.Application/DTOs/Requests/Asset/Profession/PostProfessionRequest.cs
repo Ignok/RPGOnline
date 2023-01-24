@@ -22,7 +22,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Profession
         [Required]
         [MinLength(1)]
         [MaxLength(80)]
-        public string ProfessionName { get; set; } = null!;
+        public string Name { get; set; } = null!;
 
         [Required]
         [MinLength(5)]

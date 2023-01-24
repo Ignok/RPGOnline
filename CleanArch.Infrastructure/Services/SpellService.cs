@@ -37,7 +37,7 @@ namespace RPGOnline.Infrastructure.Services
                 var page = searchSpellRequest.Page;
                 if (searchSpellRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-                var prefferedLanguages = searchSpellRequest.PrefferedLanguage.Split('-');
+
 
                 var result = _dbContext.Spells.Include(s => s.Asset)
                                                 .Include(s => s.Asset.UserSavedAssets)
@@ -48,21 +48,22 @@ namespace RPGOnline.Infrastructure.Services
                                 || object.Equals(s.KeySkill, searchSpellRequest.KeyValueName)
                             )
                     .Where(s => String.IsNullOrEmpty(searchSpellRequest.Search)
-                                || (s.SpellName.Contains(searchSpellRequest.Search, StringComparison.OrdinalIgnoreCase))
+                                || (s.Name.Contains(searchSpellRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (s.Description.Contains(searchSpellRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
-                    .Where(s => prefferedLanguages.Contains(s.Asset.Language))
+                    .Where(s => searchSpellRequest.PrefferedLanguage.Contains(s.Asset.Language))
                     .Select(s => new GetSpellResponse()
                     {
                         AssetId = s.Asset.AssetId,
                         CreationDate = s.Asset.CreationDate,
                         TimesSaved = s.Asset.UserSavedAssets.Count,
                         SpellId = s.SpellId,
-                        SpellName = s.SpellName,
-                        SpellDescription = s.Description,
-                        SpellKeySkill = s.KeySkill,
-                        SpellMinValue = s.MinValue,
-                        SpellManaCost = s.ManaCost,
+                        Name = s.Name,
+                        Description = s.Description,
+                        KeySkill = s.KeySkill,
+                        MinValue = s.MinValue,
+                        ManaCost = s.ManaCost,
+                        Effects = s.Effects,
                         PrefferedLanguage = s.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {
@@ -96,23 +97,22 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetSpellSimplifiedResponse>> GetSpellsForCharacter(int uId, GetAssetForCharacterRequest getSpellRequest)
         {
-            var prefferedLanguages = getSpellRequest.PrefferedLanguage.Split('-');
-
             var result = await (from asset in _dbContext.Assets
                                 join spell in _dbContext.Spells on asset.AssetId equals spell.AssetId
                                 where object.Equals(spell.KeySkill, getSpellRequest.KeyValueName)
-                                where prefferedLanguages.Contains(asset.Language)
+                                where getSpellRequest.PrefferedLanguage.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
-                                orderby spell.SpellName ascending
+                                orderby spell.Name ascending
                                 select new GetSpellSimplifiedResponse()
                                 {
                                     AssetId = asset.AssetId,
                                     SpellId = spell.SpellId,
-                                    SpellName = spell.SpellName,
-                                    SpellDescription = spell.Description,
-                                    SpellKeySkill = spell.KeySkill,
-                                    SpellMinValue = spell.MinValue,
-                                    SpellManaCost = spell.ManaCost
+                                    Name = spell.Name,
+                                    Description = spell.Description,
+                                    KeySkill = spell.KeySkill,
+                                    MinValue = spell.MinValue,
+                                    ManaCost = spell.ManaCost,
+                                    Effects = spell.Effects
                                 })
                                 .ToListAsync();
             return result;
@@ -149,7 +149,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 SpellId = (_dbContext.Spells.Max(s => (int)s.AssetId) + 1),
                 AssetId = asset.AssetId,
-                SpellName = postSpellRequest.SpellName,
+                Name = postSpellRequest.Name,
                 Description = postSpellRequest.Description,
                 KeySkill = postSpellRequest.KeySkill,
                 MinValue = postSpellRequest.MinValue,
@@ -170,11 +170,11 @@ namespace RPGOnline.Infrastructure.Services
                 CreationDate = asset.CreationDate,
                 TimesSaved = asset.UserSavedAssets.Count,
                 SpellId = spell.SpellId,
-                SpellName = spell.SpellName,
-                SpellDescription = spell.Description,
-                SpellKeySkill = spell.KeySkill,
-                SpellMinValue = spell.MinValue,
-                SpellManaCost = spell.ManaCost,
+                Name = spell.Name,
+                Description = spell.Description,
+                KeySkill = spell.KeySkill,
+                MinValue = spell.MinValue,
+                ManaCost = spell.ManaCost,
                 PrefferedLanguage = asset.Language,
                 CreatorNavigation = new UserResponse()
                 {

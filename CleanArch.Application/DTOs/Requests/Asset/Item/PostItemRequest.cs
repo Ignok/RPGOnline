@@ -17,7 +17,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Item
         [Required]
         [MinLength(1)]
         [MaxLength(40)]
-        public string ItemName { get; set; } = null!;
+        public string Name { get; set; } = null!;
 
         [Required]
         [MinLength(1)]

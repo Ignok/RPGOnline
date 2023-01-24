@@ -10,10 +10,11 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Spell
     {
         public int AssetId { get; set; }
         public int SpellId { get; set; }
-        public string SpellName { get; set; } = null!;
-        public string SpellDescription { get; set; } = null!;
-        public string SpellKeySkill { get; set; } = null!;
-        public int SpellMinValue { get; set; }
-        public int SpellManaCost { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string KeySkill { get; set; } = null!;
+        public int MinValue { get; set; }
+        public int ManaCost { get; set; }
+        public string Effects { get; set; } = null!;
     }
 }

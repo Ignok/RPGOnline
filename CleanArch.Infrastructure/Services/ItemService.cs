@@ -38,8 +38,6 @@ namespace RPGOnline.Infrastructure.Services
                 var page = searchItemRequest.Page;
                 if (searchItemRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-                var prefferedLanguages = searchItemRequest.PrefferedLanguage.Split('-');
-
                 
 
                 var result = _dbContext.Items.Include(i => i.Asset).ThenInclude(usa => usa.UserSavedAssets)
@@ -51,21 +49,21 @@ namespace RPGOnline.Infrastructure.Services
                                 || object.Equals(i.KeySkill, searchItemRequest.KeyValueName)
                             )
                     .Where(i => String.IsNullOrEmpty(searchItemRequest.Search)
-                                || (i.ItemName.Contains(searchItemRequest.Search, StringComparison.OrdinalIgnoreCase))
+                                || (i.Name.Contains(searchItemRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (i.Description.Contains(searchItemRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
-                    .Where(i => prefferedLanguages.Contains(i.Asset.Language))
+                    .Where(i => searchItemRequest.PrefferedLanguage.Contains(i.Asset.Language))
                     .Select(i => new GetItemResponse()
                     {
                         AssetId = i.Asset.AssetId,
                         CreationDate = i.Asset.CreationDate,
                         TimesSaved = i.Asset.UserSavedAssets.Count,
                         ItemId = i.ItemId,
-                        ItemName = i.ItemName,
-                        ItemDescription = i.Description,
-                        ItemKeySkill = i.KeySkill,
-                        ItemSkillMod = i.SkillMod,
-                        ItemGoldMultiplier = i.GoldMultiplier,
+                        Name = i.Name,
+                        Description = i.Description,
+                        KeySkill = i.KeySkill,
+                        SkillMod = i.SkillMod,
+                        GoldMultiplier = i.GoldMultiplier,
                         PrefferedLanguage = i.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {
@@ -100,23 +98,21 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetItemSimplifiedResponse>> GetItemsForCharacter(int uId, GetAssetForCharacterRequest getItemRequest)
         {
-            var prefferedLanguages = getItemRequest.PrefferedLanguage.Split('-');
-
             var result = await (from asset in _dbContext.Assets
                                 join item in _dbContext.Items on asset.AssetId equals item.AssetId
                                 where object.Equals(item.KeySkill, getItemRequest.KeyValueName)
-                                where prefferedLanguages.Contains(asset.Language)
+                                where getItemRequest.PrefferedLanguage.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
-                                orderby item.ItemName ascending
+                                orderby item.Name ascending
                                 select new GetItemSimplifiedResponse()
                                 {
                                     AssetId = asset.AssetId,
                                     ItemId = item.ItemId,
-                                    ItemName = item.ItemName,
-                                    ItemDescription = item.Description,
-                                    ItemKeySkill = item.KeySkill,
-                                    ItemSkillMod = item.SkillMod,
-                                    ItemGoldMultiplier = item.GoldMultiplier
+                                    Name = item.Name,
+                                    Description = item.Description,
+                                    KeySkill = item.KeySkill,
+                                    SkillMod = item.SkillMod,
+                                    GoldMultiplier = item.GoldMultiplier
                                 })
                                 .ToListAsync();
             return result;
@@ -153,7 +149,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 ItemId = (_dbContext.Items.Max(i => (int)i.AssetId) + 1),
                 AssetId = asset.AssetId,
-                ItemName = postItemRequest.ItemName,
+                Name = postItemRequest.Name,
                 Description = postItemRequest.Description,
                 KeySkill = postItemRequest.KeySkill.Equals("none") ? null : postItemRequest.KeySkill,
                 SkillMod = postItemRequest.SkillMod,
@@ -173,11 +169,11 @@ namespace RPGOnline.Infrastructure.Services
                 CreationDate = asset.CreationDate,
                 TimesSaved = 0,
                 ItemId = item.ItemId,
-                ItemName = item.ItemName,
-                ItemDescription = item.Description,
-                ItemKeySkill = item.KeySkill,
-                ItemSkillMod = item.SkillMod,
-                ItemGoldMultiplier = item.GoldMultiplier,
+                Name = item.Name,
+                Description = item.Description,
+                KeySkill = item.KeySkill,
+                SkillMod = item.SkillMod,
+                GoldMultiplier = item.GoldMultiplier,
                 PrefferedLanguage = item.Asset.Language,
                 CreatorNavigation = new UserResponse()
                 {

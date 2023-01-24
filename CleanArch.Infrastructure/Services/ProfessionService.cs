@@ -26,24 +26,22 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetProfessionSimplifiedResponse>> GetProfessionsForCharacter(int uId, GetAssetForCharacterRequest getProfessionRequest)
         {
-            var prefferedLanguages = getProfessionRequest.PrefferedLanguage.Split('-');
-
             var result = await (from asset in _dbContext.Assets
                                 join profession in _dbContext.Professions on asset.AssetId equals profession.AssetId
                                 where ((object.Equals(profession.KeyAttribute, getProfessionRequest.KeyValueName))
                                     || (object.Equals(profession.KeyAttribute, null)))
-                                where prefferedLanguages.Contains(asset.Language)
+                                where getProfessionRequest.PrefferedLanguage.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
-                                orderby profession.ProfessionName ascending
+                                orderby profession.Name ascending
                                 select new GetProfessionSimplifiedResponse()
                                 {
                                     ProfessionId = profession.ProfessionId,
                                     AssetId = asset.AssetId,
-                                    ProfessionName = profession.ProfessionName,
-                                    ProfessionDescription = profession.Description,
-                                    ProfessionTalent = profession.Talent,
-                                    ProfessionHiddenTalent = profession.HiddenTalent,
-                                    ProfessionKeyAttribute = profession.KeyAttribute,
+                                    Name = profession.Name,
+                                    Description = profession.Description,
+                                    Talent = profession.Talent,
+                                    HiddenTalent = profession.HiddenTalent,
+                                    KeyAttribute = profession.KeyAttribute,
                                     WeaponMod = profession.WeaponMod,
                                     ArmorMod = profession.ArmorMod,
                                     GadgetMod = profession.GadgetMod,
@@ -62,7 +60,7 @@ namespace RPGOnline.Infrastructure.Services
                 var page = searchProfessionRequest.Page;
                 if (searchProfessionRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-                var prefferedLanguages = searchProfessionRequest.PrefferedLanguage.Split('-');
+
 
                 var result = _dbContext.Professions.Include(p => p.Asset)
                                                 .Include(p => p.Asset.UserSavedAssets)
@@ -74,20 +72,20 @@ namespace RPGOnline.Infrastructure.Services
                                 || object.Equals(p.KeyAttribute, null)
                             )
                     .Where(p => String.IsNullOrEmpty(searchProfessionRequest.Search)
-                                || (p.ProfessionName.Contains(searchProfessionRequest.Search, StringComparison.OrdinalIgnoreCase))
+                                || (p.Name.Contains(searchProfessionRequest.Search, StringComparison.OrdinalIgnoreCase))
                                 || (p.Description.Contains(searchProfessionRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
-                    .Where(p => prefferedLanguages.Contains(p.Asset.Language))
+                    .Where(p => searchProfessionRequest.PrefferedLanguage.Contains(p.Asset.Language))
                     .Select(p => new GetProfessionResponse()
                     {
                         AssetId = p.Asset.AssetId,
                         CreationDate = p.Asset.CreationDate,
                         TimesSaved = p.Asset.UserSavedAssets.Count,
                         ProfessionId = p.ProfessionId,
-                        ProfesionName = p.ProfessionName,
-                        ProfessionDescription = p.Description,
-                        ProfessionTalent = p.Talent,
-                        ProfessionHiddenTalent = p.HiddenTalent,
+                        Name = p.Name,
+                        Description = p.Description,
+                        Talent = p.Talent,
+                        HiddenTalent = p.HiddenTalent,
                         WeaponMod = p.WeaponMod,
                         ArmorMod = p.ArmorMod,
                         GadgetMod = p.GadgetMod,
@@ -155,7 +153,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 ProfessionId = (_dbContext.Professions.Max(r => (int)r.AssetId) + 1),
                 AssetId = asset.AssetId,
-                ProfessionName = postProfessionRequest.ProfessionName,
+                Name = postProfessionRequest.Name,
                 Description = postProfessionRequest.Description,
                 Talent = postProfessionRequest.Talent,
                 HiddenTalent = postProfessionRequest.HiddenTalent,
@@ -180,10 +178,10 @@ namespace RPGOnline.Infrastructure.Services
                 CreationDate = profession.Asset.CreationDate,
                 TimesSaved = profession.Asset.UserSavedAssets.Count,
                 ProfessionId = profession.ProfessionId,
-                ProfesionName = profession.ProfessionName,
-                ProfessionDescription = profession.Description,
-                ProfessionTalent = profession.Talent,
-                ProfessionHiddenTalent = profession.HiddenTalent,
+                Name = profession.Name,
+                Description = profession.Description,
+                Talent = profession.Talent,
+                HiddenTalent = profession.HiddenTalent,
                 WeaponMod = profession.WeaponMod,
                 ArmorMod = profession.ArmorMod,
                 GadgetMod = profession.GadgetMod,

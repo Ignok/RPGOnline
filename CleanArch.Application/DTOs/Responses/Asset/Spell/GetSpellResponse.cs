@@ -13,11 +13,12 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Spell
         public DateTime CreationDate { get; set; }
         public int TimesSaved { get; set; }
         public int SpellId { get; set; }
-        public string SpellName { get; set; } = null!;
-        public string SpellDescription { get; set; } = null!;
-        public string SpellKeySkill { get; set; } = null!;
-        public int SpellMinValue { get; set; }
-        public int SpellManaCost { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string KeySkill { get; set; } = null!;
+        public int MinValue { get; set; }
+        public int ManaCost { get; set; }
+        public string Effects { get; set; } = null!;
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
     }
