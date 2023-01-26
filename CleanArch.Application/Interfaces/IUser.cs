@@ -1,4 +1,5 @@
 ﻿using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
@@ -21,5 +22,7 @@ namespace RPGOnline.Application.Interfaces
         Task<ICollection<UserAboutmeResponse>> GetUserFriends(int id);
         Task<object> ManageFriendship(FriendshipRequest friendshipRequest);
 
+        Task<object> PostSaveAsset(int uId, int assetId);
+        Task<object> DeleteSaveAsset(int uId, int assetId);
     }
 }

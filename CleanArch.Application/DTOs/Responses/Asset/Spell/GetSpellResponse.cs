@@ -19,6 +19,7 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Spell
         public int MinValue { get; set; }
         public int ManaCost { get; set; }
         public string Effects { get; set; } = null!;
+        public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
     }

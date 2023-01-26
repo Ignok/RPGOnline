@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
@@ -34,7 +35,7 @@ namespace RPGOnline.Infrastructure.Services
                     CreationDate = u.CreationDate
                 }).SingleOrDefaultAsync();
 
-            if(result == null)
+            if (result == null)
             {
                 throw new ArgumentNullException($"There is no user with id {id}");
             }
@@ -45,7 +46,7 @@ namespace RPGOnline.Infrastructure.Services
         public async Task<PutUserResponse> PutUser(int id, UserRequest userRequest)
         {
             var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
-            if(user == null)
+            if (user == null)
             {
                 throw new ArgumentNullException($"User {id} does not exist");
             }
@@ -66,7 +67,7 @@ namespace RPGOnline.Infrastructure.Services
                     AboutMe = user.AboutMe,
                     Attitude = user.Attitude
                 };
-            }  
+            }
         }
 
         public async Task<ICollection<UserAboutmeResponse>> GetUserFriends(int id)
@@ -98,7 +99,7 @@ namespace RPGOnline.Infrastructure.Services
                         Country = u.Country,
                         Attitude = u.Attitude,
                     }).ToListAsync();
-               
+
                 return result;
             };
         }
@@ -149,7 +150,7 @@ namespace RPGOnline.Infrastructure.Services
                 };
                 _dbContext.Friendships.Add(friendshipStatus);
             }
-            if(viceFriendshipStatus == null)
+            if (viceFriendshipStatus == null)
             {
                 viceFriendshipStatus = new Domain.Models.Friendship
                 {
@@ -165,7 +166,7 @@ namespace RPGOnline.Infrastructure.Services
             switch (Enum.Parse(typeof(Friendship), friendshipRequest.Option))
             {
                 case (Friendship.follow):
-                    if(viceFriendshipStatus.FriendshipStatus == -1)
+                    if (viceFriendshipStatus.FriendshipStatus == -1)
                     {
                         throw new Exception("Target user has blocked you");
                     }
@@ -173,7 +174,7 @@ namespace RPGOnline.Infrastructure.Services
                     {
                         throw new Exception("Target user is blocked");
                     }
-                    else if(friendshipStatus.IsFollowed == 1)
+                    else if (friendshipStatus.IsFollowed == 1)
                     {
                         throw new Exception("Target user is already followed");
                     }
@@ -238,7 +239,7 @@ namespace RPGOnline.Infrastructure.Services
                         throw new Exception("Target user is already blocked");
                     }
                     friendshipStatus.FriendshipStatus = -1;
-                    if(viceFriendshipStatus.FriendshipStatus != -1)
+                    if (viceFriendshipStatus.FriendshipStatus != -1)
                     {
                         viceFriendshipStatus.FriendshipStatus = 0;
                     }
@@ -263,6 +264,57 @@ namespace RPGOnline.Infrastructure.Services
             {
                 message = "Successfully changed status"
             };
+        }
+
+
+        //Assets save and unsave
+        public async Task<object> PostSaveAsset(int uId, int assetId)
+        {
+            var asset = await _dbContext.Assets.Where(a => a.AssetId == assetId).Where(a => a.IsPublic || a.AuthorId == uId).FirstOrDefaultAsync();
+            if (asset == null)
+            {
+                throw new Exception("Asset does not exist or it is private");
+            }
+
+            var usa = await _dbContext.UserSavedAssets.Where(usa => usa.UId == uId && usa.AssetId == assetId).FirstOrDefaultAsync();
+            if (usa != null)
+            {
+                throw new Exception("User's already saved this asset");
+            }
+
+            
+
+            var userSavedAsset = new Domain.Models.UserSavedAsset()
+            {
+                UId = uId,
+                AssetId = assetId,
+                SaveDate = DateTime.Now,
+            };
+
+            _dbContext.UserSavedAssets.Add(userSavedAsset);
+            _dbContext.SaveChanges();
+
+            return "Asset saved";
+        }
+
+        public async Task<object> DeleteSaveAsset(int uId, int assetId)
+        {
+            var asset = await _dbContext.Assets.Where(a => a.AssetId == assetId).Where(a => a.IsPublic || a.AuthorId == uId).FirstOrDefaultAsync();
+            if (asset == null)
+            {
+                throw new Exception("Asset does not exist or it is private");
+            }
+
+            var usa = await _dbContext.UserSavedAssets.Where(usa => usa.UId == uId && usa.AssetId == assetId).FirstOrDefaultAsync();
+            if (usa == null)
+            {
+                throw new Exception("User's not saved this asset yet");
+            }
+
+            _dbContext.UserSavedAssets.Remove(usa);
+            _dbContext.SaveChanges();
+
+            return "Asset unsaved";
         }
     }
 }

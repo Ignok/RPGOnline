@@ -22,5 +22,6 @@ namespace RPGOnline.Application.DTOs.Requests
 
         
         public string? Picture { get; set; }
+        public string? Tag { get; set; }
     }
 }

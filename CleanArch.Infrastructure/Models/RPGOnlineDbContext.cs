@@ -548,7 +548,7 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.GoldMultiplier).HasColumnName("gold_multiplier");
 
-                entity.Property(e => e.ItemName)
+                entity.Property(e => e.Name)
                     .HasMaxLength(40)
                     .HasColumnName("item_name");
 
@@ -716,6 +716,11 @@ namespace RPGOnline.Infrastructure.Models
                     .HasColumnType("datetime")
                     .HasColumnName("creation_date");
 
+                entity.Property(e => e.Tag)
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasColumnName("tag");
+
                 entity.Property(e => e.Picture)
                     .HasMaxLength(60)
                     .IsUnicode(false)
@@ -763,7 +768,7 @@ namespace RPGOnline.Infrastructure.Models
                     .IsUnicode(false)
                     .HasColumnName("key_attribute");
 
-                entity.Property(e => e.ProfessionName)
+                entity.Property(e => e.Name)
                     .HasMaxLength(80)
                     .HasColumnName("profession_name");
 
@@ -833,7 +838,7 @@ namespace RPGOnline.Infrastructure.Models
                     .IsUnicode(false)
                     .HasColumnName("key_attribute");
 
-                entity.Property(e => e.RaceName)
+                entity.Property(e => e.Name)
                     .HasMaxLength(80)
                     .HasColumnName("race_name");
 
@@ -875,7 +880,7 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.MinValue).HasColumnName("min_value");
 
-                entity.Property(e => e.SpellName)
+                entity.Property(e => e.Name)
                     .HasMaxLength(40)
                     .HasColumnName("spell_name");
 

@@ -17,6 +17,7 @@ namespace RPGOnline.Domain.Models
         public string Content { get; set; } = null!;
         public string? Picture { get; set; }
         public DateTime CreationDate { get; set; }
+        public string? Tag { get; set; }
 
         public virtual User UIdNavigation { get; set; } = null!;
         public virtual ICollection<Comment> Comments { get; set; }

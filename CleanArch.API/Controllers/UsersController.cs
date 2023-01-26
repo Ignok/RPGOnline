@@ -191,7 +191,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        [AllowAnonymous]
+
         [HttpPost("{id}/Friends/")]
         public async Task<IActionResult> ManageFriendship(FriendshipRequest friendshipRequest)
         {
@@ -213,6 +213,58 @@ namespace RPGOnline.API.Controllers
                 else
                 {
                     var result = await _userService.ManageFriendship(friendshipRequest);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost("{uId}/Assets/{assetId}")]
+        public async Task<IActionResult> PostSaveAsset(int uId, int assetId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.PostSaveAsset(uId, assetId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("{uId}/Assets/{assetId}")]
+        public async Task<IActionResult> DeleteSaveAsset(int uId, int assetId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.DeleteSaveAsset(uId, assetId);
                     if (result == null)
                     {
                         return NoContent();

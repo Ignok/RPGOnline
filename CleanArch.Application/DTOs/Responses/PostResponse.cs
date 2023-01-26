@@ -14,7 +14,8 @@ namespace RPGOnline.Application.DTOs.Responses
         public string Content { get; set; } = null!;
         public string? Picture { get; set; }
         public DateTime CreationDate { get; set; }
-
+        public string? Tag { get; set; }
+        
         public int Likes { get; set; } 
         public int Comments { get; set; }
 

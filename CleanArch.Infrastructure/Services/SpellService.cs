@@ -29,7 +29,7 @@ namespace RPGOnline.Infrastructure.Services
 
         private readonly int spellsOnPageAmount = 10;
 
-        public async Task<(ICollection<GetSpellResponse>, int pageCount)> GetSpells(SearchAssetRequest searchSpellRequest, CancellationToken cancellationToken)
+        public async Task<(ICollection<GetSpellResponse>, int pageCount)> GetSpells(SearchAssetRequest searchSpellRequest, CancellationToken cancellationToken, int userId)
         {
             try
             {
@@ -42,6 +42,7 @@ namespace RPGOnline.Infrastructure.Services
                 var result = _dbContext.Spells.Include(s => s.Asset)
                                                 .Include(s => s.Asset.UserSavedAssets)
                                                 .Include(s => s.Asset.Author)
+                                                .Include(s => s.Asset.UserSavedAssets)
                                                 .AsParallel().WithCancellation(cancellationToken)
                     .Where(s => s.Asset.IsPublic)
                     .Where(s => String.IsNullOrEmpty(searchSpellRequest.KeyValueName)
@@ -64,6 +65,7 @@ namespace RPGOnline.Infrastructure.Services
                         MinValue = s.MinValue,
                         ManaCost = s.ManaCost,
                         Effects = s.Effects,
+                        IsSaved = s.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = s.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {
