@@ -30,7 +30,7 @@ namespace RPGOnline.Infrastructure.Services
 
         private readonly int itemsOnPageAmount = 10;
 
-        public async Task<(ICollection<GetItemResponse>, int pageCount)> GetItems(SearchAssetRequest searchItemRequest, CancellationToken cancellationToken)
+        public async Task<(ICollection<GetItemResponse>, int pageCount)> GetItems(SearchAssetRequest searchItemRequest, int userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -64,6 +64,7 @@ namespace RPGOnline.Infrastructure.Services
                         KeySkill = i.KeySkill,
                         SkillMod = i.SkillMod,
                         GoldMultiplier = i.GoldMultiplier,
+                        IsSaved = i.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = i.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {

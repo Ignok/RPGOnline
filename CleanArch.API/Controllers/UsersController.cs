@@ -191,16 +191,15 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-
         [HttpPost("{id}/Friends/")]
         public async Task<IActionResult> ManageFriendship(FriendshipRequest friendshipRequest)
         {
             try
             {
-                /*if (!IsSameId(friendshipRequest.UId))
+                if (!IsSameId(friendshipRequest.UId))
                 {
                     return BadRequest("Access denied - bad ID");
-                }*/
+                }
 
                 if (friendshipRequest == null)
                 {

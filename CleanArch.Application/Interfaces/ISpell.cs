@@ -12,7 +12,7 @@ namespace RPGOnline.Application.Interfaces
     public interface ISpell
     {
         Task<ICollection<GetSpellSimplifiedResponse>> GetSpellsForCharacter(int uId, GetAssetForCharacterRequest getSpellRequest);
-        Task<(ICollection<GetSpellResponse>, int pageCount)> GetSpells(SearchAssetRequest searchSpellRequest, CancellationToken cancellationToken, int userId);
+        Task<(ICollection<GetSpellResponse>, int pageCount)> GetSpells(SearchAssetRequest searchSpellRequest, int userId, CancellationToken cancellationToken);
         Task<GetSpellResponse> PostSpell(PostSpellRequest postSpellRequest);
     }
 }

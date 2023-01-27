@@ -20,7 +20,10 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                var result = await _professionService.GetProfessions(searchProfessionRequest, cancellationToken);
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _professionService.GetProfessions(searchProfessionRequest, Int32.Parse(userId), cancellationToken);
 
                 return Ok(new
                 {

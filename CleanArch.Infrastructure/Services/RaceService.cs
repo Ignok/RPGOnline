@@ -24,7 +24,7 @@ namespace RPGOnline.Infrastructure.Services
 
         private readonly int racesOnPageAmount = 10;
 
-        public async Task<(ICollection<GetRaceResponse>, int pageCount)> GetRaces(SearchAssetRequest searchRaceRequest, CancellationToken cancellationToken)
+        public async Task<(ICollection<GetRaceResponse>, int pageCount)> GetRaces(SearchAssetRequest searchRaceRequest, int userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -59,6 +59,7 @@ namespace RPGOnline.Infrastructure.Services
                         Talent = r.Talent,
                         HiddenTalent = r.HiddenTalent,
                         KeyAttribute = r.KeyAttribute,
+                        IsSaved = r.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = r.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {

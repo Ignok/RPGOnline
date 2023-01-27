@@ -70,7 +70,7 @@ namespace RPGOnline.Infrastructure.Services
             }
         }
 
-        public async Task<ICollection<UserAboutmeResponse>> GetUserFriends(int id)
+        public async Task<ICollection<UserFriendshipResponse>> GetUserFriends(int id)
         {
             var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
             if (user == null)
@@ -79,26 +79,44 @@ namespace RPGOnline.Infrastructure.Services
             }
             else
             {
-                var friendsIds = await _dbContext.Users
+                var result = await _dbContext.Friendships
+                    .Include(f => f.UIdNavigation)
+                    .Include(f => f.FriendU)
+                    .Where(f => f.UIdNavigation.UId == id)
+                    .Select(f => new UserFriendshipResponse()
+                    {
+                        UId = f.FriendU.UId,
+                        Username = f.FriendU.Username,
+                        Picture = f.FriendU.Picture,
+                        Country = f.FriendU.Country,
+                        Attitude = f.FriendU.Attitude,
+                        IsFriend = f.IsFriend,
+                        IsFollowed = f.IsFollowed,
+                        IsBlocked = f.IsBlocked,
+                        IsRequestSent = f.IsRequestSent,
+                        IsRequestReceived = f.IsRequestReceived,
+                    }).ToListAsync();
+
+               /* var friendsIds = await _dbContext.Users
                 .Where(u => u.UId == id)
                 .SelectMany(u => u.FriendshipUIdNavigations
                                 .Where(f => f.UId == id)
-                                .Where(f => f.FriendshipStatus == 1 || f.FriendshipStatus == 2)
                                 .Select(f => f.FriendUId)
                             )
-                .ToListAsync();
+                .ToListAsync();*/
 
 
-                var result = await _dbContext.Users
+                /*var result = await _dbContext.Users
                     .Where(u => friendsIds.Contains(u.UId))
-                    .Select(u => new UserAboutmeResponse()
+                    .Select(u => new UserFriendshipResponse()
                     {
                         UId = u.UId,
                         Username = u.Username,
                         Picture = u.Picture,
                         Country = u.Country,
                         Attitude = u.Attitude,
-                    }).ToListAsync();
+
+                    }).ToListAsync();*/
 
                 return result;
             };
@@ -145,8 +163,11 @@ namespace RPGOnline.Infrastructure.Services
                 {
                     UId = friendshipRequest.UId,
                     FriendUId = friendshipRequest.TargetUId,
-                    FriendshipStatus = 0,
-                    IsFollowed = 0
+                    IsFriend = false,
+                    IsFollowed = false,
+                    IsBlocked = false,
+                    IsRequestSent = false,
+                    IsRequestReceived = false,
                 };
                 _dbContext.Friendships.Add(friendshipStatus);
             }
@@ -156,8 +177,11 @@ namespace RPGOnline.Infrastructure.Services
                 {
                     UId = friendshipRequest.TargetUId,
                     FriendUId = friendshipRequest.UId,
-                    FriendshipStatus = 0,
-                    IsFollowed = 0
+                    IsFriend = false,
+                    IsFollowed = false,
+                    IsBlocked = false,
+                    IsRequestSent = false,
+                    IsRequestReceived = false,
                 };
                 _dbContext.Friendships.Add(viceFriendshipStatus);
             }
@@ -166,96 +190,152 @@ namespace RPGOnline.Infrastructure.Services
             switch (Enum.Parse(typeof(Friendship), friendshipRequest.Option))
             {
                 case (Friendship.follow):
-                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    if (viceFriendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user has blocked you");
                     }
-                    else if (friendshipStatus.FriendshipStatus == -1)
+                    else if (friendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user is blocked");
                     }
-                    else if (friendshipStatus.IsFollowed == 1)
+                    else if (friendshipStatus.IsFollowed)
                     {
                         throw new Exception("Target user is already followed");
                     }
-                    friendshipStatus.IsFollowed = 1;
+                    friendshipStatus.IsFollowed = true;
                     break;
 
 
                 case (Friendship.unfollow):
-                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    if (viceFriendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user has blocked you");
                     }
-                    else if (friendshipStatus.FriendshipStatus == -1)
+                    else if (friendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user is blocked");
                     }
-                    else if (friendshipStatus.IsFollowed == 0)
+                    else if (!friendshipStatus.IsFollowed)
                     {
                         throw new Exception("Target user is not followed");
                     }
-                    friendshipStatus.IsFollowed = 0;
+                    friendshipStatus.IsFollowed = false;
                     break;
 
 
                 case (Friendship.friend):
-                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    if (viceFriendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user has blocked you");
                     }
-                    else if (friendshipStatus.FriendshipStatus == -1)
+                    else if (friendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user is blocked");
                     }
-                    else if (friendshipStatus.FriendshipStatus == 1)
+                    else if (friendshipStatus.IsFriend)
                     {
                         throw new Exception("Target user is already a friend");
                     }
-                    friendshipStatus.FriendshipStatus = 1;
+                    else if (friendshipStatus.IsRequestSent)
+                    {
+                        throw new Exception("Request is already sent");
+                    }
+                    else if (friendshipStatus.IsRequestReceived)
+                    {
+                        friendshipStatus.IsFriend = true;
+                        viceFriendshipStatus.IsFriend = true;
+                        friendshipStatus.IsRequestReceived = false;
+                        viceFriendshipStatus.IsRequestSent = false;
+                        friendshipStatus.IsFollowed = true;
+                        viceFriendshipStatus.IsFollowed = true;
+
+                    }
+                    else
+                    {
+                        friendshipStatus.IsRequestSent = true;
+                        viceFriendshipStatus.IsRequestReceived = true;
+                    }
+                    
                     break;
 
 
                 case (Friendship.unfriend):
-                    if (viceFriendshipStatus.FriendshipStatus == -1)
+                    if (viceFriendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user has blocked you");
                     }
-                    else if (friendshipStatus.FriendshipStatus == -1)
+                    else if (friendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user is blocked");
                     }
-                    else if (friendshipStatus.FriendshipStatus == 0)
+                    else if (!friendshipStatus.IsFriend)
                     {
                         throw new Exception("Target user is not a friend");
                     }
-                    friendshipStatus.FriendshipStatus = 0;
+                    else if (friendshipStatus.IsRequestSent)    //cancelling request
+                    {
+                        friendshipStatus.IsRequestSent= false;
+                        viceFriendshipStatus.IsRequestReceived= false;
+                    }
+                    else if (viceFriendshipStatus.IsRequestSent) //refusing request
+                    {
+                        viceFriendshipStatus.IsRequestSent = false;
+                        friendshipStatus.IsRequestReceived = false;
+                    }
+                    else
+                    {
+                        friendshipStatus.IsFriend = false;
+                        viceFriendshipStatus.IsFriend = false;
+                    }
                     break;
 
 
                 case (Friendship.block):
-                    if (friendshipStatus.FriendshipStatus == -1)
+                    if (friendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user is already blocked");
                     }
-                    friendshipStatus.FriendshipStatus = -1;
-                    if (viceFriendshipStatus.FriendshipStatus != -1)
+                    friendshipStatus.IsBlocked = true;
+                    if (!viceFriendshipStatus.IsBlocked)
                     {
-                        viceFriendshipStatus.FriendshipStatus = 0;
+                        viceFriendshipStatus.IsFriend = false;
+                        viceFriendshipStatus.IsRequestReceived = false;
+                        viceFriendshipStatus.IsRequestSent = false;
+                        viceFriendshipStatus.IsFollowed = false;
+
                     }
-                    friendshipStatus.IsFollowed = 0;
-                    viceFriendshipStatus.IsFollowed = 0;
+                    friendshipStatus.IsFollowed = false;
+                    friendshipStatus.IsRequestSent = false;
+                    friendshipStatus.IsRequestReceived = false;
+                    friendshipStatus.IsFriend = false;
+
                     break;
 
 
                 case (Friendship.unblock):
-                    if (friendshipStatus.FriendshipStatus != -1)
+                    if (!friendshipStatus.IsBlocked)
                     {
                         throw new Exception("Target user is not blocked.");
                     }
-                    friendshipStatus.FriendshipStatus = 0;
+                    friendshipStatus.IsBlocked = false;
                     break;
             }
+
+            if(!friendshipStatus.IsBlocked
+                && !friendshipStatus.IsFriend
+                && !friendshipStatus.IsFollowed
+                && !friendshipStatus.IsRequestSent
+                && !friendshipStatus.IsRequestReceived
+                && !viceFriendshipStatus.IsBlocked
+                && !viceFriendshipStatus.IsFriend
+                && !viceFriendshipStatus.IsFollowed
+                && !viceFriendshipStatus.IsRequestSent
+                && !viceFriendshipStatus.IsRequestReceived)
+            {
+                _dbContext.Friendships.Remove(friendshipStatus);
+                _dbContext.Friendships.Remove(viceFriendshipStatus);
+            }
+
 
 
             _dbContext.SaveChanges();

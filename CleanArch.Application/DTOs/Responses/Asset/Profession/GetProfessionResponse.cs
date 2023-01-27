@@ -23,6 +23,7 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Profession
         public int GadgetMod { get; set; }
         public int CompanionMod { get; set; }
         public int PsycheMod { get; set; }
+        public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
     }

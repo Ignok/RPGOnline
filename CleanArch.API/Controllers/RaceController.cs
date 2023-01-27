@@ -21,7 +21,10 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                var result = await _raceService.GetRaces(searchRaceRequest, cancellationToken);
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _raceService.GetRaces(searchRaceRequest, Int32.Parse(userId), cancellationToken);
 
                 return Ok(new
                 {

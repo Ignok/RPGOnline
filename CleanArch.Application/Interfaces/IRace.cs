@@ -7,7 +7,7 @@ namespace RPGOnline.Application.Interfaces
     public interface IRace
     {
         Task<ICollection<GetRaceSimplifiedResponse>> GetRacesForCharacter(int uId, GetAssetForCharacterRequest getRaceRequest);
-        Task<(ICollection<GetRaceResponse>, int pageCount)> GetRaces(SearchAssetRequest searchRaceRequest, CancellationToken cancellationToken);
+        Task<(ICollection<GetRaceResponse>, int pageCount)> GetRaces(SearchAssetRequest searchRaceRequest, int userId, CancellationToken cancellationToken);
         Task<GetRaceResponse> PostRace(PostRaceRequest postRaceRequest);
     }
 }

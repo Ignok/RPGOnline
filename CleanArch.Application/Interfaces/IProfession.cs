@@ -7,7 +7,7 @@ namespace RPGOnline.Application.Interfaces
     public interface IProfession
     {
         Task<ICollection<GetProfessionSimplifiedResponse>> GetProfessionsForCharacter(int uId, GetAssetForCharacterRequest getProfessionRequest);
-        Task<(ICollection<GetProfessionResponse>, int pageCount)> GetProfessions(SearchAssetRequest searchProfessionRequest, CancellationToken cancellationToken);
+        Task<(ICollection<GetProfessionResponse>, int pageCount)> GetProfessions(SearchAssetRequest searchProfessionRequest, int userId, CancellationToken cancellationToken);
         Task<GetProfessionResponse> PostProfession(PostProfessionRequest postProfessionRequest);
     }
 }

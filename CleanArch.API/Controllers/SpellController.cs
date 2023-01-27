@@ -23,7 +23,7 @@ namespace RPGOnline.API.Controllers
                 var claimsIdentity = this.User.Identity as ClaimsIdentity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
                 
-                var result = await _spellService.GetSpells(searchSpellRequest, cancellationToken, Int32.Parse(userId));
+                var result = await _spellService.GetSpells(searchSpellRequest, Int32.Parse(userId), cancellationToken);
 
                 return Ok(new
                 {

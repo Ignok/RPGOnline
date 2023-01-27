@@ -19,7 +19,7 @@ namespace RPGOnline.Application.Interfaces
 
         Task<UserResponse> PutAvatar(int id, AvatarRequest avatarRequest);
 
-        Task<ICollection<UserAboutmeResponse>> GetUserFriends(int id);
+        Task<ICollection<UserFriendshipResponse>> GetUserFriends(int id);
         Task<object> ManageFriendship(FriendshipRequest friendshipRequest);
 
         Task<object> PostSaveAsset(int uId, int assetId);

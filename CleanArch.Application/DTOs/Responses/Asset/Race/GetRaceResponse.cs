@@ -13,6 +13,7 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Race
         public string Talent { get; set; } = null!;
         public string HiddenTalent { get; set; } = null!;
         public string? KeyAttribute { get; set; }
+        public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
     }

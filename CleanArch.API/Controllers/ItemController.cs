@@ -22,7 +22,10 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                var result = await _itemService.GetItems(searchItemRequest, cancellationToken);
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _itemService.GetItems(searchItemRequest, Int32.Parse(userId), cancellationToken);
 
                 return Ok(new
                 {

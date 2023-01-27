@@ -52,7 +52,7 @@ namespace RPGOnline.Infrastructure.Services
             return result;
         }
 
-        public async Task<(ICollection<GetProfessionResponse>, int pageCount)> GetProfessions(SearchAssetRequest searchProfessionRequest, CancellationToken cancellationToken)
+        public async Task<(ICollection<GetProfessionResponse>, int pageCount)> GetProfessions(SearchAssetRequest searchProfessionRequest, int userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -91,6 +91,7 @@ namespace RPGOnline.Infrastructure.Services
                         GadgetMod = p.GadgetMod,
                         CompanionMod = p.CompanionMod,
                         PsycheMod = p.PsycheMod,
+                        IsSaved = p.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = p.Asset.Language,
                         CreatorNavigation = new UserResponse()
                         {

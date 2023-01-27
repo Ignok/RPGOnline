@@ -18,6 +18,7 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Item
         public string KeySkill { get; set; } = null!;
         public int SkillMod { get; set; }
         public int GoldMultiplier { get; set; }
+        public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserResponse CreatorNavigation { get; set; } = null!;
     }

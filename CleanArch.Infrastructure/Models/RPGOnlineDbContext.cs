@@ -330,9 +330,15 @@ namespace RPGOnline.Infrastructure.Models
 
                 entity.Property(e => e.FriendUId).HasColumnName("friend_u_id");
 
-                entity.Property(e => e.FriendshipStatus).HasColumnName("friendship_status");
+                entity.Property(e => e.IsFriend).HasColumnName("is_friend");
 
                 entity.Property(e => e.IsFollowed).HasColumnName("is_followed");
+
+                entity.Property(e => e.IsBlocked).HasColumnName("is_Blocked");
+
+                entity.Property(e => e.IsRequestSent).HasColumnName("is_request_sent");
+
+                entity.Property(e => e.IsRequestReceived).HasColumnName("is_request_received");
 
                 entity.HasOne(d => d.FriendU)
                     .WithMany(p => p.FriendshipFriendUs)
