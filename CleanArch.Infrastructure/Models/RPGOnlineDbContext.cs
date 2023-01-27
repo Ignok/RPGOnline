@@ -880,7 +880,7 @@ namespace RPGOnline.Infrastructure.Models
                 entity.Property(e => e.KeyAttribute)
                     .HasMaxLength(40)
                     .IsUnicode(false)
-                    .HasColumnName("key_skill");
+                    .HasColumnName("key_attribute");
 
                 entity.Property(e => e.ManaCost).HasColumnName("mana_cost");
 
