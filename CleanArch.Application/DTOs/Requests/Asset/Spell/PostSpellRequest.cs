@@ -26,7 +26,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Spell
 
         [Required]
         [MaxLength(40)]
-        public string KeySkill { get; set; } = null!;
+        public string KeyAttribute { get; set; } = null!;
 
         [Required]
         [Range(0, 20)]

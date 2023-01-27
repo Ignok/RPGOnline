@@ -15,6 +15,5 @@ namespace RPGOnline.Domain.Enums
         charisma,
         health,
         mana,
-        resistance
     }
 }

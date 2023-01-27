@@ -148,7 +148,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 RaceId = (_dbContext.Races.Max(r => (int)r.AssetId) + 1),
                 AssetId = asset.AssetId,
-                Name = postRaceRequest.RaceName,
+                Name = postRaceRequest.Name,
                 Description = postRaceRequest.Description,
                 Talent = postRaceRequest.Talent,
                 HiddenTalent = postRaceRequest.HiddenTalent,

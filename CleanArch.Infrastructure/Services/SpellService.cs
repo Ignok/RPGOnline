@@ -45,7 +45,7 @@ namespace RPGOnline.Infrastructure.Services
                                                 .AsParallel().WithCancellation(cancellationToken)
                     .Where(s => s.Asset.IsPublic)
                     .Where(s => String.IsNullOrEmpty(searchSpellRequest.KeyValueName)
-                                || object.Equals(s.KeySkill, searchSpellRequest.KeyValueName)
+                                || object.Equals(s.KeyAttribute, searchSpellRequest.KeyValueName)
                             )
                     .Where(s => String.IsNullOrEmpty(searchSpellRequest.Search)
                                 || (s.Name.Contains(searchSpellRequest.Search, StringComparison.OrdinalIgnoreCase))
@@ -60,7 +60,7 @@ namespace RPGOnline.Infrastructure.Services
                         SpellId = s.SpellId,
                         Name = s.Name,
                         Description = s.Description,
-                        KeySkill = s.KeySkill,
+                        KeyAttribute = s.KeyAttribute,
                         MinValue = s.MinValue,
                         ManaCost = s.ManaCost,
                         Effects = s.Effects,
@@ -100,7 +100,7 @@ namespace RPGOnline.Infrastructure.Services
         {
             var result = await (from asset in _dbContext.Assets
                                 join spell in _dbContext.Spells on asset.AssetId equals spell.AssetId
-                                where object.Equals(spell.KeySkill, getSpellRequest.KeyValueName)
+                                where object.Equals(spell.KeyAttribute, getSpellRequest.KeyValueName)
                                 where getSpellRequest.PrefferedLanguage.Contains(asset.Language)
                                 where asset.IsPublic || asset.AuthorId == uId
                                 orderby spell.Name ascending
@@ -110,7 +110,7 @@ namespace RPGOnline.Infrastructure.Services
                                     SpellId = spell.SpellId,
                                     Name = spell.Name,
                                     Description = spell.Description,
-                                    KeySkill = spell.KeySkill,
+                                    KeyAttribute = spell.KeyAttribute,
                                     MinValue = spell.MinValue,
                                     ManaCost = spell.ManaCost,
                                     Effects = spell.Effects
@@ -132,8 +132,8 @@ namespace RPGOnline.Infrastructure.Services
                 throw new InvalidDataException($"Language '{postSpellRequest.Language}' is not supported");
 
             //if attribute exists, or is null
-            if (!Enum.IsDefined(typeof(Attributes), postSpellRequest.KeySkill ?? "none"))
-                throw new InvalidDataException($"Attribute '{postSpellRequest?.KeySkill}' does not exist");
+            if (!Enum.IsDefined(typeof(Attributes), postSpellRequest.KeyAttribute ?? "none"))
+                throw new InvalidDataException($"Attribute '{postSpellRequest?.KeyAttribute}' does not exist");
 
 
             var asset = new Asset()
@@ -152,7 +152,7 @@ namespace RPGOnline.Infrastructure.Services
                 AssetId = asset.AssetId,
                 Name = postSpellRequest.Name,
                 Description = postSpellRequest.Description,
-                KeySkill = postSpellRequest.KeySkill,
+                KeyAttribute = postSpellRequest.KeyAttribute,
                 MinValue = postSpellRequest.MinValue,
                 ManaCost = postSpellRequest.ManaCost,
                 Effects = postSpellRequest.Effects,
@@ -173,7 +173,7 @@ namespace RPGOnline.Infrastructure.Services
                 SpellId = spell.SpellId,
                 Name = spell.Name,
                 Description = spell.Description,
-                KeySkill = spell.KeySkill,
+                KeyAttribute = spell.KeyAttribute,
                 MinValue = spell.MinValue,
                 ManaCost = spell.ManaCost,
                 PrefferedLanguage = asset.Language,

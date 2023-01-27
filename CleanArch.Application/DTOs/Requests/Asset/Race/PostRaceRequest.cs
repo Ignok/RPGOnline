@@ -17,7 +17,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Race
         [Required]
         [MinLength(1)]
         [MaxLength(80)]
-        public string RaceName { get; set; } = null!;
+        public string Name { get; set; } = null!;
 
         [Required]
         [MinLength(5)]

@@ -877,7 +877,7 @@ namespace RPGOnline.Infrastructure.Models
                     .HasMaxLength(280)
                     .HasColumnName("effects");
 
-                entity.Property(e => e.KeySkill)
+                entity.Property(e => e.KeyAttribute)
                     .HasMaxLength(40)
                     .IsUnicode(false)
                     .HasColumnName("key_skill");
