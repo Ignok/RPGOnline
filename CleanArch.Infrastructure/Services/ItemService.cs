@@ -132,8 +132,8 @@ namespace RPGOnline.Infrastructure.Services
                 throw new InvalidDataException($"Language '{postItemRequest.Language}' is not supported");
 
             //if attribute exists, or is null
-            if (!Enum.IsDefined(typeof(Attributes), postItemRequest.KeySkill ?? "none"))
-                throw new InvalidDataException($"Attribute '{postItemRequest?.KeySkill}' does not exist");
+            if (!Enum.IsDefined(typeof(Skills), postItemRequest.KeySkill ?? "none"))
+                throw new InvalidDataException($"Skill '{postItemRequest?.KeySkill}' does not exist");
 
 
             var asset = new Asset()

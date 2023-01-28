@@ -8,8 +8,6 @@ namespace RPGOnline.Domain.Enums
 {
     public enum Language
     {
-        PL,
-        EN,
         pl,
         en
     }
