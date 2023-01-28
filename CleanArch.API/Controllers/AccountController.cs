@@ -69,7 +69,7 @@ namespace RPGOnline.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Data);
             }
         }
 

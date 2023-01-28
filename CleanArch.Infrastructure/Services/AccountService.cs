@@ -93,7 +93,7 @@ namespace RPGOnline.Infrastructure.Services
 
             return new
             {
-                user = user
+                Message = "Successfully registered"
             };
         }
 
