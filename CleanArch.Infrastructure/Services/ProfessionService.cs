@@ -94,7 +94,7 @@ namespace RPGOnline.Infrastructure.Services
                         PsycheMod = p.PsycheMod,
                         IsSaved = p.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = p.Asset.Language,
-                        CreatorNavigation = new UserResponse()
+                        CreatorNavigation = new UserSimplifiedResponse()
                         {
                             UId = p.Asset.Author.UId,
                             Username = p.Asset.Author.Username,
@@ -191,7 +191,7 @@ namespace RPGOnline.Infrastructure.Services
                 CompanionMod = profession.CompanionMod,
                 PsycheMod = profession.PsycheMod,
                 PrefferedLanguage = asset.Language,
-                CreatorNavigation = new UserResponse()
+                CreatorNavigation = new UserSimplifiedResponse()
                 {
                     UId = asset.Author.UId,
                     Username = asset.Author.Username,

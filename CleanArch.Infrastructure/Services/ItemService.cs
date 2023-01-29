@@ -66,7 +66,7 @@ namespace RPGOnline.Infrastructure.Services
                         GoldMultiplier = i.GoldMultiplier,
                         IsSaved = i.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = i.Asset.Language,
-                        CreatorNavigation = new UserResponse()
+                        CreatorNavigation = new UserSimplifiedResponse()
                         {
                             UId = i.Asset.Author.UId,
                             Username = i.Asset.Author.Username,
@@ -176,7 +176,7 @@ namespace RPGOnline.Infrastructure.Services
                 SkillMod = item.SkillMod,
                 GoldMultiplier = item.GoldMultiplier,
                 PrefferedLanguage = item.Asset.Language,
-                CreatorNavigation = new UserResponse()
+                CreatorNavigation = new UserSimplifiedResponse()
                 {
                     UId = asset.Author.UId,
                     Username = asset.Author.Username,

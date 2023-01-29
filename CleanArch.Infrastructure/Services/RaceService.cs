@@ -61,7 +61,7 @@ namespace RPGOnline.Infrastructure.Services
                         KeyAttribute = r.KeyAttribute,
                         IsSaved = r.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = r.Asset.Language,
-                        CreatorNavigation = new UserResponse()
+                        CreatorNavigation = new UserSimplifiedResponse()
                         {
                             UId = r.Asset.Author.UId,
                             Username = r.Asset.Author.Username,
@@ -174,7 +174,7 @@ namespace RPGOnline.Infrastructure.Services
                 HiddenTalent = race.HiddenTalent,
                 KeyAttribute = race.KeyAttribute,
                 PrefferedLanguage = race.Asset.Language,
-                CreatorNavigation = new UserResponse()
+                CreatorNavigation = new UserSimplifiedResponse()
                 {
                     UId = asset.Author.UId,
                     Username = asset.Author.Username,

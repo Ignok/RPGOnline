@@ -19,8 +19,8 @@ namespace RPGOnline.Application.DTOs.Responses
         public int Likes { get; set; } 
         public int Comments { get; set; }
 
-        public virtual ICollection<UserResponse> UIds { get; set; }
+        public virtual ICollection<UserSimplifiedResponse> UIds { get; set; }
 
-        public virtual UserResponse CreatorNavigation { get; set; } = null!;
+        public virtual UserSimplifiedResponse CreatorNavigation { get; set; } = null!;
     }
 }

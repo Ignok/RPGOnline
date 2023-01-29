@@ -66,7 +66,7 @@ namespace RPGOnline.Infrastructure.Services
                         Effects = s.Effects,
                         IsSaved = s.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
                         PrefferedLanguage = s.Asset.Language,
-                        CreatorNavigation = new UserResponse()
+                        CreatorNavigation = new UserSimplifiedResponse()
                         {
                             UId = s.Asset.Author.UId,
                             Username = s.Asset.Author.Username,
@@ -177,7 +177,7 @@ namespace RPGOnline.Infrastructure.Services
                 MinValue = spell.MinValue,
                 ManaCost = spell.ManaCost,
                 PrefferedLanguage = asset.Language,
-                CreatorNavigation = new UserResponse()
+                CreatorNavigation = new UserSimplifiedResponse()
                 {
                     UId = asset.Author.UId,
                     Username = asset.Author.Username,

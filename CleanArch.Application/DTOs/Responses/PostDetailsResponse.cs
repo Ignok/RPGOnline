@@ -20,7 +20,7 @@ namespace RPGOnline.Application.DTOs.Responses
 
         //public virtual ICollection<UserResponse> UIds { get; set; }
 
-        public virtual UserResponse CreatorNavigation { get; set; } = null!;
+        public virtual UserSimplifiedResponse CreatorNavigation { get; set; } = null!;
         public virtual ICollection<CommentResponse> Comments { get; set; } = new HashSet<CommentResponse>();
 
     }

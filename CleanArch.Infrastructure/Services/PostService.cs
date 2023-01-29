@@ -53,7 +53,7 @@ namespace RPGOnline.Infrastructure.Services
                         Picture = p.Picture,
                         CreationDate = p.CreationDate,
                         Likes = p.UserLikedPosts.Count,
-                        CreatorNavigation = new UserResponse()
+                        CreatorNavigation = new UserSimplifiedResponse()
                         {
                             UId = p.UIdNavigation.UId,
                             Username = p.UIdNavigation.Username,
@@ -113,7 +113,7 @@ namespace RPGOnline.Infrastructure.Services
                     Likes = p.UserLikedPosts.Count(),
                     CreatorNavigation = _dbContext.Users
                                         .Where(u => u.UId == p.UId)
-                                        .Select(u => new UserResponse()
+                                        .Select(u => new UserSimplifiedResponse()
                                         {
                                             UId = u.UId,
                                             Username = u.Username,
@@ -127,7 +127,7 @@ namespace RPGOnline.Infrastructure.Services
                                             ResponseCommentId = c.ResponseCommentId,
                                             RespondingUserResponse = _dbContext.Comments
                                                                     .Where(cr => cr.CommentId == c.ResponseCommentId)
-                                                                    .Select(cr => new UserResponse()
+                                                                    .Select(cr => new UserSimplifiedResponse()
                                                                     {
                                                                         UId = cr.UIdNavigation.UId,
                                                                         Username = cr.UIdNavigation.Username,
@@ -135,7 +135,7 @@ namespace RPGOnline.Infrastructure.Services
                                                                     }).FirstOrDefault(),
                                             UserResponse = _dbContext.Users
                                                 .Where(u => u.UId == c.UId)
-                                                .Select(u => new UserResponse()
+                                                .Select(u => new UserSimplifiedResponse()
                                                 {
                                                     UId = u.UId,
                                                     Username = u.Username,
@@ -231,7 +231,7 @@ namespace RPGOnline.Infrastructure.Services
                 ResponseCommentId = comment.ResponseCommentId,
                 RespondingUserResponse = _dbContext.Comments
                                             .Where(cr => cr.CommentId == comment.ResponseCommentId)
-                                            .Select(cr => new UserResponse()
+                                            .Select(cr => new UserSimplifiedResponse()
                                             {
                                                 UId = cr.UIdNavigation.UId,
                                                 Username = cr.UIdNavigation.Username,
@@ -239,7 +239,7 @@ namespace RPGOnline.Infrastructure.Services
                                             }).FirstOrDefault(),
                 UserResponse = _dbContext.Users
                                 .Where(u => u.UId == comment.UId)
-                                .Select(u => new UserResponse()
+                                .Select(u => new UserSimplifiedResponse()
                                 {
                                     UId = u.UId,
                                     Username = u.Username,

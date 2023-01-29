@@ -17,7 +17,7 @@ namespace RPGOnline.Application.Interfaces
 
         Task<PutUserResponse> PutUser(int id, UserRequest userRequest);
 
-        Task<UserResponse> PutAvatar(int id, AvatarRequest avatarRequest);
+        Task<UserSimplifiedResponse> PutAvatar(int id, AvatarRequest avatarRequest);
 
         Task<ICollection<UserFriendshipResponse>> GetUserFriends(int id);
         Task<object> ManageFriendship(FriendshipRequest friendshipRequest);

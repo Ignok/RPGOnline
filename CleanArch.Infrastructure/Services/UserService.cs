@@ -102,7 +102,7 @@ namespace RPGOnline.Infrastructure.Services
             };
         }
 
-        public async Task<UserResponse> PutAvatar(int id, AvatarRequest avatarRequest)
+        public async Task<UserSimplifiedResponse> PutAvatar(int id, AvatarRequest avatarRequest)
         {
             var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
             if (user == null)
@@ -116,7 +116,7 @@ namespace RPGOnline.Infrastructure.Services
                 _dbContext.Entry(user).State = EntityState.Modified;
                 _dbContext.SaveChanges();
 
-                return new UserResponse()
+                return new UserSimplifiedResponse()
                 {
                     UId = user.UId,
                     Username = user.Username,

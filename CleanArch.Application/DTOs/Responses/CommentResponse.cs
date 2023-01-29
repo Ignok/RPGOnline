@@ -11,9 +11,9 @@ namespace RPGOnline.Application.DTOs.Responses
     {
         public int CommentId { get; set; }
         public int? ResponseCommentId { get; set; }
-        public UserResponse? RespondingUserResponse { get; set; }
+        public UserSimplifiedResponse? RespondingUserResponse { get; set; }
 
-        public UserResponse UserResponse { get; set; }
+        public UserSimplifiedResponse UserResponse { get; set; }
 
         public string Content { get; set; } = null!;
         public DateTime CreationDate { get; set; }

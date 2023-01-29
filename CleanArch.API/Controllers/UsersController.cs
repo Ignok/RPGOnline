@@ -42,7 +42,9 @@ namespace RPGOnline.API.Controllers
                 {
                     UId = u.UId,
                     Username = u.Username,
-                    Picture = u.Picture
+                    Picture = u.Picture,
+                    AboutMe = u.AboutMe,
+                    Attitude = u.Attitude,
                 }).ToListAsync();
 
                 if (result == null)
