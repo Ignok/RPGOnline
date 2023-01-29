@@ -11,7 +11,9 @@ using RPGOnline.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RPGOnline.Infrastructure.Services
@@ -96,26 +98,29 @@ namespace RPGOnline.Infrastructure.Services
             }
         }
 
-        public async Task<ICollection<GetSpellSimplifiedResponse>> GetSpellsForCharacter(int uId, GetAssetForCharacterRequest getSpellRequest)
+        public async Task<ICollection<GetSpellSimplifiedResponse>> GetSpellsForCharacter(int uId)
         {
-            var result = await (from asset in _dbContext.Assets
-                                join spell in _dbContext.Spells on asset.AssetId equals spell.AssetId
-                                where object.Equals(spell.KeyAttribute, getSpellRequest.KeyValueName)
-                                where getSpellRequest.PrefferedLanguage.Contains(asset.Language)
-                                where asset.IsPublic || asset.AuthorId == uId
-                                orderby spell.Name ascending
-                                select new GetSpellSimplifiedResponse()
-                                {
-                                    AssetId = asset.AssetId,
-                                    SpellId = spell.SpellId,
-                                    Name = spell.Name,
-                                    Description = spell.Description,
-                                    KeyAttribute = spell.KeyAttribute,
-                                    MinValue = spell.MinValue,
-                                    ManaCost = spell.ManaCost,
-                                    Effects = spell.Effects
-                                })
-                                .ToListAsync();
+            var result = await _dbContext.Spells.Include(s => s.Asset)
+                                                .ThenInclude(s => s.UserSavedAssets.Where(u => u.UId.Equals(uId)))
+                                               
+                    .Where(s => s.Asset.IsPublic || s.Asset.AuthorId == uId)
+
+                    .Select(s => new GetSpellSimplifiedResponse()
+                    {
+                        AssetId = s.Asset.AssetId,
+                        SpellId = s.SpellId,
+                        Name = s.Name,
+                        Description = s.Description,
+                        KeyAttribute = s.KeyAttribute,
+                        MinValue = s.MinValue,
+                        ManaCost = s.ManaCost,
+                        Effects = s.Effects,
+                        IsSaved = s.Asset.UserSavedAssets.Any(usa => usa.UId == uId),
+                        PrefferedLanguage = s.Asset.Language,
+                    })
+                    .ToListAsync();
+
+
             return result;
         }
 

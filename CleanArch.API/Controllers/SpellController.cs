@@ -38,7 +38,7 @@ namespace RPGOnline.API.Controllers
         }
 
         [HttpGet("character/{uId}")]
-        public async Task<IActionResult> GetSpellsForCharacter(int uId, [FromQuery] GetAssetForCharacterRequest getSpellRequest)
+        public async Task<IActionResult> GetSpellsForCharacter(int uId)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace RPGOnline.API.Controllers
                     return BadRequest("Access denied - bad ID");
                 }
 
-                var result = await _spellService.GetSpellsForCharacter(uId, getSpellRequest);
+                var result = await _spellService.GetSpellsForCharacter(uId);
 
                 if (result == null)
                 {
