@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGOnline.Application.DTOs.Requests.User
+namespace RPGOnline.Application.DTOs.Requests.Friendship
 {
     public class FriendshipRequest
     {

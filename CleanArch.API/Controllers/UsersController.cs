@@ -166,66 +166,6 @@ namespace RPGOnline.API.Controllers
 
         }
 
-        
-        // GET: api/{id}/Friends
-        [HttpGet("{id}/Friends")]
-        public async Task<IActionResult> GetUserFriends(int id)
-        {
-            try
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound("No such user in database");
-                }
-                else
-                {
-                    var result = await _userService.GetUserFriends(id);
-                    if (result == null)
-                    {
-                        return NoContent();
-                    }
-                    return Ok(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost("{id}/Friends/")]
-        public async Task<IActionResult> ManageFriendship(FriendshipRequest friendshipRequest)
-        {
-            try
-            {
-                if (!IsSameId(friendshipRequest.UId))
-                {
-                    return BadRequest("Access denied - bad ID");
-                }
-
-                if (friendshipRequest == null)
-                {
-                    throw new ArgumentNullException(nameof(friendshipRequest));
-                }
-                else if(!UserExists(friendshipRequest.TargetUId))
-                {
-                    return NotFound("No such user in database");
-                }
-                else
-                {
-                    var result = await _userService.ManageFriendship(friendshipRequest);
-                    if (result == null)
-                    {
-                        return NoContent();
-                    }
-                    return Ok(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
 
         [HttpPost("{uId}/Assets/{assetId}")]
