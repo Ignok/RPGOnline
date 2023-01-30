@@ -171,11 +171,25 @@ namespace RPGOnline.Infrastructure.Services
             asset.Professions.Add(profession);
 
             var spell = await _dbContext.Spells.Where(s => s.SpellId == postProfessionRequest.SpellId).FirstOrDefaultAsync();
-
-
             if (spell != null)
             {
                 profession.Spells.Add(spell);
+            }
+
+            var item = await _dbContext.Items.Where(s => s.ItemId == postProfessionRequest.ItemId).FirstOrDefaultAsync();
+            if (item != null)
+            {
+                var startingItem = new ProfessionStartingItem()
+                {
+                    ProfessionStartingItemsId = (_dbContext.ProfessionStartingItems.Max(i => (int)i.ProfessionStartingItemsId) + 1),
+                    ProfessionId = profession.ProfessionId,
+                    ItemId = item.ItemId,
+                    Item = item,
+                    Profession = profession,
+                };
+
+                profession.ProfessionStartingItems.Add(startingItem);
+                _dbContext.ProfessionStartingItems.Add(startingItem);
             }
 
             _dbContext.Assets.Add(asset);

@@ -97,25 +97,26 @@ namespace RPGOnline.Infrastructure.Services
             }
         }
 
-        public async Task<ICollection<GetItemSimplifiedResponse>> GetItemsForCharacter(int uId, GetAssetForCharacterRequest getItemRequest)
+        public async Task<ICollection<GetItemSimplifiedResponse>> GetItemsForCharacter(int uId)
         {
-            var result = await (from asset in _dbContext.Assets
-                                join item in _dbContext.Items on asset.AssetId equals item.AssetId
-                                where object.Equals(item.KeySkill, getItemRequest.KeyValueName)
-                                where getItemRequest.PrefferedLanguage.Contains(asset.Language)
-                                where asset.IsPublic || asset.AuthorId == uId
-                                orderby item.Name ascending
-                                select new GetItemSimplifiedResponse()
-                                {
-                                    AssetId = asset.AssetId,
-                                    ItemId = item.ItemId,
-                                    Name = item.Name,
-                                    Description = item.Description,
-                                    KeySkill = item.KeySkill,
-                                    SkillMod = item.SkillMod,
-                                    GoldMultiplier = item.GoldMultiplier
-                                })
-                                .ToListAsync();
+            var result = await _dbContext.Items
+                .Include(i => i.Asset)
+                .ThenInclude(i => i.UserSavedAssets.Where(u => u.UId.Equals(uId)))
+                .Where(i => i.Asset.IsPublic || i.Asset.AuthorId == uId)
+                .Select(i => new GetItemSimplifiedResponse()
+                {
+                    AssetId = i.AssetId,
+                    ItemId = i.ItemId,
+                    Name = i.Name,
+                    Description = i.Description,
+                    KeySkill = i.KeySkill,
+                    SkillMod = i.SkillMod,
+                    GoldMultiplier = i.GoldMultiplier,
+                    IsSaved = i.Asset.UserSavedAssets.Any(usa => usa.UId == uId),
+                    PrefferedLanguage = i.Asset.Language,
+                })
+                .ToListAsync();
+
             return result;
         }
 

@@ -41,7 +41,7 @@ namespace RPGOnline.API.Controllers
 
         [Authorize]
         [HttpGet("character/{uId}")]
-        public async Task<IActionResult> GetItemsForCharacter(int uId, [FromQuery] GetAssetForCharacterRequest getItemRequest)
+        public async Task<IActionResult> GetItemsForCharacter(int uId)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace RPGOnline.API.Controllers
                     return BadRequest("Access denied - bad ID");
                 }
 
-                var result = await _itemService.GetItemsForCharacter(uId, getItemRequest);
+                var result = await _itemService.GetItemsForCharacter(uId);
 
                 if (result == null)
                 {

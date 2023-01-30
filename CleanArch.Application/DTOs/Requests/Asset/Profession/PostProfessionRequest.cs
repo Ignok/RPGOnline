@@ -63,5 +63,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Profession
         public int PsycheMod { get; set; }
 
         public int SpellId { get; set; }
+
+        public int ItemId { get; set; }
     }
 }
