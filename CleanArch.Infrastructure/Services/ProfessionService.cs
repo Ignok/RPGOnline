@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Profession;
+using RPGOnline.Application.DTOs.Responses.Asset.Item;
 using RPGOnline.Application.DTOs.Responses.Asset.Profession;
+using RPGOnline.Application.DTOs.Responses.Asset.Spell;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Enums;
@@ -65,8 +67,10 @@ namespace RPGOnline.Infrastructure.Services
                 var result = _dbContext.Professions.Include(p => p.Asset)
                                                 .Include(p => p.Asset.UserSavedAssets)
                                                 .Include(p => p.Asset.Author)
+                                                .Include(p => p.ProfessionStartingItems).ThenInclude(p => p.Item).ThenInclude(p => p.Asset)
+                                                .Include(p => p.Spells).ThenInclude(p => p.Asset)
                                                 .AsParallel().WithCancellation(cancellationToken)
-                    .Where(p => p.Asset.IsPublic)
+                    .Where(p => p.Asset.IsPublic || p.Asset.Author.UId == userId)
                     .Where(p => String.IsNullOrEmpty(searchProfessionRequest.KeyValueName)
                                 || object.Equals(p.KeyAttribute, searchProfessionRequest.KeyValueName)
                                 || object.Equals(p.KeyAttribute, null)
@@ -99,10 +103,31 @@ namespace RPGOnline.Infrastructure.Services
                             UId = p.Asset.Author.UId,
                             Username = p.Asset.Author.Username,
                             Picture = p.Asset.Author.Picture,
-                        }
+                        },
+                        SpellList = p.Spells.Select(s =>
+                            new GetSpellSimplifiedResponse()
+                            {
+                                AssetId = s.AssetId,
+                                SpellId = s.SpellId,
+                                Name = s.Name,
+                                Description = s.Description,
+                                KeyAttribute = s.KeyAttribute,
+                                Effects = s.Effects,
+                                PrefferedLanguage = s.Asset.Language,
+                            }
+                        ).ToList(),
+                        ItemList = p.ProfessionStartingItems.Select(i =>
+                            new GetItemSimplifiedResponse()
+                            {
+                                AssetId = i.Item.AssetId,
+                                ItemId = i.Item.ItemId,
+                                Name = i.Item.Name,
+                                Description = i.Item.Description,
+                                KeySkill = i.Item.KeySkill,
+                                PrefferedLanguage = i.Item.Asset.Language,
+                            }
+                        ).ToList(),
                     })
-                    //.Where(p => p...)  <- kategoria
-                    .OrderByDescending(p => p.CreationDate)
                     .ToList();
 
 

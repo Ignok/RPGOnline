@@ -80,7 +80,7 @@ namespace RPGOnline.Infrastructure.Services
                 Country = null,
                 City = null,
                 AboutMe = null,
-                Attitude = "New user",
+                Attitude = "New User",
                 Picture = 0,
                 Pswd = hashedPasswordAndSalt.Item1,
                 Salt = hashedPasswordAndSalt.Item2,

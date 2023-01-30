@@ -1,4 +1,6 @@
-﻿using RPGOnline.Application.DTOs.Responses.User;
+﻿using RPGOnline.Application.DTOs.Responses.Asset.Item;
+using RPGOnline.Application.DTOs.Responses.Asset.Spell;
+using RPGOnline.Application.DTOs.Responses.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,5 +28,8 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Profession
         public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
         public virtual UserSimplifiedResponse CreatorNavigation { get; set; } = null!;
+
+        public ICollection<GetSpellSimplifiedResponse>? SpellList { get; set; }
+        public ICollection<GetItemSimplifiedResponse>? ItemList { get; set; }
     }
 }
