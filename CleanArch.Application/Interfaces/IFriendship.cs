@@ -11,7 +11,7 @@ namespace RPGOnline.Application.Interfaces
     public interface IFriendship
     {
         Task<ICollection<UserFriendshipResponse>> GetUserFriends(int id);
-        Task<object> ManageFriendship(FriendshipRequest friendshipRequest);
+        Task<FriendshipResponse> ManageFriendship(FriendshipRequest friendshipRequest);
         Task<FriendshipResponse> GetFriendship(int uId, int targetUId);
     }
 }

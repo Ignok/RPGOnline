@@ -95,7 +95,7 @@ namespace RPGOnline.Infrastructure.Services
             };
         }
 
-        public async Task<object> ManageFriendship(FriendshipRequest friendshipRequest)
+        public async Task<FriendshipResponse> ManageFriendship(FriendshipRequest friendshipRequest)
         {
             //if friendship option exists
             if (!Enum.IsDefined(typeof(Friendship), friendshipRequest.Option))
@@ -214,18 +214,31 @@ namespace RPGOnline.Infrastructure.Services
                     {
                         throw new Exception("Target user is blocked");
                     }
+                    else if (friendshipStatus.IsRequestReceived)
+                    {
+                        friendshipStatus.IsRequestReceived = false;
+                        viceFriendshipStatus.IsRequestSent = false;
+                    }
+                    else if (friendshipStatus.IsRequestSent)
+                    {
+                        friendshipStatus.IsRequestSent = false;
+                        viceFriendshipStatus.IsRequestReceived = false;
+                    }
                     else if (!friendshipStatus.IsFriend)
                     {
                         throw new Exception("Target user is not a friend");
                     }
-                    friendshipStatus.IsRequestSent = false;
-                    friendshipStatus.IsRequestReceived = false;
-                    friendshipStatus.IsFriend = false;
-                    friendshipStatus.IsBlocked = false;
+                    else
+                    {
+                        friendshipStatus.IsRequestSent = false;
+                        friendshipStatus.IsRequestReceived = false;
+                        friendshipStatus.IsFriend = false;
+                        friendshipStatus.IsBlocked = false;
 
-                    viceFriendshipStatus.IsRequestSent = false;
-                    viceFriendshipStatus.IsRequestReceived = false;
-                    viceFriendshipStatus.IsFriend = false;
+                        viceFriendshipStatus.IsRequestSent = false;
+                        viceFriendshipStatus.IsRequestReceived = false;
+                        viceFriendshipStatus.IsFriend = false;
+                    }
 
                     break;
 
@@ -277,10 +290,28 @@ namespace RPGOnline.Infrastructure.Services
 
             _dbContext.SaveChanges();
 
-            return new
+            if(await _dbContext.Friendships.AnyAsync(f => f.UId == friendshipRequest.UId && f.FriendUId == friendshipRequest.TargetUId))
             {
-                message = "Successfully changed status"
-            };
+                return new FriendshipResponse
+                {
+                    IsFriend = friendshipStatus.IsFriend,
+                    IsFollowed = friendshipStatus.IsFollowed,
+                    IsBlocked = friendshipStatus.IsBlocked,
+                    IsRequestSent = friendshipStatus.IsRequestSent,
+                    IsRequestReceived = friendshipStatus.IsRequestReceived,
+                };
+            }
+            else
+            {
+                return new FriendshipResponse
+                {
+                    IsFriend = false,
+                    IsFollowed = false,
+                    IsBlocked = false,
+                    IsRequestSent = false,
+                    IsRequestReceived = false,
+                };
+            }
         }
     }
 }
