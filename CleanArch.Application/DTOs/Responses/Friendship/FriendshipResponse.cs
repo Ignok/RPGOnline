@@ -13,5 +13,6 @@ namespace RPGOnline.Application.DTOs.Responses.Friendship
         public bool IsBlocked { get; set; }
         public bool IsRequestSent { get; set; }
         public bool IsRequestReceived { get; set; }
+        public bool HasBlockedMe { get; set; }
     }
 }

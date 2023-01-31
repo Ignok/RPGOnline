@@ -1,19 +1,14 @@
 ﻿using RPGOnline.Application.DTOs.Requests;
-using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Application.Interfaces
 {
     public interface IUser
     {
-        Task<UserAboutmeResponse> GetAboutMe(int id);
+        Task<ICollection<UserResponse>> GetUsers(SearchUserRequest userRequest, int userId, CancellationToken cancellationToken);
+        Task<UserAboutmeResponse> GetAboutMe(int uId, int targetId);
 
         Task<PutUserResponse> PutUser(int id, UserRequest userRequest);
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RPGOnline.Application.DTOs.Responses.Friendship;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +18,6 @@ namespace RPGOnline.Application.DTOs.Responses.User
         public string? AboutMe { get; set; }
         public string Attitude { get; set; } = null!;
         public DateTime CreationDate { get; set; }
+        public FriendshipResponse FriendshipStatus { get; set; } = null!;
     }
 }

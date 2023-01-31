@@ -1,27 +1,85 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
-using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.User;
 using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.Friendship;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace RPGOnline.Infrastructure.Services
 {
     public class UserService : IUser
     {
         private readonly IApplicationDbContext _dbContext;
-        public UserService(IApplicationDbContext dbContext)
+        private ILogger<UserService> _logger;
+        public UserService(IApplicationDbContext dbContext, ILogger<UserService> logger)
         {
+            _logger = logger;
             _dbContext = dbContext;
         }
 
-        public async Task<UserAboutmeResponse> GetAboutMe(int id)
+
+        public async Task<ICollection<UserResponse>> GetUsers(SearchUserRequest userRequest, int userId, CancellationToken cancellationToken)
         {
+            try
+            {
+
+                var result = _dbContext.Users
+                    .Include(u => u.FriendshipUIdNavigations)
+                    .AsParallel().WithCancellation(cancellationToken)
+                    //.Where(u => attitude.Equals(null) || u.Attitude.Equals(attitude))
+                    .Where(u => String.IsNullOrEmpty(userRequest.Attitude)
+                                || object.Equals(u.Attitude, userRequest.Attitude))
+                    .Where(u => String.IsNullOrEmpty(userRequest.Search)
+                                || (u.Username.Contains(userRequest.Search, StringComparison.OrdinalIgnoreCase))
+                                || ((u.AboutMe ?? "").Contains(userRequest.Search, StringComparison.OrdinalIgnoreCase))
+                            )
+                    .OrderBy(u => u.CreationDate)
+                    //// do dodania rating
+                    .Select(u => new UserResponse()
+                    {
+                        UId = u.UId,
+                        Username = u.Username,
+                        Picture = u.Picture,
+                        AboutMe = u.AboutMe,
+                        Attitude = u.Attitude,
+                        HasBlockedMe = u.FriendshipUIdNavigations
+                                        .Where(u => u.FriendUId == userId)
+                                        .Where(u => u.IsBlocked).Any(),
+                    }).ToList();
+
+
+                await Task.Delay(500, cancellationToken);
+
+                return result;
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError("=========== I WAS CANCELLED ==========");
+                throw ex;
+            }
+            
+
+            throw new NotImplementedException();
+
+        }
+
+        public async Task<UserAboutmeResponse> GetAboutMe(int uId, int targetId)
+        {
+            if(HasBlockedMe(uId, targetId))
+            {
+                throw new ArgumentException("Blocked");
+            }
+
             var result = await _dbContext.Users
-                .Where(u => u.UId == id)
+                .Include(u => u.FriendshipUIdNavigations)
+                .Include(u => u.FriendshipFriendUs)
+                .Where(u => u.UId == targetId)
                 .Select(u => new UserAboutmeResponse()
                 {
                     UId = u.UId,
@@ -32,12 +90,24 @@ namespace RPGOnline.Infrastructure.Services
                     City = u.City,
                     AboutMe = u.AboutMe,
                     Attitude = u.Attitude,
-                    CreationDate = u.CreationDate
+                    CreationDate = u.CreationDate,
+                    FriendshipStatus = new FriendshipResponse()
+                    {
+                        IsFriend = u.FriendshipFriendUs.Where(u => u.UId == uId).Where(u => u.IsFriend).Any(),
+                        IsBlocked = u.FriendshipFriendUs.Where(u => u.UId == uId).Where(u => u.IsBlocked).Any(),
+                        IsFollowed = u.FriendshipFriendUs.Where(u => u.UId == uId).Where(u => u.IsFollowed).Any(),
+                        IsRequestReceived = u.FriendshipFriendUs.Where(u => u.UId == uId).Where(u => u.IsRequestReceived).Any(),
+                        IsRequestSent = u.FriendshipFriendUs.Where(u => u.UId == uId).Where(u => u.IsRequestSent).Any(),
+                        HasBlockedMe = u.FriendshipUIdNavigations
+                                        .Where(u => u.FriendUId == uId)
+                                        .Where(u => u.IsBlocked).Any(),
+                    }
+                        
                 }).SingleOrDefaultAsync();
 
             if (result == null)
             {
-                throw new ArgumentNullException($"There is no user with id {id}");
+                throw new ArgumentNullException($"There is no user with id {targetId}");
             }
 
             return result;
@@ -146,6 +216,16 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext.SaveChanges();
 
             return "Asset unsaved";
+        }
+
+
+
+        private bool HasBlockedMe(int myId, int targetId)
+        {
+            if(myId == targetId) return false;
+            return myId == targetId || _dbContext.Friendships
+                .Where(f => f.UId == targetId && f.FriendUId == myId)
+                .Where(f => f.IsBlocked).Any();
         }
     }
 }

@@ -13,5 +13,6 @@ namespace RPGOnline.Application.DTOs.Responses.User
         public int Picture { get; set; }
         public string? AboutMe { get; set; }
         public string Attitude { get; set; } = null!;
+        public bool HasBlockedMe { get; set; } = false;
     }
 }

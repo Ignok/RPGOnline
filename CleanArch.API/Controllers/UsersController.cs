@@ -33,19 +33,14 @@ namespace RPGOnline.API.Controllers
         // GET: api/Users
         //[Authorize(Roles ="admin,user")]
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] SearchUserRequest userRequest, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _dbContext.Users
-                .Select(u => new UserResponse()
-                {
-                    UId = u.UId,
-                    Username = u.Username,
-                    Picture = u.Picture,
-                    AboutMe = u.AboutMe,
-                    Attitude = u.Attitude,
-                }).ToListAsync();
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _userService.GetUsers(userRequest, Int32.Parse(userId), cancellationToken);
 
                 if (result == null)
                 {
@@ -69,7 +64,15 @@ namespace RPGOnline.API.Controllers
         {
             try
             {
-                var result = await _userService.GetAboutMe(id);
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                if(userId == "0")
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _userService.GetAboutMe(Int32.Parse(userId), id);
                 if (result==null)
                 {
                     return NotFound("No such user in database");
@@ -79,7 +82,11 @@ namespace RPGOnline.API.Controllers
                     return Ok(result);
                 }
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -232,5 +239,6 @@ namespace RPGOnline.API.Controllers
 
             return userId.Equals(id.ToString());
         }
+
     }
 }
