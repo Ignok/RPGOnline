@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RPGOnline.Application.DTOs.Responses.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +19,7 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Spell
         public string Effects { get; set; } = null!;
         public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
+        public virtual UserSimplifiedResponse CreatorNavigation { get; set; } = null!;
+        public bool IsPublic { get; set; }
     }
 }

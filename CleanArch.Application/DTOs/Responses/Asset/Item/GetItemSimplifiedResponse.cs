@@ -18,5 +18,7 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Item
         public int GoldMultiplier { get; set; }
         public bool IsSaved { get; set; }
         public string PrefferedLanguage { get; set; } = null!;
+        public virtual UserSimplifiedResponse CreatorNavigation { get; set; } = null!;
+        public bool IsPublic { get; set; }
     }
 }

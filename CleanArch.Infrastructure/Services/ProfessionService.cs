@@ -113,9 +113,16 @@ namespace RPGOnline.Infrastructure.Services
                                 Description = s.Description,
                                 KeyAttribute = s.KeyAttribute,
                                 Effects = s.Effects,
-                                PrefferedLanguage = s.Asset.Language,
+                                CreatorNavigation = new UserSimplifiedResponse()
+                                {
+                                    UId = s.Asset.Author.UId,
+                                    Username = s.Asset.Author.Username,
+                                    Picture = s.Asset.Author.Picture,
+                                },
+                                IsPublic = s.Asset.IsPublic,
                             }
-                        ).ToList(),
+                        ).Where(r => r.CreatorNavigation.UId == userId || r.IsPublic)
+                        .ToList(),
                         ItemList = p.ProfessionStartingItems.Select(i =>
                             new GetItemSimplifiedResponse()
                             {
@@ -124,10 +131,18 @@ namespace RPGOnline.Infrastructure.Services
                                 Name = i.Item.Name,
                                 Description = i.Item.Description,
                                 KeySkill = i.Item.KeySkill,
-                                PrefferedLanguage = i.Item.Asset.Language,
+                                CreatorNavigation = new UserSimplifiedResponse()
+                                {
+                                    UId = i.Item.Asset.AuthorId,
+                                    Username = i.Item.Asset.Author.Username,
+                                    Picture = i.Item.Asset.Author.Picture,
+                                },
+                                IsPublic = i.Item.Asset.IsPublic,
                             }
-                        ).ToList(),
+                        ).Where(r => r.CreatorNavigation.UId == userId || r.IsPublic)
+                        .ToList(),
                     })
+                    .OrderByDescending(p => p.CreationDate)
                     .ToList();
 
 
