@@ -45,6 +45,7 @@ builder.Services.AddScoped<IRace, RaceService>();
 builder.Services.AddScoped<IItem, ItemService>();
 builder.Services.AddScoped<ISpell, SpellService>();
 builder.Services.AddScoped<IProfession, ProfessionService>();
+builder.Services.AddScoped<ICharacter, CharacterService>();
 
 
 builder.Services.AddInfrastructure().AddApplication();
