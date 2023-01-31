@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Services.Common;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Profession;
@@ -210,26 +211,33 @@ namespace RPGOnline.Infrastructure.Services
 
             asset.Professions.Add(profession);
 
-            var spell = await _dbContext.Spells.Where(s => s.SpellId == postProfessionRequest.SpellId).FirstOrDefaultAsync();
-            if (spell != null)
+            if(postProfessionRequest.Spells != null)
             {
-                profession.Spells.Add(spell);
+                var spells = await _dbContext.Spells
+                                    .Where(s => postProfessionRequest.Spells.Contains(s.SpellId))
+                                    .ToListAsync();
+                profession.Spells.AddRange(spells);
             }
 
-            var item = await _dbContext.Items.Where(s => s.ItemId == postProfessionRequest.ItemId).FirstOrDefaultAsync();
-            if (item != null)
+            if(postProfessionRequest.Items != null)
             {
-                var startingItem = new ProfessionStartingItem()
+                var items = await _dbContext.Items.Where(i => postProfessionRequest.Items.Contains(i.ItemId)).ToListAsync();
+                var startingItemsId = (_dbContext.ProfessionStartingItems.Max(i => (int)i.ProfessionStartingItemsId) + 1);
+                var startingItems = new List<ProfessionStartingItem>();
+                foreach (Item i in items)
                 {
-                    ProfessionStartingItemsId = (_dbContext.ProfessionStartingItems.Max(i => (int)i.ProfessionStartingItemsId) + 1),
-                    ProfessionId = profession.ProfessionId,
-                    ItemId = item.ItemId,
-                    Item = item,
-                    Profession = profession,
-                };
-
-                profession.ProfessionStartingItems.Add(startingItem);
-                _dbContext.ProfessionStartingItems.Add(startingItem);
+                    var startingItem = new ProfessionStartingItem()
+                    {
+                        ProfessionStartingItemsId = startingItemsId++,
+                        ProfessionId = profession.ProfessionId,
+                        ItemId = i.ItemId,
+                        Item = i,
+                        Profession = profession,
+                    };
+                    startingItems.Add(startingItem);
+                }
+                profession.ProfessionStartingItems.AddRange(startingItems);
+                //_dbContext.ProfessionStartingItems.Add(startingItems);
             }
 
             _dbContext.Assets.Add(asset);

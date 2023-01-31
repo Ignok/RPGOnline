@@ -62,8 +62,8 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Profession
         [Range(-6, 6)]
         public int PsycheMod { get; set; }
 
-        public int SpellId { get; set; }
+        public int[]? Spells { get; set; }
 
-        public int ItemId { get; set; }
+        public int[]? Items { get; set; }
     }
 }
