@@ -49,10 +49,13 @@ namespace RPGOnline.Infrastructure.Services
                             .Where(f => f.UId == u.UId && f.FriendUId == uId)
                             .Where(f => f.IsBlocked).Any()
                         )
+                        .Where(p => !searchPostRequest.OnlyFollowed || p.UIdNavigation.FriendshipFriendUs
+                            .Where(f => f.UIdNavigation.UId ==uId)
+                            .Where(f => f.IsFollowed).Any()
+                        )
                     .Include(ulp => ulp.UserLikedPosts)
                     .Include(c => c.Comments)
                     .AsParallel().WithCancellation(cancellationToken)
-                    //.Where(p => !HasBlockedMe(uId, p.UIdNavigation.UId))
                     .Select(p => new PostResponse()
                     {
                         PostId = p.PostId,
@@ -67,17 +70,10 @@ namespace RPGOnline.Infrastructure.Services
                             Username = p.UIdNavigation.Username,
                             Picture = p.UIdNavigation.Picture
                         },
-                    /*CreatorNavigation = _dbContext.Users
-                                        .Where(u => u.UId == p.UId)
-                                        .Select(u => new UserResponse()
-                                        {
-                                            UId = u.UId,
-                                            Username = u.Username,
-                                            Picture = u.Picture
-                                        }).First(),*/
                         Comments = p.Comments.Count
                     })
-                    //.Where(p => p...)  <- kategoria
+                    .Where(p => String.IsNullOrEmpty(category)
+                                || p.Tag?.IndexOf(category, StringComparison.OrdinalIgnoreCase) >= 0)
                     .Where(p => String.IsNullOrEmpty(search)
                                 || (p.Title.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
                                 || (p.Content.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
