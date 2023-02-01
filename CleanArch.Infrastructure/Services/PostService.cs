@@ -6,6 +6,7 @@ using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
+//using System.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace RPGOnline.Infrastructure.Services
 
         private readonly int postsOnPageAmount = 10;
 
-        public async Task<(ICollection<PostResponse>, int pageCount)> GetPosts(SearchPostRequest searchPostRequest, CancellationToken cancellationToken)
+        public async Task<(ICollection<PostResponse>, int pageCount)> GetPosts(int uId, SearchPostRequest searchPostRequest, CancellationToken cancellationToken)
         {
             try
             {
@@ -41,10 +42,17 @@ namespace RPGOnline.Infrastructure.Services
                 //Search
                 //clear string to prevent sql injection
 
-                var result = _dbContext.Posts.Include(u => u.UIdNavigation)
+                var result = _dbContext.Posts
+                    .Include(u => u.UIdNavigation)
+                        .ThenInclude(u => u.FriendshipUIdNavigations)
+                        .Where(u => !u.UIdNavigation.FriendshipUIdNavigations
+                            .Where(f => f.UId == u.UId && f.FriendUId == uId)
+                            .Where(f => f.IsBlocked).Any()
+                        )
                     .Include(ulp => ulp.UserLikedPosts)
                     .Include(c => c.Comments)
                     .AsParallel().WithCancellation(cancellationToken)
+                    //.Where(p => !HasBlockedMe(uId, p.UIdNavigation.UId))
                     .Select(p => new PostResponse()
                     {
                         PostId = p.PostId,
@@ -99,10 +107,11 @@ namespace RPGOnline.Infrastructure.Services
 
         
 
-        public async Task<PostDetailsResponse> GetPostDetails(int id)
+        public async Task<PostDetailsResponse> GetPostDetails(int uId, int postId)
         {
+            
             var result = await _dbContext.Posts
-                .Where(p => p.PostId == id)
+                .Where(p => p.PostId == postId)
                 .Select(p => new PostDetailsResponse()
                 {
                     PostId = p.PostId,
@@ -148,9 +157,14 @@ namespace RPGOnline.Infrastructure.Services
                                         .OrderByDescending(c => c.CreationDate)
                                         .ToList()
                 }).SingleOrDefaultAsync();
-            if(result == null)
+
+            if (HasBlockedMe(uId, result.CreatorNavigation.UId))
             {
-                throw new ArgumentNullException($"There is no post with id: {id}");
+                throw new ArgumentException("Blocked");
+            }
+            else if (result == null)
+            {
+                throw new ArgumentNullException($"There is no post with id: {postId}");
             }
             return result;
         }
@@ -249,6 +263,14 @@ namespace RPGOnline.Infrastructure.Services
                 CreationDate = comment.CreationDate,
                 PostIdNavigation = comment.PostId
             };
+        }
+
+        private bool HasBlockedMe(int myId, int targetId)
+        {
+            if (myId == targetId) return false;
+            return myId == targetId || _dbContext.Friendships
+                .Where(f => f.UId == targetId && f.FriendUId == myId)
+                .Where(f => f.IsBlocked).Any();
         }
     }
 }

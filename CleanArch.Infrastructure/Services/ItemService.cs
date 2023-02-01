@@ -185,5 +185,13 @@ namespace RPGOnline.Infrastructure.Services
                 }
             };
         }
+
+        private bool HasBlockedMe(int myId, int targetId)
+        {
+            if (myId == targetId) return false;
+            return myId == targetId || _dbContext.Friendships
+                .Where(f => f.UId == targetId && f.FriendUId == myId)
+                .Where(f => f.IsBlocked).Any();
+        }
     }
 }

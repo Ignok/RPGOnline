@@ -78,13 +78,19 @@ namespace RPGOnline.Infrastructure.Services
                 e.Data.Add("Username", $"Username {messageRequest.ReceiverUsername} does not exist");
                 throw e;
             }
+            else if (HasBlockedMe(senderId, receiver.UId))
+            {
+                Exception e = new Exception();
+                e.Data.Add("Username", "Error - this user has blocked you");
+                throw e;
+            }
             else
             {
                 var message = new Message()
                 {
                     MessageId = (_dbContext.Messages.Max(m => (int)m.MessageId) + 1), //potem jak dodamy automatyczny id można usunąć
                     SenderUId = senderId,
-                    ReceiverUId = await _dbContext.Users.Where(u => u.Username.Equals(messageRequest.ReceiverUsername)).Select(u => u.UId).FirstOrDefaultAsync(),
+                    ReceiverUId = receiver.UId,
                     Title = messageRequest.Title,
                     Content = messageRequest.Content,
                     SendDate = DateTime.Now,
@@ -226,6 +232,15 @@ namespace RPGOnline.Infrastructure.Services
 
 
             throw new NotImplementedException();
+        }
+
+
+        private bool HasBlockedMe(int myId, int targetId)
+        {
+            if (myId == targetId) return false;
+            return myId == targetId || _dbContext.Friendships
+                .Where(f => f.UId == targetId && f.FriendUId == myId)
+                .Where(f => f.IsBlocked).Any();
         }
     }
 }

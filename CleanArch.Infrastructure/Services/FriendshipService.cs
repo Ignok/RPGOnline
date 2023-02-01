@@ -63,19 +63,23 @@ namespace RPGOnline.Infrastructure.Services
         }
 
 
-        public async Task<ICollection<UserFriendshipResponse>> GetUserFriends(int id)
+        public async Task<ICollection<UserFriendshipResponse>> GetUserFriends(int uId, int targetId)
         {
-            var user = await _dbContext.Users.Where(u => u.UId == id).FirstOrDefaultAsync();
+            var user = await _dbContext.Users.Where(u => u.UId == targetId).FirstOrDefaultAsync();
             if (user == null)
             {
-                throw new ArgumentNullException($"User {id} does not exist");
+                throw new ArgumentNullException($"User {targetId} does not exist");
+            }
+            else if (HasBlockedMe(uId, targetId))
+            {
+                throw new ArgumentException("Blocked");
             }
             else
             {
                 var result = await _dbContext.Friendships
                     .Include(f => f.UIdNavigation)
                     .Include(f => f.FriendU)
-                    .Where(f => f.UIdNavigation.UId == id)
+                    .Where(f => f.UIdNavigation.UId == targetId)
                     .Select(f => new UserFriendshipResponse()
                     {
                         UId = f.FriendU.UId,
@@ -312,6 +316,15 @@ namespace RPGOnline.Infrastructure.Services
                     IsRequestReceived = false,
                 };
             }
+        }
+
+
+        private bool HasBlockedMe(int myId, int targetId)
+        {
+            if (myId == targetId) return false;
+            return myId == targetId || _dbContext.Friendships
+                .Where(f => f.UId == targetId && f.FriendUId == myId)
+                .Where(f => f.IsBlocked).Any();
         }
     }
 }

@@ -65,7 +65,10 @@ namespace RPGOnline.API.Controllers
                 }
                 else
                 {
-                    var result = await _friendshipService.GetUserFriends(id);
+                    var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                    var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                    var result = await _friendshipService.GetUserFriends(Int32.Parse(userId), id);
                     if (result == null)
                     {
                         return NoContent();
