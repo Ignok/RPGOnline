@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RPGOnline.Application.DTOs.Responses.Character;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,11 @@ namespace RPGOnline.Application.Interfaces
 {
     public interface ICharacter
     {
-        public Task<string> GetMotivation();
+        public Task<MotivationResponse> GetMotivation();
 
-        public Task<string> GetCharacteristics();
+        public Task<CharacteristicsResponse> GetCharacteristics();
+
+        public Task<CharacterResponse> GetCharacterInfo(int characterId);
 
     }
 }

@@ -15,6 +15,29 @@ namespace RPGOnline.API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("character/{characterId}")]
+        public async Task<IActionResult> GetCharacterInfo(int characterId)
+        {
+            try
+            {
+                var result = await _characterService.GetCharacterInfo(characterId);
+
+                if (result == null)
+                {
+                    return NotFound("No such character in database.");
+                }
+                else
+                {
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [AllowAnonymous]
         [HttpGet("character/motivation")]
         public async Task<IActionResult> GetMotivation()
         {

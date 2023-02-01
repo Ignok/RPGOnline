@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="DTOs\Requests\Asset\Character\" />
-    <Folder Include="DTOs\Responses\Asset\Character\" />
   </ItemGroup>
 
 </Project>
