@@ -1,4 +1,8 @@
-﻿using RPGOnline.Application.DTOs.Responses.Character;
+﻿using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.Asset;
+using RPGOnline.Application.DTOs.Responses;
+using RPGOnline.Application.DTOs.Responses.Asset.Character.Character;
+using RPGOnline.Application.DTOs.Responses.Character;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +13,14 @@ namespace RPGOnline.Application.Interfaces
 {
     public interface ICharacter
     {
-        public Task<MotivationResponse> GetMotivation();
+        Task<CharacterResponse> GetCharacter(int characterId);
 
-        public Task<CharacteristicsResponse> GetCharacteristics();
+        Task<(ICollection<CharacterResponse>, int pageCount)> GetCharacters(SearchAssetRequest searchAssetRequest, int userId, CancellationToken cancellationToken);
 
-        public Task<CharacterResponse> GetCharacterInfo(int characterId);
+        Task<MotivationResponse> GetRandomMotivation();
 
+        Task<CharacteristicsResponse> GetRandomCharacteristics();
+
+        Task<AttributesResponse> GetRandomAttributes();
     }
 }

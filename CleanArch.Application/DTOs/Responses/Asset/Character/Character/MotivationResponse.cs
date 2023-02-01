@@ -10,9 +10,9 @@ namespace RPGOnline.Application.DTOs.Responses.Character
     {
         public string Objective { get; set; } = null!;
         public string Subject { get; set; } = null!;
-        public string WhatHappened { get; set; } = null!;
-        public string WhereHappened { get; set; } = null!;
-        public string HowHappened { get; set; } = null!;
+        public string What_Happened { get; set; } = null!;
+        public string Where_Happened { get; set; } = null!;
+        public string How_Happened { get; set; } = null!;
         public string Destination { get; set; } = null!;
     }
 }
