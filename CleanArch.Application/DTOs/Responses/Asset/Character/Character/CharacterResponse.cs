@@ -19,8 +19,8 @@ namespace RPGOnline.Application.DTOs.Responses.Character
         public int CharacterId { get; set; }
         public int AssetId { get; set; }
         public DateTime CreationDate { get; set; }
-        public string CharacterName { get; set; } = null!;
-        public string? Remarks { get; set; }
+        public string Name { get; set; } = null!;
+        public string? Description { get; set; }
         public int Gold { get; set; }
         public string? Avatar { get; set; }
 
@@ -29,13 +29,13 @@ namespace RPGOnline.Application.DTOs.Responses.Character
         public GetProfessionSimplifiedResponse? Profession { get; set; }
         public GetRaceSimplifiedResponse? Race { get; set; }
 
-        public ICollection<CharacterItemResponse>? Items { get; set; }
-        public ICollection<CharacterSpellResponse>? Spells { get; set; }
-
-        //public bool IsSaved { get; set; }
-        //public string PrefferedLanguage { get; set; } = null!;
+        public ICollection<CharacterItemResponse>? ItemList { get; set; }
+        public ICollection<CharacterSpellResponse>? SpellList { get; set; }
 
         public virtual UserSimplifiedResponse CreatorNavigation { get; set; } = null!;
 
+        public bool IsSaved { get; set; }
+        public int TimesSaved { get; set; }
+        public string PrefferedLanguage { get; set; } = null!;
     }
 }

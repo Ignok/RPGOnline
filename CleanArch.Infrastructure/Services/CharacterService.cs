@@ -51,7 +51,7 @@ namespace RPGOnline.Infrastructure.Services
                                     from race in rc.DefaultIfEmpty()
                                     where (character.Asset.IsPublic || character.Asset.Author.UId == userId)
                                     //warunek na typ (NPC/ MONSTER/ PLAYABLE)
-                                    //warunek na PrefferedLanguage
+                                    where (searchAssetRequest.PrefferedLanguage.Contains(character.Asset.Language))
                                     where (String.IsNullOrEmpty(searchAssetRequest.Search)
                                             || character.CharacterName.Contains(searchAssetRequest.Search, StringComparison.OrdinalIgnoreCase)
                                             || character.Remarks.Contains(searchAssetRequest.Search, StringComparison.OrdinalIgnoreCase)
@@ -61,8 +61,8 @@ namespace RPGOnline.Infrastructure.Services
                                         CharacterId = character.CharacterId,
                                         AssetId = asset.AssetId,
                                         CreationDate = asset.CreationDate,
-                                        CharacterName = character.CharacterName,
-                                        Remarks = character.Remarks,
+                                        Name = character.CharacterName,
+                                        Description = character.Remarks,
                                         Gold = character.Gold,
                                         Avatar = character.Avatar,
                                         JsonResponse = GetFromJsonResponse(character),
@@ -91,7 +91,7 @@ namespace RPGOnline.Infrastructure.Services
                                             HiddenTalent = race.HiddenTalent,
                                             KeyAttribute = race.KeyAttribute,
                                         } : null,
-                                        Items = character.CharacterItems != null ? (
+                                        ItemList = character.CharacterItems != null ? (
                                         character.CharacterItems
                                             .Select(i =>
                                                 new CharacterItemResponse()
@@ -108,7 +108,7 @@ namespace RPGOnline.Infrastructure.Services
                                                 }
                                             )
                                             .ToList()) : null,
-                                        Spells = character.Spells != null ? (
+                                        SpellList = character.Spells != null ? (
                                             character.Spells.Select(s =>
                                                 new CharacterSpellResponse()
                                                 {
@@ -129,8 +129,10 @@ namespace RPGOnline.Infrastructure.Services
                                             UId = asset.AuthorId,
                                             Username = asset.Author.Username,
                                             Picture = asset.Author.Picture
-                                        }
-
+                                        },
+                                        IsSaved = character.Asset.UserSavedAssets.Any(usa => usa.UId == userId),
+                                        TimesSaved = character.Asset.UserSavedAssets.Count,
+                                        PrefferedLanguage = character.Asset.Language,
                                     })
                                 .ToListAsync();
 
@@ -140,6 +142,8 @@ namespace RPGOnline.Infrastructure.Services
                     .Skip(charactersOnPageAmount * (page - 1))
                     .Take(charactersOnPageAmount)
                     .ToList();
+
+                await Task.Delay(500, cancellationToken);
 
                 return (result, pageCount);
             }
@@ -169,8 +173,8 @@ namespace RPGOnline.Infrastructure.Services
                                     CharacterId = characterId,
                                     AssetId = asset.AssetId,
                                     CreationDate = asset.CreationDate,
-                                    CharacterName = character.CharacterName,
-                                    Remarks = character.Remarks,
+                                    Name = character.CharacterName,
+                                    Description = character.Remarks,
                                     Gold = character.Gold,
                                     Avatar = character.Avatar,
                                     JsonResponse = jsonResponse,
@@ -199,7 +203,7 @@ namespace RPGOnline.Infrastructure.Services
                                         HiddenTalent = race.HiddenTalent,
                                         KeyAttribute = race.KeyAttribute,
                                     } : null,
-                                    Items = character.CharacterItems != null ? (
+                                    ItemList = character.CharacterItems != null ? (
                                     character.CharacterItems
                                         .Select(i =>
                                             new CharacterItemResponse()
@@ -216,7 +220,7 @@ namespace RPGOnline.Infrastructure.Services
                                             }
                                         )
                                         .ToList()) : null,
-                                    Spells = character.Spells != null ? (
+                                    SpellList = character.Spells != null ? (
                                         character.Spells.Select(s =>
                                             new CharacterSpellResponse()
                                             {
