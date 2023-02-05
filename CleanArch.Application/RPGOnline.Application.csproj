@@ -24,8 +24,4 @@
     <ProjectReference Include="..\CleanArch.Domain\RPGOnline.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Requests\Asset\Character\" />
-  </ItemGroup>
-
 </Project>

@@ -1,0 +1,45 @@
+﻿using RPGOnline.Application.DTOs.Requests.Asset.Character.FromJson;
+using RPGOnline.Application.DTOs.Responses.Asset.Character.Character;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RPGOnline.Application.DTOs.Requests.Asset.Character
+{
+    public class PostCharacterRequest
+    {
+        [Required]
+        public int UId { get; set; }
+
+        [Required]
+        public bool IsPublic { get; set; }
+
+        [Required]
+        [StringLength(2)]
+        public string Language { get; set; } = null!;
+
+        [Required]
+        [MinLength(1)]
+        [MaxLength(80)]
+        public string Name { get; set; } = null!;
+
+        [Required]
+        [MinLength(5)]
+        [MaxLength(280)]
+        public string? Description { get; set; } = null!;
+
+        [Required]
+        [Range(0, 9999999)]
+        public int Gold { get; set; }
+
+        //public string? Avatar { get; set; }
+
+        public virtual FromJsonRequest JsonRequest { get; set; } = null!;
+
+        public int? Race { get; set; }
+        public int? Profession { get; set; }
+    }
+}

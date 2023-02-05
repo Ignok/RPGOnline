@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
+using RPGOnline.Application.DTOs.Requests.Asset.Character;
+using RPGOnline.Application.DTOs.Requests.Asset.Profession;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Infrastructure.Services;
 using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
+    [Authorize]
     public class CharacterController : CommonController
     {
         private readonly ICharacter _characterService;
@@ -39,6 +42,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetCharacters([FromQuery] SearchAssetRequest searchAssetRequest, CancellationToken cancellationToken)
         {
@@ -128,6 +132,37 @@ namespace RPGOnline.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostCharacter(PostCharacterRequest postCharacterRequest)
+        {
+            try
+            {
+                if (!IsSameId(postCharacterRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _characterService.PostCharacter(postCharacterRequest);
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
         }
     }
 }

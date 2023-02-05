@@ -20,8 +20,8 @@ namespace RPGOnline.Domain.Models
         public string? Remarks { get; set; }
         public int Gold { get; set; }
         public string? Avatar { get; set; }
-        public string MotivationJson { get; set; } = null!;
-        public string CharacteristicsJson { get; set; } = null!;
+        public string? MotivationJson { get; set; } = null!;
+        public string? CharacteristicsJson { get; set; } = null!;
         public string SkillsetJson { get; set; } = null!;
         public string ProficiencyJson { get; set; } = null!;
 

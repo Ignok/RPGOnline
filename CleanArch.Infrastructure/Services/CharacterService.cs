@@ -1,9 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Common;
+using Microsoft.VisualStudio.Services.Common;
 using Newtonsoft.Json;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests.Asset;
+using RPGOnline.Application.DTOs.Requests.Asset.Character;
+using RPGOnline.Application.DTOs.Requests.Asset.Character.FromJson;
+using RPGOnline.Application.DTOs.Requests.Asset.Profession;
+using RPGOnline.Application.DTOs.Responses.Asset.Character;
 using RPGOnline.Application.DTOs.Responses.Asset.Character.Character;
 using RPGOnline.Application.DTOs.Responses.Asset.Item;
 using RPGOnline.Application.DTOs.Responses.Asset.Profession;
@@ -12,6 +17,7 @@ using RPGOnline.Application.DTOs.Responses.Asset.Spell;
 using RPGOnline.Application.DTOs.Responses.Character;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
+using RPGOnline.Domain.Enums;
 using RPGOnline.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -134,6 +140,7 @@ namespace RPGOnline.Infrastructure.Services
                                         TimesSaved = character.Asset.UserSavedAssets.Count,
                                         PrefferedLanguage = character.Asset.Language,
                                     })
+                                .OrderByDescending(c => c.CreationDate)
                                 .ToListAsync();
 
                 int pageCount = (int)Math.Ceiling((double)result.Count / charactersOnPageAmount);
@@ -314,6 +321,180 @@ namespace RPGOnline.Infrastructure.Services
                 Characteristics = characteristicsResponse,
                 Skillset = skillsetResponse,
                 Attributes = attributesResponse,
+            };
+        }
+
+        public async Task<CharacterSimplifiedResponse> PostCharacter(PostCharacterRequest postCharacterRequest)
+        {
+            if (postCharacterRequest == null) throw new ArgumentNullException(nameof(postCharacterRequest));
+            
+            //if attributes or skillset is null
+            if (postCharacterRequest.JsonRequest.Skillset == null || postCharacterRequest.JsonRequest.Attributes == null)
+                throw new ArgumentNullException(nameof(postCharacterRequest));
+
+            //if user exists
+            if (!_dbContext.Users.Where(u => u.UId == postCharacterRequest.UId).ToList().Any())
+                throw new ArgumentException($"User with id: {postCharacterRequest.UId} does not exist");
+
+            //if language exists
+            if (!Enum.IsDefined(typeof(Language), postCharacterRequest.Language))
+                throw new InvalidDataException($"Language '{postCharacterRequest.Language}' is not supported");
+
+            var asset = new Asset()
+            {
+                AssetId = (_dbContext.Assets.Max(a => (int)a.AssetId) + 1),
+                AuthorId = postCharacterRequest.UId,
+                IsPublic = postCharacterRequest.IsPublic,
+                Language = postCharacterRequest.Language,
+                CreationDate = DateTime.Now,
+                Author = await _dbContext.Users.Where(u => u.UId == postCharacterRequest.UId).SingleAsync(),
+            };
+
+            string? serializedMotivation = null;
+            if(postCharacterRequest.JsonRequest.Motivation != null)
+            {
+                serializedMotivation = JsonConvert.SerializeObject(postCharacterRequest.JsonRequest.Motivation);
+            }
+
+            string? serializedCharacteristics = null;
+            if (postCharacterRequest.JsonRequest.Characteristics != null)
+            {
+                serializedCharacteristics = JsonConvert.SerializeObject(postCharacterRequest.JsonRequest.Characteristics);
+            }
+
+            string? serializedSkillset = null;
+            if(postCharacterRequest.JsonRequest.Skillset != null)
+            {
+                serializedSkillset = JsonConvert.SerializeObject(postCharacterRequest.JsonRequest.Skillset);
+            } 
+            else if (postCharacterRequest.Profession != null)
+            {
+                var profession = await _dbContext.Professions
+                                    .Where(p => postCharacterRequest.Profession == p.ProfessionId)
+                                    .SingleAsync();
+
+                var skillset = new SkillsetRequest()
+                {
+                    Weapon = profession.WeaponMod,
+                    Armor = profession.ArmorMod,
+                    Gadget = profession.GadgetMod,
+                    Companion = profession.CompanionMod,
+                    Psyche = profession.PsycheMod
+                };
+                serializedSkillset = JsonConvert.SerializeObject(skillset);
+            }
+
+            var serializedAttributes = JsonConvert.SerializeObject(postCharacterRequest.JsonRequest.Attributes);
+
+            var character = new Character()
+            {
+                CharacterId = (_dbContext.Characters.Max(c => (int)c.CharacterId) + 1),
+                AssetId = asset.AssetId,
+                CharacterName = postCharacterRequest.Name,
+                Remarks = postCharacterRequest.Description,
+                Gold = postCharacterRequest.Gold,
+                //avatar
+                ProfessionId = postCharacterRequest.Profession,
+                RaceId = postCharacterRequest.Race,
+                MotivationJson = serializedMotivation,
+                CharacteristicsJson = serializedCharacteristics,
+                SkillsetJson = serializedSkillset,
+                ProficiencyJson = serializedAttributes,
+                Asset = asset,
+                Profession = _dbContext.Professions.SingleOrDefault(p => p.ProfessionId == postCharacterRequest.Profession),
+                Race = _dbContext.Races.SingleOrDefault(r => r.RaceId == postCharacterRequest.Race),
+            };
+
+            asset.Characters.Add(character);
+
+            if(postCharacterRequest.Race != null)
+            {
+                var race = await _dbContext.Races
+                                    .Where(r => postCharacterRequest.Race == r.RaceId)
+                                    .SingleOrDefaultAsync();
+                if(race != null)
+                {
+                    character.Race = race;
+                }
+            }
+
+            if(postCharacterRequest.Profession != null)
+            {
+                var profession = await _dbContext.Professions
+                                    .Include(p => p.Spells)
+                                    .Where(p => postCharacterRequest.Profession == p.ProfessionId)
+                                    .SingleOrDefaultAsync();
+
+                if(profession != null)
+                {
+                    character.Profession = profession;
+
+                    if (profession.Spells != null)
+                    {
+                        var spells = await _dbContext.Spells
+                                    .Include(a => a.Asset)
+                                    .Where(s => profession.Spells.Contains(s))
+                                    .Where(s => s.Asset.IsPublic || s.Asset.Author.UId == postCharacterRequest.UId)
+                                    .ToListAsync();
+
+                        character.Spells.AddRange(spells);
+                    }
+
+                    if(profession.ProfessionStartingItems != null)
+                    {
+                        var items = await _dbContext.Items
+                                    .Include(a => a.Asset)
+                                    .Include(psi => psi.ProfessionStartingItems).ThenInclude(psi => psi.Profession)
+                                    .Where(i => i.Asset.IsPublic || i.Asset.Author.UId == postCharacterRequest.UId)
+                                    .Where(i => i.ProfessionStartingItems
+                                                    .Where(psi => psi.ProfessionId == profession.ProfessionId)
+                                                    .Select(psi => psi.Item).Any())
+                                    //.SelectMany(Enumerable<Item>))
+                                    .ToListAsync();
+
+                        var characterItemsId = (_dbContext.CharacterItems.Max(i => (int)i.CharacterItemsId) + 1);
+                        var characterItems = (from Item i in items
+                                              let characterItem = new CharacterItem()
+                                              {
+                                                  CharacterItemsId = characterItemsId++,
+                                                  ItemId = i.ItemId,
+                                                  CharacterId = character.CharacterId,
+                                                  Quantity = 1,
+                                                  Item = i,
+                                                  Character = character
+                                              }
+                                              select characterItem)
+                                              .ToList();
+                        character.CharacterItems.AddRange(characterItems);
+                    }
+                }
+            }
+
+            _dbContext.Assets.Add(asset);
+            _dbContext.Characters.Add(character);
+            _dbContext.SaveChanges();
+
+            return new CharacterSimplifiedResponse()
+            {
+                CharacterId = character.CharacterId,
+                AssetId = character.Asset.AssetId,
+                CreationDate = character.Asset.CreationDate,
+                Name = character.CharacterName,
+                Description = character.Remarks,
+                Gold = character.Gold,
+                //avatar
+                JsonResponse = GetFromJsonResponse(character),
+                ProfessionName = character.Profession?.Name,
+                RaceName = character.Race?.Name,
+                ItemsNames = character.CharacterItems?.Select(ci => ci.Item.Name).ToList(),
+                SpellsNames = character.Spells?.Select(cs => cs.Name).ToList(),
+                CreatorNavigation = new UserSimplifiedResponse()
+                {
+                    UId = asset.Author.UId,
+                    Username = asset.Author.Username,
+                    Picture = asset.Author.Picture,
+                },
+                PrefferedLanguage = character.Asset.Language
             };
         }
 
