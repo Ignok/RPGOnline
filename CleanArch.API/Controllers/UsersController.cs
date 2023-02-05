@@ -226,6 +226,57 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [HttpPost("{uId}/Posts/{postId}")]
+        public async Task<IActionResult> PostSavePost(int uId, int postId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.PostSavePost(uId, postId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("{uId}/Posts/{postId}")]
+        public async Task<IActionResult> DeleteSavePost(int uId, int postId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.DeleteSavePost(uId, postId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         private bool UserExists(int id)
         {

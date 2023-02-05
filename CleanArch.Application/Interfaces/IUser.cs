@@ -16,5 +16,8 @@ namespace RPGOnline.Application.Interfaces
 
         Task<object> PostSaveAsset(int uId, int assetId);
         Task<object> DeleteSaveAsset(int uId, int assetId);
+
+        Task<object> PostSavePost(int uId, int postId);
+        Task<object> DeleteSavePost(int uId, int postId);
     }
 }

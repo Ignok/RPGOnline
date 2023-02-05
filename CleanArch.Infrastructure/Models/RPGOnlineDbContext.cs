@@ -339,6 +339,7 @@ namespace RPGOnline.Infrastructure.Models
                 entity.Property(e => e.IsRequestSent).HasColumnName("is_request_sent");
 
                 entity.Property(e => e.IsRequestReceived).HasColumnName("is_request_received");
+                entity.Property(e => e.Rating).HasColumnName("rating");
 
                 entity.HasOne(d => d.FriendU)
                     .WithMany(p => p.FriendshipFriendUs)

@@ -82,7 +82,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Manage")]
         public async Task<IActionResult> ManageFriendship(FriendshipRequest friendshipRequest)
         {
             try
@@ -103,6 +103,40 @@ namespace RPGOnline.API.Controllers
                 else
                 {
                     var result = await _friendshipService.ManageFriendship(friendshipRequest);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Rate")]
+        public async Task<IActionResult> ManageRating(FriendshipRatingRequest friendshipRatingRequest)
+        {
+            try
+            {
+                if (!IsSameId(friendshipRatingRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                if (friendshipRatingRequest == null)
+                {
+                    throw new ArgumentNullException(nameof(friendshipRatingRequest));
+                }
+                else if (!UserExists(friendshipRatingRequest.TargetUId))
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    var result = await _friendshipService.ManageRating(friendshipRatingRequest);
                     if (result == null)
                     {
                         return NoContent();
