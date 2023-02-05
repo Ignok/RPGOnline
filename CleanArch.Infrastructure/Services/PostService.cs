@@ -64,6 +64,7 @@ namespace RPGOnline.Infrastructure.Services
                         Picture = p.Picture,
                         CreationDate = p.CreationDate,
                         Likes = p.UserLikedPosts.Count,
+                        IsLiked = p.UserLikedPosts.Any(ulp => ulp.UId == uId),
                         CreatorNavigation = new UserSimplifiedResponse()
                         {
                             UId = p.UIdNavigation.UId,
@@ -107,6 +108,7 @@ namespace RPGOnline.Infrastructure.Services
         {
             
             var result = await _dbContext.Posts
+                .Include(p => p.UserLikedPosts)
                 .Where(p => p.PostId == postId)
                 .Select(p => new PostDetailsResponse()
                 {
@@ -116,6 +118,7 @@ namespace RPGOnline.Infrastructure.Services
                     Picture = p.Picture,
                     CreationDate = p.CreationDate,
                     Likes = p.UserLikedPosts.Count(),
+                    IsLiked = p.UserLikedPosts.Any(ulp => ulp.UId == uId),
                     CreatorNavigation = _dbContext.Users
                                         .Where(u => u.UId == p.UId)
                                         .Select(u => new UserSimplifiedResponse()

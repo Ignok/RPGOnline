@@ -47,6 +47,7 @@ namespace RPGOnline.Application.Common.Interfaces
 
         //Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         public int SaveChanges();
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
         public EntityEntry Entry(object entity);
     }

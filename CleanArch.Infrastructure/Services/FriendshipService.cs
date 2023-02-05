@@ -92,6 +92,7 @@ namespace RPGOnline.Infrastructure.Services
                         IsBlocked = f.IsBlocked,
                         IsRequestSent = f.IsRequestSent,
                         IsRequestReceived = f.IsRequestReceived,
+                        Rating = f.Rating,
                     }).ToListAsync();
 
 
@@ -99,7 +100,47 @@ namespace RPGOnline.Infrastructure.Services
             };
         }
 
-        public async Task<FriendshipResponse> ManageFriendship(FriendshipRequest friendshipRequest)
+        public async Task<FriendshipResponse> ManageRating(FriendshipRatingRequest friendshipRatingRequest)
+        {
+            var friendship = await _dbContext.Friendships
+                .Where(f => f.UId == friendshipRatingRequest.UId
+                            && f.FriendUId == friendshipRatingRequest.TargetUId
+                            && f.IsFriend
+                ).FirstOrDefaultAsync();
+
+            if(friendship == null)
+            {
+                throw new Exception("You cannot rate user that is not your friend");
+            }
+
+            if(friendshipRatingRequest.Rating > 5)
+            {
+                friendship.Rating = 5;
+            }
+            else if(friendshipRatingRequest.Rating < 0)
+            {
+                friendship.Rating = 0;
+            }
+            else
+            {
+                friendship.Rating = friendshipRatingRequest.Rating;
+            }
+
+
+            await _dbContext.SaveChangesAsync();
+
+            return new FriendshipResponse()
+            {
+                IsFriend = friendship.IsFriend,
+                IsFollowed = friendship.IsFollowed,
+                IsBlocked = friendship.IsBlocked,
+                IsRequestSent = friendship.IsRequestSent,
+                IsRequestReceived = friendship.IsRequestReceived,
+                Rating = friendship.Rating,
+            };
+        }
+
+            public async Task<FriendshipResponse> ManageFriendship(FriendshipRequest friendshipRequest)
         {
             //if friendship option exists
             if (!Enum.IsDefined(typeof(Friendship), friendshipRequest.Option))
@@ -122,6 +163,7 @@ namespace RPGOnline.Infrastructure.Services
                     IsBlocked = false,
                     IsRequestSent = false,
                     IsRequestReceived = false,
+                    Rating = 0,
                 };
                 _dbContext.Friendships.Add(friendshipStatus);
             }
@@ -136,6 +178,7 @@ namespace RPGOnline.Infrastructure.Services
                     IsBlocked = false,
                     IsRequestSent = false,
                     IsRequestReceived = false,
+                    Rating = 0,
                 };
                 _dbContext.Friendships.Add(viceFriendshipStatus);
             }
@@ -314,6 +357,7 @@ namespace RPGOnline.Infrastructure.Services
                     IsBlocked = false,
                     IsRequestSent = false,
                     IsRequestReceived = false,
+                    Rating = 0,
                 };
             }
         }

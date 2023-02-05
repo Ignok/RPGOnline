@@ -101,6 +101,7 @@ namespace RPGOnline.Infrastructure.Services
                         HasBlockedMe = u.FriendshipUIdNavigations
                                         .Where(u => u.FriendUId == uId)
                                         .Where(u => u.IsBlocked).Any(),
+                        Rating = u.FriendshipFriendUs.Where(u => u.UId == uId).Select(u => u.Rating).FirstOrDefault(),
                     }
                         
                 }).SingleOrDefaultAsync();
@@ -216,6 +217,58 @@ namespace RPGOnline.Infrastructure.Services
             _dbContext.SaveChanges();
 
             return "Asset unsaved";
+        }
+
+
+
+        //Assets save and unsave
+        public async Task<object> PostSavePost(int uId, int postId)
+        {
+            var post = await _dbContext.Posts.Where(p => p.PostId == postId).FirstOrDefaultAsync();
+            if (post == null)
+            {
+                throw new Exception("Post does not exist");
+            }
+
+            var ulp = await _dbContext.UserLikedPosts.Where(ulp => ulp.UId == uId && ulp.PostId == postId).FirstOrDefaultAsync();
+            if (ulp != null)
+            {
+                throw new Exception("User's already liked this post");
+            }
+
+
+
+            var userLikedPost = new Domain.Models.UserLikedPost()
+            {
+                UId = uId,
+                PostId = postId,
+                LikeDate = DateTime.Now,
+            };
+
+            _dbContext.UserLikedPosts.Add(userLikedPost);
+            _dbContext.SaveChanges();
+
+            return "Post liked";
+        }
+
+        public async Task<object> DeleteSavePost(int uId, int postId)
+        {
+            var post = await _dbContext.Posts.Where(p => p.PostId == postId).FirstOrDefaultAsync();
+            if (post == null)
+            {
+                throw new Exception("Post does not exist");
+            }
+
+            var ulp = await _dbContext.UserLikedPosts.Where(ulp => ulp.UId == uId && ulp.PostId == postId).FirstOrDefaultAsync();
+            if (ulp == null)
+            {
+                throw new Exception("User's already liked this post");
+            }
+
+            _dbContext.UserLikedPosts.Remove(ulp);
+            _dbContext.SaveChanges();
+
+            return "Post unliked";
         }
 
 

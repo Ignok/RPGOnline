@@ -12,6 +12,7 @@ namespace RPGOnline.Domain.Models
         public bool IsBlocked { get; set; }
         public bool IsRequestSent { get; set; }
         public bool IsRequestReceived { get; set; }
+        public byte Rating { get; set; }
 
         public virtual User FriendU { get; set; } = null!;
         public virtual User UIdNavigation { get; set; } = null!;
