@@ -19,6 +19,7 @@ namespace RPGOnline.Application.DTOs.Responses.Friendship
         public bool IsBlocked { get; set; }
         public bool IsRequestSent { get; set; }
         public bool IsRequestReceived { get; set; }
-        public byte Rating { get; set; } = 0;
+        public byte MyRating { get; set; } = 0;
+        public double AverageRating { get; set; } = 0.0;
     }
 }

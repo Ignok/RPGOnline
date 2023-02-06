@@ -92,7 +92,7 @@ namespace RPGOnline.Infrastructure.Services
                         IsBlocked = f.IsBlocked,
                         IsRequestSent = f.IsRequestSent,
                         IsRequestReceived = f.IsRequestReceived,
-                        Rating = f.Rating,
+                        MyRating = f.Rating,
                     }).ToListAsync();
 
 
@@ -136,7 +136,7 @@ namespace RPGOnline.Infrastructure.Services
                 IsBlocked = friendship.IsBlocked,
                 IsRequestSent = friendship.IsRequestSent,
                 IsRequestReceived = friendship.IsRequestReceived,
-                Rating = friendship.Rating,
+                MyRating = friendship.Rating,
             };
         }
 
@@ -281,10 +281,12 @@ namespace RPGOnline.Infrastructure.Services
                         friendshipStatus.IsRequestReceived = false;
                         friendshipStatus.IsFriend = false;
                         friendshipStatus.IsBlocked = false;
+                        friendshipStatus.Rating = 0;
 
                         viceFriendshipStatus.IsRequestSent = false;
                         viceFriendshipStatus.IsRequestReceived = false;
                         viceFriendshipStatus.IsFriend = false;
+                        viceFriendshipStatus.Rating = 0;
                     }
 
                     break;
@@ -299,12 +301,15 @@ namespace RPGOnline.Infrastructure.Services
                     viceFriendshipStatus.IsRequestReceived = false;
                     viceFriendshipStatus.IsRequestSent = false;
                     viceFriendshipStatus.IsFollowed = false;
+                    viceFriendshipStatus.Rating = 0;
+
 
                     friendshipStatus.IsBlocked = true;
                     friendshipStatus.IsFollowed = false;
                     friendshipStatus.IsRequestSent = false;
                     friendshipStatus.IsRequestReceived = false;
                     friendshipStatus.IsFriend = false;
+                    friendshipStatus.Rating = 0;
 
                     break;
 
@@ -357,7 +362,7 @@ namespace RPGOnline.Infrastructure.Services
                     IsBlocked = false,
                     IsRequestSent = false,
                     IsRequestReceived = false,
-                    Rating = 0,
+                    MyRating = 0,
                 };
             }
         }

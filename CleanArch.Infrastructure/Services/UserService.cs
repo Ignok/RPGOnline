@@ -31,6 +31,7 @@ namespace RPGOnline.Infrastructure.Services
 
                 var result = _dbContext.Users
                     .Include(u => u.FriendshipUIdNavigations)
+                    .Include(u => u.FriendshipFriendUs)
                     .AsParallel().WithCancellation(cancellationToken)
                     //.Where(u => attitude.Equals(null) || u.Attitude.Equals(attitude))
                     .Where(u => String.IsNullOrEmpty(userRequest.Attitude)
@@ -51,6 +52,7 @@ namespace RPGOnline.Infrastructure.Services
                         HasBlockedMe = u.FriendshipUIdNavigations
                                         .Where(u => u.FriendUId == userId)
                                         .Where(u => u.IsBlocked).Any(),
+                        AverageRating = u.FriendshipFriendUs.Where(f => f.Rating != 0).Select(f => (int)f.Rating).DefaultIfEmpty().Average(),
                     }).ToList();
 
 
@@ -101,7 +103,8 @@ namespace RPGOnline.Infrastructure.Services
                         HasBlockedMe = u.FriendshipUIdNavigations
                                         .Where(u => u.FriendUId == uId)
                                         .Where(u => u.IsBlocked).Any(),
-                        Rating = u.FriendshipFriendUs.Where(u => u.UId == uId).Select(u => u.Rating).FirstOrDefault(),
+                        MyRating = u.FriendshipFriendUs.Where(u => u.UId == uId).Select(u => u.Rating).FirstOrDefault(),
+                        AverageRating = u.FriendshipFriendUs.Where(f => f.Rating != 0).Select(f => (int)f.Rating).DefaultIfEmpty().Average(),
                     }
                         
                 }).SingleOrDefaultAsync();

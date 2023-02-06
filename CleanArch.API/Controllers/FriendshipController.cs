@@ -66,7 +66,12 @@ namespace RPGOnline.API.Controllers
                 else
                 {
                     var claimsIdentity = this.User.Identity as ClaimsIdentity;
-                    var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+                    var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                    if(userId == null)
+                    {
+                        return BadRequest("Cannot read user's ID");
+                    }
 
                     var result = await _friendshipService.GetUserFriends(Int32.Parse(userId), id);
                     if (result == null)
@@ -158,7 +163,7 @@ namespace RPGOnline.API.Controllers
         private bool IsSameId(int id)
         {
             var claimsIdentity = this.User.Identity as ClaimsIdentity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null) return false;
 
