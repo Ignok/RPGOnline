@@ -729,7 +729,7 @@ namespace RPGOnline.Infrastructure.Models
                     .HasColumnName("tag");
 
                 entity.Property(e => e.Picture)
-                    .HasMaxLength(60)
+                    .HasMaxLength(280)
                     .IsUnicode(false)
                     .HasColumnName("picture");
 

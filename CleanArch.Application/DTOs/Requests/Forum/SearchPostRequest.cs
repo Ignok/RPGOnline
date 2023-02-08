@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGOnline.Application.DTOs.Requests
+namespace RPGOnline.Application.DTOs.Requests.Forum
 {
     [BindProperties]
     public class SearchPostRequest

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.Forum;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
@@ -54,6 +55,8 @@ namespace RPGOnline.Infrastructure.Services
                             .Where(f => f.IsFollowed).Any()
                         )
                     .Include(ulp => ulp.UserLikedPosts)
+                        .Where(p => !searchPostRequest.OnlyFavourite || p.UserLikedPosts
+                            .Where(ulp => ulp.UId == uId).Any())
                     .Include(c => c.Comments)
                     .AsParallel().WithCancellation(cancellationToken)
                     .Select(p => new PostResponse()
@@ -63,6 +66,7 @@ namespace RPGOnline.Infrastructure.Services
                         Content = p.Content,
                         Picture = p.Picture,
                         CreationDate = p.CreationDate,
+                        Tag = p.Tag,
                         Likes = p.UserLikedPosts.Count,
                         IsLiked = p.UserLikedPosts.Any(ulp => ulp.UId == uId),
                         CreatorNavigation = new UserSimplifiedResponse()
@@ -117,7 +121,8 @@ namespace RPGOnline.Infrastructure.Services
                     Content = p.Content,
                     Picture = p.Picture,
                     CreationDate = p.CreationDate,
-                    Likes = p.UserLikedPosts.Count(),
+                    Tag = p.Tag,
+                    Likes = p.UserLikedPosts.Count,
                     IsLiked = p.UserLikedPosts.Any(ulp => ulp.UId == uId),
                     CreatorNavigation = _dbContext.Users
                                         .Where(u => u.UId == p.UId)
@@ -187,6 +192,7 @@ namespace RPGOnline.Infrastructure.Services
                 UId = postRequest.UId,
                 Title = postRequest.Title,
                 Content = postRequest.Content,
+                Tag = postRequest.Tag,
                 Picture = postRequest.Picture,
                 CreationDate = DateTime.Now
             };
@@ -200,6 +206,7 @@ namespace RPGOnline.Infrastructure.Services
             };
 
         }
+
 
         public async Task<CommentResponse> PostComment(int postId, CommentRequest commentRequest)
         {

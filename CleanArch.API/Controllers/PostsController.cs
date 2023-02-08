@@ -1,22 +1,27 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.TeamFoundation;
-using RPGOnline.Application.DTOs.Requests;
+using Microsoft.Extensions.Options;
+using RPGOnline.API.Helpers;
+using RPGOnline.Application.DTOs.Requests.Forum;
 using RPGOnline.Application.Interfaces;
 using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
+    [Authorize]
     public class PostsController : CommonController
     {
 
         private readonly IPost _postService;
+        private readonly BlobStorageConf _blobStorageConf;
 
-        public PostsController(IPost postService)
+        public PostsController(IPost postService, IOptions<BlobStorageConf> blobStorageConf)
         {
             _postService = postService;
+            _blobStorageConf = blobStorageConf.Value;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetPosts([FromQuery] SearchPostRequest postRequest, CancellationToken cancellationToken)
         {
@@ -47,6 +52,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPost(int id)
         {
@@ -69,7 +75,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        [Authorize]
+
         [HttpPost]
         public async Task<IActionResult> PostPost(PostRequest postRequest)
         {
@@ -94,7 +100,8 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        [Authorize]
+
+
         [HttpPost("{postId}/Comment")]
         public async Task<IActionResult> PostComment(int postId, CommentRequest commentRequest)
         {
@@ -111,6 +118,24 @@ namespace RPGOnline.API.Controllers
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("BlobToken/{uId}")]
+        public async Task<IActionResult> GetBlobToken(int uId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                return Ok(_blobStorageConf);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex);
             }
         }
 

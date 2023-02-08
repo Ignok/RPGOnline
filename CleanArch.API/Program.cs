@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using RPGOnline.API.Helpers;
 using RPGOnline.API.Middlewares;
 using RPGOnline.Application;
 using RPGOnline.Application.Common.Interfaces;
@@ -34,6 +35,8 @@ builder.Services.AddCors(c =>
             });
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<BlobStorageConf>(configuration.GetSection("BlobStorage"));
 
 builder.Services.AddScoped<IApplicationDbContext, RPGOnlineDbContext>();
 builder.Services.AddScoped<IUser, UserService>();

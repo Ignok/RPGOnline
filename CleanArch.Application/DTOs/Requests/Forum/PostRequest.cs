@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGOnline.Application.DTOs.Requests
+namespace RPGOnline.Application.DTOs.Requests.Forum
 {
     public class PostRequest
     {
@@ -20,7 +20,7 @@ namespace RPGOnline.Application.DTOs.Requests
         [MaxLength(1080)]
         public string Content { get; set; }
 
-        
+        [MaxLength(280)]
         public string? Picture { get; set; }
         public string? Tag { get; set; }
     }
