@@ -20,5 +20,6 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Profession
         public int GadgetMod { get; set; }
         public int CompanionMod { get; set; }
         public int PsycheMod { get; set; }
+        public string Language { get;set; } = null!;
     }
 }

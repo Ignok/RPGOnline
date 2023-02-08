@@ -94,13 +94,11 @@ namespace RPGOnline.Infrastructure.Services
         public async Task<ICollection<GetRaceSimplifiedResponse>> GetRacesForCharacter(int uId, GetAssetForCharacterRequest getRaceRequest)
         {
 
-            var prefferedLanguages = getRaceRequest.PrefferedLanguage.Split('-');
-            // select* from asset a join[character] r on a.asset_id = r.asset_id where is_public = 1 or a.author_id = 3;
+            var keyValues = getRaceRequest.KeyValueName.Split('-');
+
             var result = await (from asset in _dbContext.Assets
                                 join race in _dbContext.Races on asset.AssetId equals race.AssetId
-                                where ((object.Equals(race.KeyAttribute, getRaceRequest.KeyValueName))
-                                    || (object.Equals(race.KeyAttribute, null)))
-                                where prefferedLanguages.Contains(asset.Language)
+                                where keyValues.Contains(race.KeyAttribute) || object.Equals(race.KeyAttribute, null)
                                 where asset.IsPublic || asset.AuthorId == uId
                                 orderby race.Name ascending
                                 select new GetRaceSimplifiedResponse()
@@ -111,7 +109,8 @@ namespace RPGOnline.Infrastructure.Services
                                      Description = race.Description,
                                      Talent = race.Talent,
                                      HiddenTalent = race.HiddenTalent,
-                                     KeyAttribute = race.KeyAttribute
+                                     KeyAttribute = race.KeyAttribute,
+                                     Language = asset.Language,
                                 })
                                 .ToListAsync();
             return result;

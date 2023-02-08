@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Race;
 using RPGOnline.Application.Interfaces;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
+    [Authorize]
     public class RaceController : CommonController
     {
         private readonly IRace _raceService;
@@ -15,7 +17,7 @@ namespace RPGOnline.API.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetRaces([FromQuery] SearchAssetRequest searchRaceRequest, CancellationToken cancellationToken)
         {

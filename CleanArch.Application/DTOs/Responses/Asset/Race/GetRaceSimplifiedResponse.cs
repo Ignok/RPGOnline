@@ -15,5 +15,6 @@ namespace RPGOnline.Application.DTOs.Responses.Asset.Race
         public string Talent { get; set; } = null!;
         public string HiddenTalent { get; set; } = null!;
         public string? KeyAttribute { get; set; }
+        public string Language { get; set; } = null!;
     }
 }

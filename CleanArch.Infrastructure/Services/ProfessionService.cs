@@ -11,6 +11,7 @@ using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Enums;
 using RPGOnline.Domain.Models;
+using System.Diagnostics;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -29,11 +30,12 @@ namespace RPGOnline.Infrastructure.Services
 
         public async Task<ICollection<GetProfessionSimplifiedResponse>> GetProfessionsForCharacter(int uId, GetAssetForCharacterRequest getProfessionRequest)
         {
+
+            var keyValues = getProfessionRequest.KeyValueName.Split('-');
+
             var result = await (from asset in _dbContext.Assets
                                 join profession in _dbContext.Professions on asset.AssetId equals profession.AssetId
-                                where ((object.Equals(profession.KeyAttribute, getProfessionRequest.KeyValueName))
-                                    || (object.Equals(profession.KeyAttribute, null)))
-                                where getProfessionRequest.PrefferedLanguage.Contains(asset.Language)
+                                where keyValues.Contains(profession.KeyAttribute) || object.Equals(profession.KeyAttribute, null)
                                 where asset.IsPublic || asset.AuthorId == uId
                                 orderby profession.Name ascending
                                 select new GetProfessionSimplifiedResponse()
@@ -49,7 +51,8 @@ namespace RPGOnline.Infrastructure.Services
                                     ArmorMod = profession.ArmorMod,
                                     GadgetMod = profession.GadgetMod,
                                     CompanionMod = profession.CompanionMod,
-                                    PsycheMod = profession.PsycheMod
+                                    PsycheMod = profession.PsycheMod,
+                                    Language = asset.Language,
                                 })
                                 .ToListAsync();
             return result;

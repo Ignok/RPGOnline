@@ -328,9 +328,9 @@ namespace RPGOnline.Infrastructure.Services
         {
             if (postCharacterRequest == null) throw new ArgumentNullException(nameof(postCharacterRequest));
             
-            //if attributes or skillset is null
-            if (postCharacterRequest.JsonRequest.Skillset == null || postCharacterRequest.JsonRequest.Attributes == null)
-                throw new ArgumentNullException(nameof(postCharacterRequest));
+            //if attributes are null
+            if (postCharacterRequest.JsonRequest.Attributes == null)
+                throw new ArgumentNullException($"Attributes are mandatory");
 
             //if user exists
             if (!_dbContext.Users.Where(u => u.UId == postCharacterRequest.UId).ToList().Any())
