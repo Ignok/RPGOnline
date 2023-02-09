@@ -385,7 +385,12 @@ namespace RPGOnline.Infrastructure.Services
             }
 
             string? serializedSkillset = null;
-            if(postCharacterRequest.JsonRequest.Skillset != null)
+            if((postCharacterRequest.JsonRequest.Skillset != null)
+                && !(postCharacterRequest.JsonRequest.Skillset.Weapon == 0
+                && postCharacterRequest.JsonRequest.Skillset.Armor == 0
+                && postCharacterRequest.JsonRequest.Skillset.Gadget == 0
+                && postCharacterRequest.JsonRequest.Skillset.Companion == 0
+                && postCharacterRequest.JsonRequest.Skillset.Psyche == 0))
             {
                 serializedSkillset = JsonConvert.SerializeObject(postCharacterRequest.JsonRequest.Skillset);
             } 
