@@ -12,5 +12,6 @@ namespace RPGOnline.Domain.Models
         public string Beliefs { get; set; } = null!;
         public string Face { get; set; } = null!;
         public string Origins { get; set; } = null!;
+        public string Language { get; set; } = null!;
     }
 }

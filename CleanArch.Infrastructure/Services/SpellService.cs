@@ -45,7 +45,8 @@ namespace RPGOnline.Infrastructure.Services
                                                 .Include(s => s.Asset.Author)
                                                 .Include(s => s.Asset.UserSavedAssets)
                                                 .AsParallel().WithCancellation(cancellationToken)
-                    .Where(s => s.Asset.IsPublic)
+                    .Where(s => s.Asset.IsPublic || s.Asset.AuthorId == userId)
+                    .Where(s => !searchSpellRequest.IfOnlyMyAssets.GetValueOrDefault() || s.Asset.AuthorId == userId)
                     .Where(s => String.IsNullOrEmpty(searchSpellRequest.KeyValueName)
                                 || object.Equals(s.KeyAttribute, searchSpellRequest.KeyValueName)
                             )
@@ -78,6 +79,16 @@ namespace RPGOnline.Infrastructure.Services
                     //.Where(p => p...)  <- kategoria
                     .OrderByDescending(p => p.CreationDate)
                     .ToList();
+
+
+                if (searchSpellRequest.SortingByDate ?? false)
+                {
+                    result = result.OrderByDescending(i => i.CreationDate).ToList();
+                }
+                else if (searchSpellRequest.SortingByLikes ?? false)
+                {
+                    result = result.OrderByDescending(i => i.TimesSaved).ToList();
+                }
 
 
                 int pageCount = (int)Math.Ceiling((double)result.Count / spellsOnPageAmount);

@@ -138,7 +138,7 @@ namespace RPGOnline.Infrastructure.Services
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
                 claims: UserClaims,
-                expires: DateTime.Now.AddMinutes(2),
+                expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: creds
             );
 
@@ -195,7 +195,7 @@ namespace RPGOnline.Infrastructure.Services
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
                 claims: UserClaims,
-                expires: DateTime.Now.AddMinutes(2),
+                expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: creds
             );
 

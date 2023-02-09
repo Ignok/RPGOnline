@@ -29,7 +29,7 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Character
         [Required]
         [MinLength(5)]
         [MaxLength(280)]
-        public string? Description { get; set; } = null!;
+        public string Description { get; set; } = null!;
 
         [Required]
         [Range(0, 9999999)]
@@ -41,5 +41,9 @@ namespace RPGOnline.Application.DTOs.Requests.Asset.Character
 
         public int? Race { get; set; }
         public int? Profession { get; set; }
+
+        [Required]
+        [MaxLength(40)]
+        public string Type { get; set; } = null!;
     }
 }

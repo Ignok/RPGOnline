@@ -17,13 +17,14 @@ namespace RPGOnline.Domain.Models
         public int? RaceId { get; set; }
         public int? ProfessionId { get; set; }
         public string CharacterName { get; set; } = null!;
-        public string? Remarks { get; set; }
+        public string Remarks { get; set; }
         public int Gold { get; set; }
         public string? Avatar { get; set; }
         public string? MotivationJson { get; set; } = null!;
         public string? CharacteristicsJson { get; set; } = null!;
         public string SkillsetJson { get; set; } = null!;
         public string ProficiencyJson { get; set; } = null!;
+        public string Kind { get; set; } = null!;
 
         public virtual Asset Asset { get; set; } = null!;
         public virtual Profession? Profession { get; set; }

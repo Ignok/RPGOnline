@@ -43,15 +43,15 @@ namespace RPGOnline.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> GetCharacters([FromQuery] SearchAssetRequest searchAssetRequest, CancellationToken cancellationToken)
+        [HttpGet("{type}")]
+        public async Task<IActionResult> GetCharacters(string type, [FromQuery] SearchAssetRequest searchAssetRequest, CancellationToken cancellationToken)
         {
             try
             {
                 var claimsIdentity = this.User.Identity as ClaimsIdentity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
 
-                var result = await _characterService.GetCharacters(searchAssetRequest, Int32.Parse(userId), cancellationToken);
+                var result = await _characterService.GetCharacters(type, searchAssetRequest, Int32.Parse(userId), cancellationToken);
 
                 return Ok(new
                 {

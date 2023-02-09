@@ -31,7 +31,7 @@ namespace RPGOnline.API.Controllers
                     Secure = true,
                     HttpOnly = true,
                     SameSite = SameSiteMode.None,
-                    Expires = DateTime.Now.AddMinutes(10)
+                    Expires = DateTime.Now.AddMinutes(60)
                 };
 
                 Response.Cookies.Append(
@@ -92,7 +92,7 @@ namespace RPGOnline.API.Controllers
                     Secure = true,
                     HttpOnly = true,
                     SameSite = SameSiteMode.None,
-                    Expires = DateTime.Now.AddMinutes(10)
+                    Expires = DateTime.Now.AddMinutes(60)
                 };
 
                 Response.Cookies.Append(

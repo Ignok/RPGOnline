@@ -49,6 +49,8 @@ namespace RPGOnline.Application.Common.Interfaces
         public int SaveChanges();
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
+       // public Task<List<TSource>> ToListAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken = default);
+
         public EntityEntry Entry(object entity);
     }
 }

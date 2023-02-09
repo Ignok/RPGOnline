@@ -42,10 +42,15 @@ namespace RPGOnline.Infrastructure.Services
 
         private readonly int charactersOnPageAmount = 5;
 
-        public async Task<(ICollection<CharacterResponse>, int pageCount)> GetCharacters(SearchAssetRequest searchAssetRequest, int userId, CancellationToken cancellationToken)
+        public async Task<(ICollection<CharacterResponse>, int pageCount)> GetCharacters(string type, SearchAssetRequest searchAssetRequest, int userId, CancellationToken cancellationToken)
         {
             try
             {
+                //if character type exists
+                if (!Enum.IsDefined(typeof(CharacterType), type))
+                    throw new InvalidDataException($"Character type '{type}' is not supported");
+
+
                 var page = searchAssetRequest.Page;
                 if (searchAssetRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
@@ -55,12 +60,14 @@ namespace RPGOnline.Infrastructure.Services
                                     from profession in prof.DefaultIfEmpty()
                                     join r in _dbContext.Races on character.RaceId equals r.RaceId into rc
                                     from race in rc.DefaultIfEmpty()
-                                    where (character.Asset.IsPublic || character.Asset.Author.UId == userId)
+                                    where (character.Asset.IsPublic || character.Asset.AuthorId == userId)
+                                    where (!searchAssetRequest.IfOnlyMyAssets.GetValueOrDefault() || character.Asset.AuthorId == userId)
+                                    where (character.Kind.Equals(type))
                                     //warunek na typ (NPC/ MONSTER/ PLAYABLE)
                                     where (searchAssetRequest.PrefferedLanguage.Contains(character.Asset.Language))
                                     where (String.IsNullOrEmpty(searchAssetRequest.Search)
-                                            || character.CharacterName.Contains(searchAssetRequest.Search, StringComparison.OrdinalIgnoreCase)
-                                            || character.Remarks.Contains(searchAssetRequest.Search, StringComparison.OrdinalIgnoreCase)
+                                            || character.CharacterName.Contains(searchAssetRequest.Search)
+                                            || character.Remarks.Contains(searchAssetRequest.Search)
                                             )
                                     select new CharacterResponse()
                                     {
@@ -141,9 +148,19 @@ namespace RPGOnline.Infrastructure.Services
                                         PrefferedLanguage = character.Asset.Language,
                                     })
                                 .OrderByDescending(c => c.CreationDate)
-                                .ToListAsync();
+                                .ToListAsync(cancellationToken: cancellationToken);
+
+                if (searchAssetRequest.SortingByDate ?? false)
+                {
+                    result = result.OrderByDescending(i => i.CreationDate).ToList();
+                }
+                else if (searchAssetRequest.SortingByLikes ?? false)
+                {
+                    result = result.OrderByDescending(i => i.TimesSaved).ToList();
+                }
 
                 int pageCount = (int)Math.Ceiling((double)result.Count / charactersOnPageAmount);
+
 
                 result = result
                     .Skip(charactersOnPageAmount * (page - 1))
@@ -258,8 +275,8 @@ namespace RPGOnline.Infrastructure.Services
 
         private static FromJsonResponse GetFromJsonResponse(Character character)
         {
-            var motivation = JsonConvert.DeserializeObject<MotivationResponse>(character.MotivationJson);
-            var characteristics = JsonConvert.DeserializeObject<CharacteristicsResponse>(character.CharacteristicsJson);
+            var motivation = JsonConvert.DeserializeObject<MotivationResponse>(character.MotivationJson?? "");
+            var characteristics = JsonConvert.DeserializeObject<CharacteristicsResponse>(character.CharacteristicsJson ?? "");
             var skillset = JsonConvert.DeserializeObject<SkillsetResponse>(character.SkillsetJson);
             var attributes = JsonConvert.DeserializeObject<AttributesResponse>(character.ProficiencyJson);
 
@@ -340,6 +357,11 @@ namespace RPGOnline.Infrastructure.Services
             if (!Enum.IsDefined(typeof(Language), postCharacterRequest.Language))
                 throw new InvalidDataException($"Language '{postCharacterRequest.Language}' is not supported");
 
+            //if character type exists
+            if (!Enum.IsDefined(typeof(CharacterType), postCharacterRequest.Type))
+                throw new InvalidDataException($"Character type '{postCharacterRequest.Type}' is not supported");
+
+
             var asset = new Asset()
             {
                 AssetId = (_dbContext.Assets.Max(a => (int)a.AssetId) + 1),
@@ -393,6 +415,7 @@ namespace RPGOnline.Infrastructure.Services
                 CharacterName = postCharacterRequest.Name,
                 Remarks = postCharacterRequest.Description,
                 Gold = postCharacterRequest.Gold,
+                Kind = postCharacterRequest.Type,
                 //avatar
                 ProfessionId = postCharacterRequest.Profession,
                 RaceId = postCharacterRequest.Race,

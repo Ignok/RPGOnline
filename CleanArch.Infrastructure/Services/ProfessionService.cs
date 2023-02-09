@@ -74,7 +74,8 @@ namespace RPGOnline.Infrastructure.Services
                                                 .Include(p => p.ProfessionStartingItems).ThenInclude(p => p.Item).ThenInclude(p => p.Asset)
                                                 .Include(p => p.Spells).ThenInclude(p => p.Asset)
                                                 .AsParallel().WithCancellation(cancellationToken)
-                    .Where(p => p.Asset.IsPublic || p.Asset.Author.UId == userId)
+                    .Where(p => p.Asset.IsPublic || p.Asset.AuthorId == userId)
+                    .Where(i => !searchProfessionRequest.IfOnlyMyAssets.GetValueOrDefault() || i.Asset.AuthorId == userId)
                     .Where(p => String.IsNullOrEmpty(searchProfessionRequest.KeyValueName)
                                 || object.Equals(p.KeyAttribute, searchProfessionRequest.KeyValueName)
                                 || object.Equals(p.KeyAttribute, null)
@@ -149,6 +150,15 @@ namespace RPGOnline.Infrastructure.Services
                     .OrderByDescending(p => p.CreationDate)
                     .ToList();
 
+
+                if (searchProfessionRequest.SortingByDate ?? false)
+                {
+                    result = result.OrderByDescending(i => i.CreationDate).ToList();
+                }
+                else if (searchProfessionRequest.SortingByLikes ?? false)
+                {
+                    result = result.OrderByDescending(i => i.TimesSaved).ToList();
+                }
 
                 int pageCount = (int)Math.Ceiling((double)result.Count / professionsOnPageAmount);
 

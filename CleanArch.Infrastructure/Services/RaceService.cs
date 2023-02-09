@@ -38,7 +38,8 @@ namespace RPGOnline.Infrastructure.Services
                                                 .Include(r => r.Asset.UserSavedAssets)
                                                 .Include(r => r.Asset.Author)
                                                 .AsParallel().WithCancellation(cancellationToken)
-                    .Where(r => r.Asset.IsPublic)
+                    .Where(r => r.Asset.IsPublic || r.Asset.AuthorId == userId)
+                    .Where(i => !searchRaceRequest.IfOnlyMyAssets.GetValueOrDefault() || i.Asset.AuthorId == userId)
                     .Where(r => String.IsNullOrEmpty(searchRaceRequest.KeyValueName)
                                 || object.Equals(r.KeyAttribute, searchRaceRequest.KeyValueName)
                                 || object.Equals(r.KeyAttribute, null)
@@ -71,6 +72,16 @@ namespace RPGOnline.Infrastructure.Services
                     //.Where(p => p...)  <- kategoria
                     .OrderByDescending(p => p.CreationDate)
                     .ToList();
+
+
+                if (searchRaceRequest.SortingByDate ?? false)
+                {
+                    result = result.OrderByDescending(i => i.CreationDate).ToList();
+                }
+                else if (searchRaceRequest.SortingByLikes ?? false)
+                {
+                    result = result.OrderByDescending(i => i.TimesSaved).ToList();
+                }
 
 
                 int pageCount = (int)Math.Ceiling((double)result.Count / racesOnPageAmount);

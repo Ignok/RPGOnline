@@ -17,7 +17,7 @@ namespace RPGOnline.Application.Interfaces
     {
         Task<CharacterResponse> GetCharacter(int characterId);
 
-        Task<(ICollection<CharacterResponse>, int pageCount)> GetCharacters(SearchAssetRequest searchAssetRequest, int userId, CancellationToken cancellationToken);
+        Task<(ICollection<CharacterResponse>, int pageCount)> GetCharacters(string type, SearchAssetRequest searchAssetRequest, int userId, CancellationToken cancellationToken);
 
         Task<MotivationResponse> GetRandomMotivation();
 

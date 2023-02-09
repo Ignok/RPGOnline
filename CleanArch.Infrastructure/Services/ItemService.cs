@@ -34,17 +34,17 @@ namespace RPGOnline.Infrastructure.Services
         {
             try
             {
-
                 var page = searchItemRequest.Page;
                 if (searchItemRequest.Page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
 
-                
+
 
                 var result = _dbContext.Items.Include(i => i.Asset).ThenInclude(usa => usa.UserSavedAssets)
                                                 //.Include(i => i.Asset.UserSavedAssets)
                                                 .Include(i => i.Asset.Author)
                                                 .AsParallel().WithCancellation(cancellationToken)
-                   .Where(i => i.Asset.IsPublic)
+                   .Where(i => i.Asset.IsPublic || i.Asset.AuthorId == userId)
+                   .Where(i => !searchItemRequest.IfOnlyMyAssets.GetValueOrDefault() || i.Asset.AuthorId == userId)
                    .Where(i => String.IsNullOrEmpty(searchItemRequest.KeyValueName)
                                 || object.Equals(i.KeySkill, searchItemRequest.KeyValueName)
                             )
@@ -73,10 +73,17 @@ namespace RPGOnline.Infrastructure.Services
                             Picture = i.Asset.Author.Picture,
                         }
                     })
-                    //.Where(p => p...)  <- kategoria
-                    .OrderByDescending(i => i.CreationDate)
-                    
+                    .OrderBy(i => i.Name)
                     .ToList();
+
+                if (searchItemRequest.SortingByDate ?? false)
+                {
+                    result = result.OrderByDescending(i => i.CreationDate).ToList();
+                }
+                else if( searchItemRequest.SortingByLikes ?? false)
+                {
+                    result = result.OrderByDescending(i => i.TimesSaved).ToList();
+                }
 
 
                 int pageCount = (int)Math.Ceiling((double)result.Count / itemsOnPageAmount);

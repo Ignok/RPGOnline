@@ -153,6 +153,10 @@ namespace RPGOnline.Infrastructure.Models
                     .HasMaxLength(280)
                     .HasColumnName("remarks");
 
+                entity.Property(e => e.Kind)
+                    .HasMaxLength(40)
+                    .HasColumnName("kind");
+
                 entity.Property(e => e.SkillsetJson)
                     .HasMaxLength(280)
                     .HasColumnName("skillset_json");
@@ -253,6 +257,10 @@ namespace RPGOnline.Infrastructure.Models
                 entity.Property(e => e.Voice)
                     .HasMaxLength(80)
                     .HasColumnName("voice");
+
+                entity.Property(e => e.Language)
+                    .HasMaxLength(2)
+                    .HasColumnName("language");
             });
 
             modelBuilder.Entity<ChatMessage>(entity =>
@@ -675,6 +683,10 @@ namespace RPGOnline.Infrastructure.Models
                 entity.Property(e => e.WhereHappened)
                     .HasMaxLength(140)
                     .HasColumnName("where_happened");
+
+                entity.Property(e => e.Language)
+                    .HasMaxLength(2)
+                    .HasColumnName("language");
             });
 
             modelBuilder.Entity<Note>(entity =>

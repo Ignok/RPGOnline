@@ -12,5 +12,6 @@ namespace RPGOnline.Domain.Models
         public string WhereHappened { get; set; } = null!;
         public string HowHappened { get; set; } = null!;
         public string Destination { get; set; } = null!;
+        public string Language { get; set; } = null!;
     }
 }
