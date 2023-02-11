@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{618D96E5-D
 	ProjectSection(SolutionItems) = preProject
 		CodingDescription.txt = CodingDescription.txt
 		DoPrzedyskutowania.txt = DoPrzedyskutowania.txt
+		future_patch.txt = future_patch.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DABE21FA-C96C-47AD-8E99-D364E1B69FFC}"

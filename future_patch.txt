@@ -1,0 +1,8 @@
+
+
+--
+in User Messages - Outbox
+delete Message only on one side -> hide msg on one side
+delete Message on both sides -> delete Message instance
+--
+

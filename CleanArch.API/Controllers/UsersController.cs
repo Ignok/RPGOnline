@@ -1,107 +1,100 @@
-﻿using System;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RPGOnline.Infrastructure.DTOs.Responses;
+using RPGOnline.Application.DTOs.Requests;
+using RPGOnline.Application.DTOs.Requests.User;
+using RPGOnline.Application.Interfaces;
 using RPGOnline.Infrastructure.Models;
 
 namespace RPGOnline.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    [Authorize]
+    public class UsersController : CommonController
     {
         private readonly RPGOnlineDbContext _dbContext;
 
-        public UsersController(RPGOnlineDbContext dbContext)
+        private readonly IUser _userService;
+
+        public UsersController(RPGOnlineDbContext dbContext, IUser userService)
         {
+            _userService = userService;
             _dbContext = dbContext;
         }
 
-        // GET: api/Users
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] SearchUserRequest userRequest, CancellationToken cancellationToken)
         {
-            var result = await _dbContext.Users
-                .Select(u => new UserResponse()
-                {
-                    UId = u.UId,
-                    Username = u.Username,
-                    Picture = u.Picture
-                }).ToListAsync();
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
 
-            if(result == null)
-            {
-                return NotFound("No users in database.");
+                var result = await _userService.GetUsers(userRequest, Int32.Parse(userId), cancellationToken);
+
+                if (result == null)
+                {
+                    return NotFound("No users in database.");
+                }
+                else
+                {
+                    return Ok(result);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(result);
+                return BadRequest(ex.Message);
             }
         }
 
-        //GET info in About Me
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAboutMe(int id)
         {
-            var result = await _dbContext.Users
-                .Where(u => u.UId == id)
-                .Select(u => new UserAboutmeResponse()
-                {
-                    UId = u.UId,
-                    Email = u.Email,
-                    Country = u.Country,
-                    City = u.City,
-                    AboutMe = u.AboutMe,
-                    Attitude = u.Attitude,
-                    CreationDate = u.CreationDate
-                }).SingleOrDefaultAsync();
-
-            if (result == null)
+            try
             {
-                return BadRequest("No such user in database.");
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                if(userId == "0")
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _userService.GetAboutMe(Int32.Parse(userId), id);
+                if (result==null)
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    return Ok(result);
+                }
             }
-            return Ok(result);
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
-        /*
-        // GET: api/Users/id
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(int id)
+        [HttpPut("{id}/Details")]
+        public async Task<IActionResult> PutUser(int id, UserRequest userRequest)
         {
-            var user = await _dbContext.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            UserResponse result = new UserResponse()
-            {
-                UId = user.UId,
-                Username=user.Username,
-                Picture=user.Picture
-            };
-            {
-                return Ok(result);
-            }
-        }*/
-
-        // PUT: api/Users/id
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user) //<- user request
-        {
-            if (id != user.UId)
-            {
-                return BadRequest();
-            }
-
-            _dbContext.Entry(user).State = EntityState.Modified;
-
             try
             {
-                await _dbContext.SaveChangesAsync();
+
+                if (!IsSameId(id))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+
+                var result = await _userService.PutUser(id, userRequest);
+                return Ok(result);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -111,58 +104,178 @@ namespace RPGOnline.API.Controllers
                 }
                 else
                 {
-                    throw;
+                    return NoContent();
                 }
             }
-
-            return NoContent();
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<IActionResult> PostUser(User user) //<- user request
+        [HttpPut("{id}/Avatar")]
+        public async Task<IActionResult> PutAvatar(int id, AvatarRequest avatarRequest)
         {
-            _dbContext.Users.Add(user);
             try
             {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (UserExists(user.UId))
+                if (!IsSameId(id))
                 {
-                    return Conflict("Such user already exists in database");
-                    //raczej sprawdzac login, mail, bo id w bazie bedzie sekwencyjnie inkrementowane
+                    return BadRequest("Access denied - bad ID");
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return CreatedAtAction("GetUser", new { id = user.UId }, user);
+                var result = await _userService.PutAvatar(id, avatarRequest);
+                return Ok(result);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NoContent();
+            }
         }
 
-        // DELETE: api/Users/id
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _dbContext.Users.FindAsync(id);
-            if (user == null)
+            try
             {
-                return NotFound();
+                if (!IsSameId(id))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var user = await _dbContext.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound("No such user in database");
+                }
+                else
+                {
+                    _dbContext.Users.Remove(user);
+                    await _dbContext.SaveChangesAsync();
+
+                    return NoContent();
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            _dbContext.Users.Remove(user);
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
         }
+
+
+
+        [HttpPost("{uId}/Assets/{assetId}")]
+        public async Task<IActionResult> PostSaveAsset(int uId, int assetId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.PostSaveAsset(uId, assetId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("{uId}/Assets/{assetId}")]
+        public async Task<IActionResult> DeleteSaveAsset(int uId, int assetId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.DeleteSaveAsset(uId, assetId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{uId}/Posts/{postId}")]
+        public async Task<IActionResult> PostSavePost(int uId, int postId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.PostSavePost(uId, postId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("{uId}/Posts/{postId}")]
+        public async Task<IActionResult> DeleteSavePost(int uId, int postId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return NotFound("Access denied - bad ID");
+                }
+                else
+                {
+                    var result = await _userService.DeleteSavePost(uId, postId);
+                    if (result == null)
+                    {
+                        return NoContent();
+                    }
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         private bool UserExists(int id)
         {
             return _dbContext.Users.Any(e => e.UId == id);
         }
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
+        }
+
     }
 }

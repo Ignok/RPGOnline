@@ -1,72 +1,202 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RPGOnline.Infrastructure.DTOs.Responses;
-using RPGOnline.Infrastructure.Models;
+using Microsoft.Extensions.Options;
+using RPGOnline.API.Helpers;
+using RPGOnline.Application.DTOs.Requests.Forum;
+using RPGOnline.Application.Interfaces;
+using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
-    [Route("api/postscontroller")]
-    [ApiController]
-    public class PostsController : ControllerBase
+    [Authorize]
+    public class PostsController : CommonController
     {
 
-        private readonly RPGOnlineDbContext _dbContext;
+        private readonly IPost _postService;
+        private readonly BlobStorageConf _blobStorageConf;
 
-        public PostsController(RPGOnlineDbContext dbContext)
+        public PostsController(IPost postService, IOptions<BlobStorageConf> blobStorageConf)
         {
-            _dbContext = dbContext;
+            _postService = postService;
+            _blobStorageConf = blobStorageConf.Value;
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetPosts()
+        public async Task<IActionResult> GetPosts([FromQuery] SearchPostRequest postRequest, CancellationToken cancellationToken)
         {
-            var result = await _dbContext.Posts
-                .Select(p => new PostResponse()
-                {
-                    PostId = p.PostId,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Picture = p.Picture,
-                    CreationDate = p.CreationDate,
-                    Likes = _dbContext.Users
-                            .Where(u => p.UIds.Select(d => d.UId).Contains(u.UId))
-                            .Count(),
-                    CreatorNavigation = _dbContext.Users
-                                        .Where(u => u.UId == p.UId)
-                                        .Select(u => new UserResponse()
-                                        {
-                                            UId = u.UId,
-                                            Username = u.Username,
-                                            Picture = u.Picture
-                                        }).First(),
-                    Comments = _dbContext.Comments
-                                        .Where(c => c.PostId == p.PostId)
-                                        .Select(c => new CommentResponse()
-                                        {
-                                            ResponseCommentId = c.ResponseCommentId,
-                                            UserResponse = _dbContext.Users
-                                                .Where(u => u.UId == c.UId)
-                                                .Select(u => new UserResponse()
-                                                {
-                                                    UId = u.UId,
-                                                    Username = u.Username,
-                                                    Picture = u.Picture
-                                                }).First(),
-                                            Content = c.Content,
-                                            CreationDate = c.CreationDate,
-                                            PostIdNavigation = c.PostId
-                                        }).ToList()
-                }).ToListAsync();
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
 
-            if(result == null)
+                var result = await _postService.GetPosts(Int32.Parse(userId), postRequest, cancellationToken);
+
+
+
+                if (result == (null, null))
+                {
+                    return NotFound("No posts in database.");
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        result.Item1,
+                        result.pageCount
+                    });
+                }
+            }catch (Exception ex)
             {
-                return BadRequest("No posts in database.");
+                return BadRequest(ex.Message);
             }
-            else
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPost(int id)
+        {
+            try
             {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _postService.GetPostDetails(Int32.Parse(userId), id);
+
+                if (result == null)
+                {
+                    return NotFound("No such post in database.");
+                }
                 return Ok(result);
             }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> PostPost(PostRequest postRequest)
+        {
+            try
+            {
+                if (!IsSameId(postRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _postService.PostPost(postRequest);
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok("Post has been uploaded");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{postId}")]
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _postService.DeletePost(postId, Int32.Parse(userId), IsAdminRole());
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/comment/{commentId}")]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _postService.DeleteComment(commentId, Int32.Parse(userId), IsAdminRole());
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+
+
+        [HttpPost("{postId}/Comment")]
+        public async Task<IActionResult> PostComment(int postId, CommentRequest commentRequest)
+        {
+            try
+            {
+                if (!IsSameId(commentRequest.UId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                var result = await _postService.PostComment(postId, commentRequest);
+                return Ok(result);
+
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("BlobToken/{uId}")]
+        public async Task<IActionResult> GetBlobToken(int uId)
+        {
+            try
+            {
+                if (!IsSameId(uId))
+                {
+                    return BadRequest("Access denied - bad ID");
+                }
+
+                return Ok(_blobStorageConf);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId.Equals(id.ToString());
+        }
+
+        private bool IsAdminRole()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userRole = claimsIdentity?.FindFirst(ClaimTypes.Role)?.Value ?? "a";
+
+            return userRole.Equals("admin");
         }
     }
 }
