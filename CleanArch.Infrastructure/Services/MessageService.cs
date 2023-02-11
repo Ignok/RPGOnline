@@ -88,7 +88,7 @@ namespace RPGOnline.Infrastructure.Services
             {
                 var message = new Message()
                 {
-                    MessageId = (_dbContext.Messages.Max(m => (int)m.MessageId) + 1), //potem jak dodamy automatyczny id można usunąć
+                    MessageId = (_dbContext.Messages.Max(m => (int)m.MessageId) + 1),
                     SenderUId = senderId,
                     ReceiverUId = receiver.UId,
                     Title = messageRequest.Title,

@@ -7,9 +7,6 @@ using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.Friendship;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
-using RPGOnline.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -33,7 +30,6 @@ namespace RPGOnline.Infrastructure.Services
                     .Include(u => u.FriendshipUIdNavigations)
                     .Include(u => u.FriendshipFriendUs)
                     .AsParallel().WithCancellation(cancellationToken)
-                    //.Where(u => attitude.Equals(null) || u.Attitude.Equals(attitude))
                     .Where(u => String.IsNullOrEmpty(userRequest.Attitude)
                                 || object.Equals(u.Attitude, userRequest.Attitude))
                     .Where(u => String.IsNullOrEmpty(userRequest.Search)
@@ -41,7 +37,6 @@ namespace RPGOnline.Infrastructure.Services
                                 || ((u.AboutMe ?? "").Contains(userRequest.Search, StringComparison.OrdinalIgnoreCase))
                             )
                     .OrderBy(u => u.CreationDate)
-                    //// do dodania rating
                     .Select(u => new UserResponse()
                     {
                         UId = u.UId,
@@ -53,10 +48,9 @@ namespace RPGOnline.Infrastructure.Services
                                         .Where(u => u.FriendUId == userId)
                                         .Where(u => u.IsBlocked).Any(),
                         AverageRating = u.FriendshipFriendUs.Where(f => f.Rating != 0).Select(f => (int)f.Rating).DefaultIfEmpty().Average(),
-                    }).ToList();
+                    })
+                    .ToList();
 
-
-                await Task.Delay(500, cancellationToken);
 
                 return result;
             }
@@ -170,8 +164,6 @@ namespace RPGOnline.Infrastructure.Services
 
 
         
-
-
         //Assets save and unsave
         public async Task<object> PostSaveAsset(int uId, int assetId)
         {

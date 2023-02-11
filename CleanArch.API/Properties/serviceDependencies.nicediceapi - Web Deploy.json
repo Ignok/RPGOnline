@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/rpg-online-server/databases/DBRPGOnline",
+      "type": "mssql.azure",
+      "connectionId": "DBRPGOnline"
+    }
+  }
+}

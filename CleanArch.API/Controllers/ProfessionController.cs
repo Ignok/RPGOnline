@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Profession;

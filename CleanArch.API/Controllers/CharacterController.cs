@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Character;
-using RPGOnline.Application.DTOs.Requests.Asset.Profession;
 using RPGOnline.Application.Interfaces;
-using RPGOnline.Infrastructure.Services;
 using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers

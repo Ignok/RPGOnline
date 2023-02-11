@@ -69,7 +69,6 @@ namespace RPGOnline.Infrastructure.Services
                             Picture = r.Asset.Author.Picture,
                         }
                     })
-                    //.Where(p => p...)  <- kategoria
                     .OrderByDescending(p => p.CreationDate)
                     .ToList();
 
@@ -91,7 +90,6 @@ namespace RPGOnline.Infrastructure.Services
                     .Take(racesOnPageAmount)
                     .ToList();
 
-                await Task.Delay(500, cancellationToken);
 
                 return (result, pageCount);
             }
@@ -191,14 +189,6 @@ namespace RPGOnline.Infrastructure.Services
                     Picture = asset.Author.Picture,
                 }
             };
-        }
-
-        private bool HasBlockedMe(int myId, int targetId)
-        {
-            if (myId == targetId) return false;
-            return myId == targetId || _dbContext.Friendships
-                .Where(f => f.UId == targetId && f.FriendUId == myId)
-                .Where(f => f.IsBlocked).Any();
         }
     }
 }

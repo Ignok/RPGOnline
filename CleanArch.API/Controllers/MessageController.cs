@@ -19,7 +19,6 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        // GET: api/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserMessages(int id, [FromQuery] GetMessageRequest getMessageRequest)
         {
@@ -44,7 +43,6 @@ namespace RPGOnline.API.Controllers
             
         }
 
-        // POST: api/{senderId}/send
         [HttpPost("{senderId}/send")]
         public async Task<IActionResult> PostMessage(int senderId, PostMessageRequest messageRequest)
         {
@@ -70,7 +68,6 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        // DELETE: api/{uId}/delete/{messageId}
         [HttpDelete("{uId}/delete/{messageId}")]
         public async Task<IActionResult> DeleteMessage(int uId, int messageId)
         {
@@ -95,7 +92,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        // PUT: api/{uid}/open/{messageId}
+
         [HttpPut("{uId}/open/{messageId}")]
         public async Task<IActionResult> OpenMessage(int uId, int messageId)
         {
@@ -120,7 +117,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        // PUT: api/{uid}/close/{messageId}
+
         [HttpPut("{uId}/close/{messageId}")]
         public async Task<IActionResult> CloseMessage(int uId, int messageId)
         {
@@ -145,7 +142,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        // GET: api/{id}
+
         [HttpGet("{id}/newMessages")]
         public async Task<IActionResult> GetNewMessagesCountMessages(int id)
         {

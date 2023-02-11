@@ -11,7 +11,6 @@ using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Enums;
 using RPGOnline.Domain.Models;
-using System.Diagnostics;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -167,7 +166,6 @@ namespace RPGOnline.Infrastructure.Services
                     .Take(professionsOnPageAmount)
                     .ToList();
 
-                await Task.Delay(500, cancellationToken);
 
                 return (result, pageCount);
             }
@@ -250,7 +248,6 @@ namespace RPGOnline.Infrastructure.Services
                     startingItems.Add(startingItem);
                 }
                 profession.ProfessionStartingItems.AddRange(startingItems);
-                //_dbContext.ProfessionStartingItems.Add(startingItems);
             }
 
             _dbContext.Assets.Add(asset);
@@ -281,14 +278,6 @@ namespace RPGOnline.Infrastructure.Services
                     Picture = asset.Author.Picture,
                 }
             };
-        }
-
-        private bool HasBlockedMe(int myId, int targetId)
-        {
-            if (myId == targetId) return false;
-            return myId == targetId || _dbContext.Friendships
-                .Where(f => f.UId == targetId && f.FriendUId == myId)
-                .Where(f => f.IsBlocked).Any();
         }
     }
 }

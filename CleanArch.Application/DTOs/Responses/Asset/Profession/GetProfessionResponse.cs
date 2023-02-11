@@ -1,11 +1,6 @@
 ﻿using RPGOnline.Application.DTOs.Responses.Asset.Item;
 using RPGOnline.Application.DTOs.Responses.Asset.Spell;
 using RPGOnline.Application.DTOs.Responses.User;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Application.DTOs.Responses.Asset.Profession
 {

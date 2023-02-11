@@ -2,19 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RPGOnline.API.Helpers;
-using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
 using RPGOnline.Infrastructure.Models;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -27,7 +22,6 @@ namespace RPGOnline.Infrastructure.Services
             _configuration = configuration;
             _dbContext = dbContext;
         }
-
 
 
         // Register service
@@ -176,10 +170,6 @@ namespace RPGOnline.Infrastructure.Services
                 throw new SecurityTokenException("Refresh token expired");
             }
 
-            //var login = SecurityHelpers.GetUserIdFromAccessToken(token.Replace("Bearer ", ""), _configuration["JWT:Secret"]);
-
-            //Console.WriteLine(login);
-
             Claim[] UserClaims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, result.UId.ToString()),
@@ -259,10 +249,6 @@ namespace RPGOnline.Infrastructure.Services
             }
             _dbContext.Comments.RemoveRange(comments);
 
-
-            // assets -> items, spells, race
-            
-
             _dbContext.Users.Remove(user);
 
             var temp = _dbContext.SaveChangesAsync();
@@ -272,51 +258,5 @@ namespace RPGOnline.Infrastructure.Services
                 Response = temp
             };
         }
-
-
-        /*public async Task<Object> HashPassword()
-        {
-            var result = await _dbContext.Users
-                .Where(u => u.Username.Equals("bocz"))
-                .SingleOrDefaultAsync();
-
-            var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt("PickleRick");
-
-            result.Pswd = hashedPasswordAndSalt.Item1;
-            result.Salt = hashedPasswordAndSalt.Item2;
-            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
-            result.RefreshTokenExp = DateTime.Now.AddDays(1);
-
-
-            result = await _dbContext.Users
-                .Where(u => u.Username.Equals("julec"))
-                .SingleOrDefaultAsync();
-
-            hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt("PickleRickes");
-
-            result.Pswd = hashedPasswordAndSalt.Item1;
-            result.Salt = hashedPasswordAndSalt.Item2;
-            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
-            result.RefreshTokenExp = DateTime.Now.AddDays(1);
-
-
-            result = await _dbContext.Users
-                .Where(u => u.Username.Equals("maciek"))
-                .SingleOrDefaultAsync();
-
-            hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt("minotarl");
-
-            result.Pswd = hashedPasswordAndSalt.Item1;
-            result.Salt = hashedPasswordAndSalt.Item2;
-            result.RefreshToken = SecurityHelpers.GenerateRefreshToken();
-            result.RefreshTokenExp = DateTime.Now.AddDays(1);
-
-
-            _dbContext.SaveChanges();
-            return new
-            {
-                wiadomosc = "Udało się"
-            };
-        }*/
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using RPGOnline.Infrastructure.Models;
 using System.Security.Claims;
@@ -22,7 +21,6 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        // GET: api/{id}/Friends/{targetUId}
         [HttpGet("{uId}/{targetUId}")]
         public async Task<IActionResult> GetFriendship(int uId, int targetUId)
         {
@@ -53,7 +51,6 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        // GET: api/{id}/Friends
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserFriends(int id)
         {

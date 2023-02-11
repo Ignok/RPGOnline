@@ -7,7 +7,6 @@ using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
-    //[Authorize]
     public class AccountController : CommonController
     {
 
@@ -180,22 +179,6 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-
-        /*
-        [AllowAnonymous]
-        [HttpPost("first_changes")]
-        public async Task<IActionResult> FirstChanges()
-        {
-            try
-            {
-                return Ok(await _accountService.HashPassword());
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex);
-            }
-        }
-        */
 
 
         private bool IsSameId(int id)

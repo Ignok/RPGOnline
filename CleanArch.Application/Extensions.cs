@@ -11,7 +11,6 @@ namespace RPGOnline.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            //.. auto mapper, mediatr
 
             return services;
         }

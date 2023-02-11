@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RPGOnline.API.Helpers;
-using RPGOnline.API.Middlewares;
 using RPGOnline.Application;
 using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.Interfaces;
@@ -14,15 +12,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
+
 configuration.AddUserSecrets("aaa");
-// Add services to the container.
 
-//builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-//Enable CORS
 builder.Services.AddCors(c =>
             {
                 c.AddPolicy("AllowSetOrigins", options => {
@@ -57,14 +49,11 @@ builder.Services.AddInfrastructure().AddApplication();
 builder.Services.AddDbContext<RPGOnlineDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DBRPGOnline")));
 
-//builder.Services.AddDbContext<ApplicationDbContext>();
-
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(opt =>
 {
     opt.TokenValidationParameters = new TokenValidationParameters
@@ -111,17 +100,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 
+app.UseDeveloperExceptionPage();
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fajerbol"));
 
-//app.UseGreatErrorHandling();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fajerbol"));
-    app.UseSwaggerUI();
-}
 
 app.UseCors("AllowSetOrigins");
 

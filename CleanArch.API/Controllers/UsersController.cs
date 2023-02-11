@@ -1,19 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Services.Users;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Requests.User;
-using RPGOnline.Application.DTOs.Responses;
-using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
-using RPGOnline.Domain.Models;
 using RPGOnline.Infrastructure.Models;
-using RPGOnline.Infrastructure.Services;
 
 namespace RPGOnline.API.Controllers
 {
@@ -30,8 +22,6 @@ namespace RPGOnline.API.Controllers
             _dbContext = dbContext;
         }
 
-        // GET: api/Users
-        //[Authorize(Roles ="admin,user")]
         [HttpGet]
         public async Task<IActionResult> GetUsers([FromQuery] SearchUserRequest userRequest, CancellationToken cancellationToken)
         {
@@ -57,8 +47,6 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        //GET info in About Me
-        //[Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAboutMe(int id)
         {
@@ -93,13 +81,11 @@ namespace RPGOnline.API.Controllers
         }
 
 
-        // PUT: api/Users/id
         [HttpPut("{id}/Details")]
-        public async Task<IActionResult> PutUser(int id, UserRequest userRequest) //<- user request
+        public async Task<IActionResult> PutUser(int id, UserRequest userRequest)
         {
             try
             {
-                //checking if uId in request matches uId from claims
 
                 if (!IsSameId(id))
                 {
@@ -142,7 +128,7 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        // DELETE: api/Users/id
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RPGOnline.Application.DTOs.Responses.Character
+﻿namespace RPGOnline.Application.DTOs.Responses.Character
 {
     public class MotivationResponse
     {

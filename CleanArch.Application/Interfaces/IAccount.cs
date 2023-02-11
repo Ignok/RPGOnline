@@ -1,10 +1,5 @@
 ﻿using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Application.Interfaces
 {
@@ -15,6 +10,5 @@ namespace RPGOnline.Application.Interfaces
         Task<TokenResponse> RefreshToken(string token, string refreshToken);
 
         Task<object> DeleteAccount(int uId);
-        //Task<Object> HashPassword();
     }
 }

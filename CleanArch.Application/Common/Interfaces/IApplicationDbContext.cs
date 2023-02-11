@@ -1,16 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.VisualStudio.Services.Identity;
-using Microsoft.VisualStudio.Services.Profile;
-using RPGOnline.Application.DTOs.Requests;
-using RPGOnline.Domain.Entities;
 using RPGOnline.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Application.Common.Interfaces
 {
@@ -44,13 +34,8 @@ namespace RPGOnline.Application.Common.Interfaces
         public DbSet<UserAchievement> UserAchievements { get; set; }
         public DbSet<UserLikedPost> UserLikedPosts { get; set; }
         public DbSet<UserSavedAsset> UserSavedAssets { get; set; }
-
-        //Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         public int SaveChanges();
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
-       // public Task<List<TSource>> ToListAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken = default);
-
         public EntityEntry Entry(object entity);
     }
 }

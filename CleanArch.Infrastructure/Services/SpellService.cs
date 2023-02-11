@@ -8,13 +8,6 @@ using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Enums;
 using RPGOnline.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -76,7 +69,6 @@ namespace RPGOnline.Infrastructure.Services
                             Picture = s.Asset.Author.Picture,
                         }
                     })
-                    //.Where(p => p...)  <- kategoria
                     .OrderByDescending(p => p.CreationDate)
                     .ToList();
 
@@ -98,7 +90,6 @@ namespace RPGOnline.Infrastructure.Services
                     .Take(spellsOnPageAmount)
                     .ToList();
 
-                await Task.Delay(500, cancellationToken);
 
                 return (result, pageCount);
             }
@@ -245,16 +236,6 @@ namespace RPGOnline.Infrastructure.Services
                 Message = "Successfully deleted spell",
                 Response = temp
             };
-        }
-
-
-
-        private bool HasBlockedMe(int myId, int targetId)
-        {
-            if (myId == targetId) return false;
-            return myId == targetId || _dbContext.Friendships
-                .Where(f => f.UId == targetId && f.FriendUId == myId)
-                .Where(f => f.IsBlocked).Any();
         }
     }
 }

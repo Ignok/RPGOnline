@@ -1,18 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RPGOnline.Application.Common.Interfaces;
-using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Requests.Forum;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Models;
-//using System.Data.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -40,8 +33,6 @@ namespace RPGOnline.Infrastructure.Services
                 var category = searchPostRequest.Category ?? "";
                 var search = searchPostRequest.Search ?? "";
 
-                //Search
-                //clear string to prevent sql injection
 
                 var result = _dbContext.Posts
                     .Include(u => u.UIdNavigation)
@@ -94,7 +85,6 @@ namespace RPGOnline.Infrastructure.Services
                     .Take(postsOnPageAmount)
                     .ToList();
 
-                await Task.Delay(500, cancellationToken);
 
                 return (result, pageCount);
             }
@@ -189,7 +179,7 @@ namespace RPGOnline.Infrastructure.Services
 
             var post = new Post()
             {
-                PostId = (_dbContext.Posts.Max(p => (int)p.PostId)+1), //potem jak dodamy automatyczny id można usunąć
+                PostId = (_dbContext.Posts.Max(p => (int)p.PostId)+1),
                 UId = postRequest.UId,
                 Title = postRequest.Title,
                 Content = postRequest.Content,
@@ -265,7 +255,7 @@ namespace RPGOnline.Infrastructure.Services
 
             var comment = new Comment()
             {
-                CommentId = (_dbContext.Comments.Max(c => (int)c.CommentId) + 1), //potem jak dodamy automatyczny id można usunąć
+                CommentId = (_dbContext.Comments.Max(c => (int)c.CommentId) + 1),
                 UId = commentRequest.UId,
                 PostId = postId,
                 Content = commentRequest.Content,

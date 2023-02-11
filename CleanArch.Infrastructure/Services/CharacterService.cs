@@ -7,25 +7,15 @@ using RPGOnline.Application.Common.Interfaces;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Character;
 using RPGOnline.Application.DTOs.Requests.Asset.Character.FromJson;
-using RPGOnline.Application.DTOs.Requests.Asset.Profession;
 using RPGOnline.Application.DTOs.Responses.Asset.Character;
 using RPGOnline.Application.DTOs.Responses.Asset.Character.Character;
-using RPGOnline.Application.DTOs.Responses.Asset.Item;
 using RPGOnline.Application.DTOs.Responses.Asset.Profession;
 using RPGOnline.Application.DTOs.Responses.Asset.Race;
-using RPGOnline.Application.DTOs.Responses.Asset.Spell;
 using RPGOnline.Application.DTOs.Responses.Character;
 using RPGOnline.Application.DTOs.Responses.User;
 using RPGOnline.Application.Interfaces;
 using RPGOnline.Domain.Enums;
 using RPGOnline.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGOnline.Infrastructure.Services
 {
@@ -63,7 +53,6 @@ namespace RPGOnline.Infrastructure.Services
                                     where (character.Asset.IsPublic || character.Asset.AuthorId == userId)
                                     where (!searchAssetRequest.IfOnlyMyAssets.GetValueOrDefault() || character.Asset.AuthorId == userId)
                                     where (character.Kind.Equals(type))
-                                    //warunek na typ (NPC/ MONSTER/ PLAYABLE)
                                     where (searchAssetRequest.PrefferedLanguage.Contains(character.Asset.Language))
                                     where (String.IsNullOrEmpty(searchAssetRequest.Search)
                                             || character.CharacterName.Contains(searchAssetRequest.Search)
@@ -167,7 +156,6 @@ namespace RPGOnline.Infrastructure.Services
                     .Take(charactersOnPageAmount)
                     .ToList();
 
-                await Task.Delay(500, cancellationToken);
 
                 return (result, pageCount);
             }
@@ -190,7 +178,6 @@ namespace RPGOnline.Infrastructure.Services
                                     from profession in prof.DefaultIfEmpty()
                                 join r in _dbContext.Races on character.RaceId equals r.RaceId into rc
                                     from race in rc.DefaultIfEmpty()
-                                //join characterItems in _dbContext.CharacterItems on character.CharacterId equals characterItems.CharacterId
                                 where (character.CharacterId == characterId)
                                 select new CharacterResponse()
                                 {
@@ -421,7 +408,6 @@ namespace RPGOnline.Infrastructure.Services
                 Remarks = postCharacterRequest.Description,
                 Gold = postCharacterRequest.Gold,
                 Kind = postCharacterRequest.Type,
-                //avatar
                 ProfessionId = postCharacterRequest.Profession,
                 RaceId = postCharacterRequest.Race,
                 MotivationJson = serializedMotivation,
@@ -477,7 +463,6 @@ namespace RPGOnline.Infrastructure.Services
                                     .Where(i => i.ProfessionStartingItems
                                                     .Where(psi => psi.ProfessionId == profession.ProfessionId)
                                                     .Select(psi => psi.Item).Any())
-                                    //.SelectMany(Enumerable<Item>))
                                     .ToListAsync();
 
                         var characterItemsId = (_dbContext.CharacterItems.Max(i => (int)i.CharacterItemsId) + 1);
@@ -498,6 +483,11 @@ namespace RPGOnline.Infrastructure.Services
                 }
             }
 
+            if(character.SkillsetJson == null)
+            {
+                character.SkillsetJson = "{\"Weapon\":0,\"Armor\":0,\"Gadget\":0,\"Companion\":0,\"Psyche\":0}";
+            }
+
             _dbContext.Assets.Add(asset);
             _dbContext.Characters.Add(character);
             _dbContext.SaveChanges();
@@ -510,7 +500,6 @@ namespace RPGOnline.Infrastructure.Services
                 Name = character.CharacterName,
                 Description = character.Remarks,
                 Gold = character.Gold,
-                //avatar
                 JsonResponse = GetFromJsonResponse(character),
                 ProfessionName = character.Profession?.Name,
                 RaceName = character.Race?.Name,
@@ -614,36 +603,6 @@ namespace RPGOnline.Infrastructure.Services
         {
             Random random = new();
             return random.Next(min, max);
-        }
-
-        private static async Task<string> FlattenMotivation(params string[] values)
-        {
-            return 
-                $"You have to {(values[0].IsNullOrEmpty() ? "rescue" : values[0])} " +
-                $"your {(values[1].IsNullOrEmpty() ? "companion" : values[1])} " +
-                $"who was {(values[2].IsNullOrEmpty() ? "kidnapped" : values[2])} " +
-                $"in the {(values[3].IsNullOrEmpty() ? "ancient forest" : values[3])} " +
-                $"by {(values[4].IsNullOrEmpty() ? "dark elves" : values[4])}, " +
-                $"now roaming in the {(values[5].IsNullOrEmpty() ? "Beastmen city" : values[5])}.";
-        }
-
-        private static async Task<string> FlattenCharacteristics(params string[] values)
-        {
-            return
-                $"Your voice is {(values[0].IsNullOrEmpty() ? "loud" : values[0])}, " +
-                $"and your posture is {(values[1].IsNullOrEmpty() ? "athletic" : values[1])}. " +
-                $"You are considered to be {(values[2].IsNullOrEmpty() ? "brave" : values[2])}. " +
-                $"You believe in the {(values[3].IsNullOrEmpty() ? "ancient forest" : values[3])}. " +
-                $"Your face covered in {(values[4].IsNullOrEmpty() ? "dark elves" : values[4])} " +
-                $"indicates your origins - the {(values[5].IsNullOrEmpty() ? "Beastmen city" : values[5])}.";
-        }
-
-        private bool HasBlockedMe(int myId, int targetId)
-        {
-            if (myId == targetId) return false;
-            return myId == targetId || _dbContext.Friendships
-                .Where(f => f.UId == targetId && f.FriendUId == myId)
-                .Where(f => f.IsBlocked).Any();
         }
     }
 }
