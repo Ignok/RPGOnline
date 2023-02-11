@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests;
 using RPGOnline.Application.DTOs.Responses;
 using RPGOnline.Application.Interfaces;
-
+using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
@@ -157,6 +157,30 @@ namespace RPGOnline.API.Controllers
         }
 
 
+        [Authorize]
+        [HttpDelete("delete/{uId}")]
+        public async Task<IActionResult> DeleteAccount(int uId)
+        {
+            try
+            {
+                if (IsSameId(uId) || IsAdminRole())
+                {
+                    return Ok(await _accountService.DeleteAccount(uId));
+                }
+
+                return BadRequest("Permission denied");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+
         /*
         [AllowAnonymous]
         [HttpPost("first_changes")]
@@ -172,5 +196,22 @@ namespace RPGOnline.API.Controllers
             }
         }
         */
+
+
+        private bool IsSameId(int id)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "a";
+
+            return userId.Equals(id.ToString());
+        }
+
+        private bool IsAdminRole()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userRole = claimsIdentity?.FindFirst(ClaimTypes.Role)?.Value ?? "a";
+
+            return userRole.Equals("admin");
+        }
     }
 }

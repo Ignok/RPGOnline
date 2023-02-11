@@ -10,5 +10,6 @@ namespace RPGOnline.Application.Interfaces
         Task<(ICollection<GetItemResponse>, int pageCount)> GetItems(SearchAssetRequest searchRaceRequest, int userId, CancellationToken cancellationToken);
         Task<GetItemResponse> PostItem(PostItemRequest postItemRequest);
 
+        Task<object> DeleteItem(int itemId, int userId, bool isAdmin);
     }
 }

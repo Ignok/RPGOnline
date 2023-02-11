@@ -164,7 +164,7 @@ namespace RPGOnline.Infrastructure.Services
 
             var spell = new Spell()
             {
-                SpellId = (_dbContext.Spells.Max(s => (int)s.AssetId) + 1),
+                SpellId = (_dbContext.Spells.Max(s => (int)s.SpellId) + 1),
                 AssetId = asset.AssetId,
                 Name = postSpellRequest.Name,
                 Description = postSpellRequest.Description,
@@ -201,6 +201,53 @@ namespace RPGOnline.Infrastructure.Services
                 }
             };
         }
+
+        public async Task<object> DeleteSpell(int spellId, int userId, bool isAdmin)
+        {
+            var spell = await _dbContext.Spells
+                                .Include(s => s.Characters)
+                                .Include(s => s.Professions)
+                                .FirstOrDefaultAsync(s => s.SpellId == spellId);
+            if (spell == null)
+            {
+                throw new Exception("Spell does not exist");
+            }
+            var asset = await _dbContext.Assets.FirstOrDefaultAsync(a => a.AssetId == spell.AssetId);
+            if (asset == null)
+            {
+                throw new Exception("Asset does not exist");
+            }
+            if(asset.AuthorId != userId && !isAdmin)
+            {
+                throw new Exception("Permission denied - not the owner or admin");
+            }
+
+            _dbContext.UserSavedAssets.RemoveRange(await _dbContext.UserSavedAssets.Where(usa => usa.Asset.Equals(asset)).ToListAsync());
+            foreach (var profession in await _dbContext.Professions.Where(p => p.Spells.Contains(spell)).ToListAsync())
+            {
+                profession.Spells.Remove(spell);
+                spell.Professions.Remove(profession);
+            }
+            foreach (var character in await _dbContext.Characters.Where(p => p.Spells.Contains(spell)).ToListAsync())
+            {
+                character.Spells.Remove(spell);
+                spell.Characters.Remove(character);
+            }
+            _dbContext.Spells.Remove(spell);
+            _dbContext.Assets.Remove(asset);
+
+
+
+            var temp = _dbContext.SaveChangesAsync();
+
+            return new 
+            {
+                Message = "Successfully deleted spell",
+                Response = temp
+            };
+        }
+
+
 
         private bool HasBlockedMe(int myId, int targetId)
         {

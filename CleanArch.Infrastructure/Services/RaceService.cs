@@ -156,7 +156,7 @@ namespace RPGOnline.Infrastructure.Services
 
             var race = new Race()
             {
-                RaceId = (_dbContext.Races.Max(r => (int)r.AssetId) + 1),
+                RaceId = (_dbContext.Races.Max(r => (int)r.RaceId) + 1),
                 AssetId = asset.AssetId,
                 Name = postRaceRequest.Name,
                 Description = postRaceRequest.Description,

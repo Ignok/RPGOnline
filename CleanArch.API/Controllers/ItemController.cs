@@ -7,6 +7,7 @@ using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
+    [Authorize]
     public class ItemController : CommonController
     {
         private readonly IItem _itemService;
@@ -16,7 +17,7 @@ namespace RPGOnline.API.Controllers
             _itemService = itemService;
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetItems([FromQuery] SearchAssetRequest searchItemRequest, CancellationToken cancellationToken)
         {
@@ -39,7 +40,6 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("character/{uId}")]
         public async Task<IActionResult> GetItemsForCharacter(int uId)
         {
@@ -67,7 +67,6 @@ namespace RPGOnline.API.Controllers
             }
         }
 
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostItem(PostItemRequest postItemRequest)
         {
@@ -92,12 +91,42 @@ namespace RPGOnline.API.Controllers
             }
         }
 
+        [HttpDelete("delete/{spellId}")]
+        public async Task<IActionResult> DeleteSpell(int spellId)
+        {
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _itemService.DeleteItem(spellId, Int32.Parse(userId), IsAdminRole());
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         private bool IsSameId(int id)
         {
             var claimsIdentity = this.User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             return userId.Equals(id.ToString());
+        }
+
+        private bool IsAdminRole()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userRole = claimsIdentity?.FindFirst(ClaimTypes.Role)?.Value ?? "a";
+
+            return userRole.Equals("admin");
         }
     }
 }

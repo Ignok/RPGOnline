@@ -59,7 +59,7 @@ namespace RPGOnline.API.Controllers
             try
             {
                 var claimsIdentity = this.User.Identity as ClaimsIdentity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
 
                 var result = await _postService.GetPostDetails(Int32.Parse(userId), id);
 
@@ -97,6 +97,50 @@ namespace RPGOnline.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{postId}")]
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _postService.DeletePost(postId, Int32.Parse(userId), IsAdminRole());
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/comment/{commentId}")]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            try
+            {
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+                var result = await _postService.DeleteComment(commentId, Int32.Parse(userId), IsAdminRole());
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
             }
         }
 
@@ -145,6 +189,14 @@ namespace RPGOnline.API.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             return userId.Equals(id.ToString());
+        }
+
+        private bool IsAdminRole()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userRole = claimsIdentity?.FindFirst(ClaimTypes.Role)?.Value ?? "a";
+
+            return userRole.Equals("admin");
         }
     }
 }

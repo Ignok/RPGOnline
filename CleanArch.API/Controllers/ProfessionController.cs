@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPGOnline.Application.DTOs.Requests.Asset;
 using RPGOnline.Application.DTOs.Requests.Asset.Profession;
@@ -7,6 +8,7 @@ using System.Security.Claims;
 
 namespace RPGOnline.API.Controllers
 {
+    [Authorize]
     public class ProfessionController : CommonController
     {
         private readonly IProfession _professionService;
@@ -15,6 +17,7 @@ namespace RPGOnline.API.Controllers
             _professionService = professionService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProfessions([FromQuery] SearchAssetRequest searchProfessionRequest, CancellationToken cancellationToken)
         {

@@ -215,6 +215,65 @@ namespace RPGOnline.Infrastructure.Services
         }
 
 
+        public async Task<object> DeleteAccount(int uId)
+        {
+            var user = await _dbContext.Users
+
+               .Where(u => u.UId == uId)
+               .SingleOrDefaultAsync();
+
+
+            if (user == null)
+            {
+                throw new ArgumentNullException("User does not exist");
+            }
+
+
+            // userLikedPosts
+            _dbContext.UserLikedPosts.RemoveRange(await _dbContext.UserLikedPosts.Where(ulp => ulp.UId == uId).ToListAsync());
+
+            // userSavedAssets
+            _dbContext.UserSavedAssets.RemoveRange(await _dbContext.UserSavedAssets.Where(usa => usa.UId == uId).ToListAsync());
+
+            // UserAchievements
+            _dbContext.UserAchievements.RemoveRange(await _dbContext.UserAchievements.Where(ua => ua.UId == uId).ToListAsync());
+
+            // friendship
+            _dbContext.Friendships.RemoveRange(await _dbContext.Friendships.Where(f => f.UId == uId || f.FriendUId == uId).ToListAsync());
+
+            // messages
+            _dbContext.Messages.RemoveRange(await _dbContext.Messages.Where(m => m.SenderUId == uId || m.ReceiverUId == uId).ToListAsync());
+
+            // posts, comments to posts, posts likes
+            var posts = await _dbContext.Posts.Where(p => p.UId == uId).ToListAsync();
+            _dbContext.Comments.RemoveRange(await _dbContext.Comments.Where(c => posts.Contains(c.Post)).ToListAsync());
+            _dbContext.UserLikedPosts.RemoveRange(await _dbContext.UserLikedPosts.Where(ulp => posts.Contains(ulp.Post)).ToListAsync());
+            _dbContext.Posts.RemoveRange(posts);
+
+            // remove comments and change responses to comments responseId to null
+            var comments = await _dbContext.Comments.Include(c => c.ResponseComment).Where(c => c.UId == uId).ToListAsync();
+            foreach (var comment in await _dbContext.Comments.Where(c => c.ResponseComment != null && comments.Contains(c.ResponseComment)).ToListAsync())
+            {
+                comment.ResponseComment = null;
+                comment.ResponseCommentId = null;
+            }
+            _dbContext.Comments.RemoveRange(comments);
+
+
+            // assets -> items, spells, race
+            
+
+            _dbContext.Users.Remove(user);
+
+            var temp = _dbContext.SaveChangesAsync();
+
+            return new {
+                Message = "Successfully deleted an account",
+                Response = temp
+            };
+        }
+
+
         /*public async Task<Object> HashPassword()
         {
             var result = await _dbContext.Users

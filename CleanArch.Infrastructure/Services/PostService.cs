@@ -162,14 +162,15 @@ namespace RPGOnline.Infrastructure.Services
                                         .ToList()
                 }).SingleOrDefaultAsync();
 
-            if (HasBlockedMe(uId, result.CreatorNavigation.UId))
-            {
-                throw new ArgumentException("Blocked");
-            }
-            else if (result == null)
+            if (result == null)
             {
                 throw new ArgumentNullException($"There is no post with id: {postId}");
             }
+            else if (HasBlockedMe(uId, result.CreatorNavigation.UId))
+            {
+                throw new ArgumentException("Blocked");
+            }
+            
             return result;
         }
 
@@ -205,6 +206,36 @@ namespace RPGOnline.Infrastructure.Services
                 post = post
             };
 
+        }
+
+        public async Task<object> DeletePost(int postId, int userId, bool isAdmin)
+        {
+            var post = await _dbContext.Posts
+                                .Include(p => p.UserLikedPosts)
+                                .Include(p => p.Comments)
+                                .FirstOrDefaultAsync(p => p.PostId == postId);
+            if (post == null)
+            {
+                throw new Exception("Post does not exist");
+            }
+            if (post.UId != userId && !isAdmin)
+            {
+                throw new Exception("Permission denied - not the owner or admin");
+            }
+
+            _dbContext.UserLikedPosts.RemoveRange(post.UserLikedPosts);
+            _dbContext.Comments.RemoveRange(post.Comments);
+
+            _dbContext.Posts.Remove(post);
+
+
+            var temp = _dbContext.SaveChangesAsync();
+
+            return new
+            {
+                Message = "Successfully deleted post",
+                Response = temp
+            };
         }
 
 
@@ -268,6 +299,34 @@ namespace RPGOnline.Infrastructure.Services
                 Content = comment.Content,
                 CreationDate = comment.CreationDate,
                 PostIdNavigation = comment.PostId
+            };
+        }
+
+        public async Task<object> DeleteComment(int commentId, int userId, bool isAdmin)
+        {
+            var comment = await _dbContext.Comments
+                                .Include(c => c.InverseResponseComment)
+                                .FirstOrDefaultAsync(c => c.CommentId == commentId);
+            if (comment == null)
+            {
+                throw new Exception("Comment does not exist");
+            }
+            if (comment.UId != userId && !isAdmin)
+            {
+                throw new Exception("Permission denied - not the owner or admin");
+            }
+
+
+            comment.InverseResponseComment.Clear();
+            _dbContext.Comments.Remove(comment);
+
+
+            var temp = _dbContext.SaveChangesAsync();
+
+            return new
+            {
+                Message = "Successfully deleted comment",
+                Comment = comment
             };
         }
 

@@ -193,6 +193,44 @@ namespace RPGOnline.Infrastructure.Services
             };
         }
 
+        public async Task<object> DeleteItem(int itemId, int userId, bool isAdmin)
+        {
+            var item = await _dbContext.Items
+                                .Include(i => i.CharacterItems).ThenInclude(ci => ci.Character)
+                                .Include(i => i.ProfessionStartingItems).ThenInclude(psi => psi.Profession)
+                                .FirstOrDefaultAsync(i => i.ItemId == itemId);
+            if (item == null)
+            {
+                throw new Exception("Item does not exist");
+            }
+            var asset = await _dbContext.Assets.FirstOrDefaultAsync(a => a.AssetId == item.AssetId);
+            if (asset == null)
+            {
+                throw new Exception("Asset does not exist");
+            }
+            if (asset.AuthorId != userId && !isAdmin)
+            {
+                throw new Exception("Permission denied - not the owner or admin");
+            }
+
+            _dbContext.UserSavedAssets.RemoveRange(await _dbContext.UserSavedAssets.Where(usa => usa.Asset.Equals(asset)).ToListAsync());
+            _dbContext.ProfessionStartingItems.RemoveRange(item.ProfessionStartingItems);
+            _dbContext.CharacterItems.RemoveRange(item.CharacterItems);
+            
+            _dbContext.Items.Remove(item);
+            _dbContext.Assets.Remove(asset);
+
+
+
+            var temp = _dbContext.SaveChangesAsync();
+
+            return new
+            {
+                Message = "Successfully deleted item",
+                Response = temp
+            };
+        }
+
         private bool HasBlockedMe(int myId, int targetId)
         {
             if (myId == targetId) return false;
