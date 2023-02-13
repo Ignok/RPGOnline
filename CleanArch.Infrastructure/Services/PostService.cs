@@ -64,7 +64,8 @@ namespace RPGOnline.Infrastructure.Services
                         {
                             UId = p.UIdNavigation.UId,
                             Username = p.UIdNavigation.Username,
-                            Picture = p.UIdNavigation.Picture
+                            Picture = p.UIdNavigation.Picture,
+                            IsFollowed = p.UIdNavigation.FriendshipFriendUs.Where(f => f.UIdNavigation.UId == uId).Where(f => f.IsFollowed).Any(),
                         },
                         Comments = p.Comments.Count
                     })
@@ -142,7 +143,8 @@ namespace RPGOnline.Infrastructure.Services
                                                 {
                                                     UId = u.UId,
                                                     Username = u.Username,
-                                                    Picture = u.Picture
+                                                    Picture = u.Picture,
+                                                    IsFollowed = u.FriendshipFriendUs.Where(f => f.UIdNavigation.UId == uId).Where(f => f.IsFollowed).Any(),
                                                 }).First(),
                                             Content = c.Content,
                                             CreationDate = c.CreationDate,

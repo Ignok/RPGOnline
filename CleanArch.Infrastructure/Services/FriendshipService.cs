@@ -80,6 +80,7 @@ namespace RPGOnline.Infrastructure.Services
                     .Include(f => f.UIdNavigation)
                     .Include(f => f.FriendU)
                     .Where(f => f.UIdNavigation.UId == targetId)
+                    .Where(f => f.IsFriend || uId == targetId)
                     .Select(f => new UserFriendshipResponse()
                     {
                         UId = f.FriendU.UId,
